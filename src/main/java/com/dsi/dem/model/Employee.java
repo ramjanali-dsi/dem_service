@@ -3,7 +3,9 @@ package com.dsi.dem.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by sabbir on 7/14/16.
@@ -30,6 +32,9 @@ public class Employee {
 
     @Column(name = "nick_name", length = 30)
     private String nickName;
+
+    @Column(name = "user_id", length = 40)
+    private String userId;
 
     @Column(name = "bank_ac_no", length = 50)
     private String bankAcNo;
@@ -69,6 +74,18 @@ public class Employee {
 
     @Column(name = "is_active")
     private boolean isActive;
+
+    @Transient
+    private EmployeeInfo employeeInfo;
+
+    @Transient
+    private EmployeeDesignation employeeDesignation;
+
+    @Transient
+    private List<EmployeeContact> employeeContactList = new ArrayList<>();
+
+    @Transient
+    private List<EmployeeEmail> employeeEmailList = new ArrayList<>();
 
     public String getEmployeeId() {
         return employeeId;
@@ -212,5 +229,45 @@ public class Employee {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public EmployeeInfo getEmployeeInfo() {
+        return employeeInfo;
+    }
+
+    public void setEmployeeInfo(EmployeeInfo employeeInfo) {
+        this.employeeInfo = employeeInfo;
+    }
+
+    public EmployeeDesignation getEmployeeDesignation() {
+        return employeeDesignation;
+    }
+
+    public void setEmployeeDesignation(EmployeeDesignation employeeDesignation) {
+        this.employeeDesignation = employeeDesignation;
+    }
+
+    public List<EmployeeContact> getEmployeeContactList() {
+        return employeeContactList;
+    }
+
+    public void setEmployeeContactList(List<EmployeeContact> employeeContactList) {
+        this.employeeContactList = employeeContactList;
+    }
+
+    public List<EmployeeEmail> getEmployeeEmailList() {
+        return employeeEmailList;
+    }
+
+    public void setEmployeeEmailList(List<EmployeeEmail> employeeEmailList) {
+        this.employeeEmailList = employeeEmailList;
     }
 }

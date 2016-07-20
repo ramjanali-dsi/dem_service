@@ -2,7 +2,7 @@ create table dis_client (client_id varchar(40) not null, is_notify bit, member_e
 
 create table dsi_configuration (configuration_id varchar(40) not null, total_casual integer, total_leave integer, total_sick integer, primary key (configuration_id));
 
-create table dsi_employee (employee_id varchar(40) not null, bank_ac_no varchar(50), created_date datetime, date_of_confirmation datetime, e_tin_id varchar(50), employee_no varchar(20), first_name varchar(40), github_id varchar(50), ip_address varchar(40), is_active bit, joining_date datetime, last_modified_date datetime, last_name varchar(40), mac_address varchar(40), national_id varchar(50), nick_name varchar(30), resign_date datetime, skype_id varchar(50), primary key (employee_id));
+create table dsi_employee (employee_id varchar(40) not null, bank_ac_no varchar(50), created_date datetime, date_of_confirmation datetime, e_tin_id varchar(50), employee_no varchar(20), first_name varchar(40), github_id varchar(50), ip_address varchar(40), is_active bit, joining_date datetime, last_modified_date datetime, last_name varchar(40), mac_address varchar(40), national_id varchar(50), nick_name varchar(30), user_id varchar(40), resign_date datetime, skype_id varchar(50), primary key (employee_id));
 
 create table dsi_employee_attendance (employee_attendance_id varchar(40) not null, attendance_date datetime, check_in_time varchar(10), check_out_time varchar(10), is_absent bit, total_hour varchar(10), employee_id varchar(40), primary key (employee_attendance_id));
 

@@ -3,6 +3,8 @@ package com.dsi.dem.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by sabbir on 7/15/16.
@@ -27,6 +29,9 @@ public class Project {
     @ManyToOne
     @JoinColumn(name = "status_id")
     private ProjectStatus status;
+
+    @Transient
+    private List<ProjectTeam> projectTeamList = new ArrayList<>();
 
     public String getProjectId() {
         return projectId;
@@ -58,5 +63,13 @@ public class Project {
 
     public void setStatus(ProjectStatus status) {
         this.status = status;
+    }
+
+    public List<ProjectTeam> getProjectTeamList() {
+        return projectTeamList;
+    }
+
+    public void setProjectTeamList(List<ProjectTeam> projectTeamList) {
+        this.projectTeamList = projectTeamList;
     }
 }

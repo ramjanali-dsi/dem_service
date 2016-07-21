@@ -78,4 +78,19 @@ public class EmployeeResource {
         }
         return null;
     }
+
+    @GET
+    @Path("/search")
+    @ApiOperation(value = "Search An Employee Or All Employees", notes = "Search An Employee Or All Employees", position = 5)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Search an employee or all employees success"),
+            @ApiResponse(code = 500, message = "Search an employee or all employees failed, unauthorized.")
+    })
+    public Response searchEmployeeOrAllEmployees(@QueryParam("search_text") String searchText) throws CustomException {
+
+        if(!Utility.isNullOrEmpty(searchText)){
+            //TODO search an employee info.
+        }
+        return null;
+    }
 }

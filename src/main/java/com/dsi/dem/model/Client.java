@@ -3,6 +3,8 @@ package com.dsi.dem.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by sabbir on 7/15/16.
@@ -32,6 +34,9 @@ public class Client {
 
     @Column(length = 50)
     private String organization;
+
+    @Transient
+    private List<Project> projectList = new ArrayList<>();
 
     public String getClientId() {
         return clientId;
@@ -79,5 +84,13 @@ public class Client {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    public List<Project> getProjectList() {
+        return projectList;
+    }
+
+    public void setProjectList(List<Project> projectList) {
+        this.projectList = projectList;
     }
 }

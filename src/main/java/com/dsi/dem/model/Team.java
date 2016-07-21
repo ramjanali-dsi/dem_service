@@ -3,6 +3,8 @@ package com.dsi.dem.model;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by sabbir on 7/14/16.
@@ -32,6 +34,9 @@ public class Team {
 
     @Column(name = "is_active")
     private boolean isActive;
+
+    @Transient
+    private List<TeamMember> teamMemberList = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -79,5 +84,13 @@ public class Team {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public List<TeamMember> getTeamMemberList() {
+        return teamMemberList;
+    }
+
+    public void setTeamMemberList(List<TeamMember> teamMemberList) {
+        this.teamMemberList = teamMemberList;
     }
 }

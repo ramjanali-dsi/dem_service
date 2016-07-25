@@ -38,6 +38,9 @@ public class Team {
     @Transient
     private List<TeamMember> teamMemberList = new ArrayList<>();
 
+    @Transient
+    private List<ProjectTeam> teamProjectList = new ArrayList<>();
+
     public String getName() {
         return name;
     }
@@ -92,5 +95,13 @@ public class Team {
 
     public void setTeamMemberList(List<TeamMember> teamMemberList) {
         this.teamMemberList = teamMemberList;
+    }
+
+    public List<ProjectTeam> getTeamProjectList() {
+        return teamProjectList;
+    }
+
+    public void setTeamProjectList(List<ProjectTeam> teamProjectList) {
+        this.teamProjectList = teamProjectList;
     }
 }

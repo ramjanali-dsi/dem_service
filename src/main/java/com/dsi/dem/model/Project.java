@@ -33,6 +33,9 @@ public class Project {
     @Transient
     private List<ProjectTeam> projectTeamList = new ArrayList<>();
 
+    @Transient
+    private List<ProjectClient> projectClientList = new ArrayList<>();
+
     public String getProjectId() {
         return projectId;
     }
@@ -71,5 +74,13 @@ public class Project {
 
     public void setProjectTeamList(List<ProjectTeam> projectTeamList) {
         this.projectTeamList = projectTeamList;
+    }
+
+    public List<ProjectClient> getProjectClientList() {
+        return projectClientList;
+    }
+
+    public void setProjectClientList(List<ProjectClient> projectClientList) {
+        this.projectClientList = projectClientList;
     }
 }

@@ -1,8 +1,6 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.APIModel;
-import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.EmployeeEmail;
 import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.Api;
@@ -10,11 +8,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
 import org.apache.log4j.Logger;
-import scala.collection.immutable.List;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Created by sabbir on 7/20/16.
@@ -35,7 +33,7 @@ public class EmployeeEmailResource {
             @ApiResponse(code = 500, message = "Employees email create failed, unauthorized.")
     })
     public Response createEmployeesEmail(@PathParam("employee_id") String employeeID,
-                                         APIModel apiModel) throws CustomException {
+                                         List<EmployeeEmail> employeeEmailList) throws CustomException {
 
         return null;
     }

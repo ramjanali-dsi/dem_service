@@ -30,11 +30,13 @@ public class Project {
     @JoinColumn(name = "status_id")
     private ProjectStatus status;
 
-    @Transient
-    private List<ProjectTeam> projectTeamList = new ArrayList<>();
+    private int version;
 
     @Transient
-    private List<ProjectClient> projectClientList = new ArrayList<>();
+    private List<ProjectTeam> teamList = new ArrayList<>();
+
+    @Transient
+    private List<ProjectClient> clientList = new ArrayList<>();
 
     public String getProjectId() {
         return projectId;
@@ -68,19 +70,27 @@ public class Project {
         this.status = status;
     }
 
-    public List<ProjectTeam> getProjectTeamList() {
-        return projectTeamList;
+    public int getVersion() {
+        return version;
     }
 
-    public void setProjectTeamList(List<ProjectTeam> projectTeamList) {
-        this.projectTeamList = projectTeamList;
+    public void setVersion(int version) {
+        this.version = version;
     }
 
-    public List<ProjectClient> getProjectClientList() {
-        return projectClientList;
+    public List<ProjectTeam> getTeamList() {
+        return teamList;
     }
 
-    public void setProjectClientList(List<ProjectClient> projectClientList) {
-        this.projectClientList = projectClientList;
+    public void setTeamList(List<ProjectTeam> teamList) {
+        this.teamList = teamList;
+    }
+
+    public List<ProjectClient> getClientList() {
+        return clientList;
+    }
+
+    public void setClientList(List<ProjectClient> clientList) {
+        this.clientList = clientList;
     }
 }

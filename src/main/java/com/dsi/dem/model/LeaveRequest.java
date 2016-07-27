@@ -70,6 +70,8 @@ public class LeaveRequest {
     @Column(name = "is_client_notify")
     private boolean isClientNotify;
 
+    private int version;
+
     public String getLeaveRequestId() {
         return leaveRequestId;
     }
@@ -204,5 +206,13 @@ public class LeaveRequest {
 
     public void setClientNotify(boolean clientNotify) {
         isClientNotify = clientNotify;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

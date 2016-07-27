@@ -35,11 +35,13 @@ public class Team {
     @Column(name = "is_active")
     private boolean isActive;
 
-    @Transient
-    private List<TeamMember> teamMemberList = new ArrayList<>();
+    private int version;
 
     @Transient
-    private List<ProjectTeam> teamProjectList = new ArrayList<>();
+    private List<TeamMember> memberList = new ArrayList<>();
+
+    @Transient
+    private List<ProjectTeam> projectList = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -89,19 +91,27 @@ public class Team {
         isActive = active;
     }
 
-    public List<TeamMember> getTeamMemberList() {
-        return teamMemberList;
+    public int getVersion() {
+        return version;
     }
 
-    public void setTeamMemberList(List<TeamMember> teamMemberList) {
-        this.teamMemberList = teamMemberList;
+    public void setVersion(int version) {
+        this.version = version;
     }
 
-    public List<ProjectTeam> getTeamProjectList() {
-        return teamProjectList;
+    public List<TeamMember> getMemberList() {
+        return memberList;
     }
 
-    public void setTeamProjectList(List<ProjectTeam> teamProjectList) {
-        this.teamProjectList = teamProjectList;
+    public void setMemberList(List<TeamMember> memberList) {
+        this.memberList = memberList;
+    }
+
+    public List<ProjectTeam> getProjectList() {
+        return projectList;
+    }
+
+    public void setProjectList(List<ProjectTeam> projectList) {
+        this.projectList = projectList;
     }
 }

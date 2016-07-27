@@ -1,6 +1,7 @@
 package com.dsi.dem.model;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.ManyToAny;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -19,7 +20,7 @@ public class EmployeeDesignation {
     @Column(name = "employee_designation_id", length = 40)
     private String employeeDesignationId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
@@ -28,6 +29,9 @@ public class EmployeeDesignation {
 
     @Column(name = "designation_date")
     private Date designationDate;
+
+    @Column(name = "is_current")
+    private boolean isCurrent;
 
     public Employee getEmployee() {
         return employee;
@@ -59,5 +63,13 @@ public class EmployeeDesignation {
 
     public void setDesignationDate(Date designationDate) {
         this.designationDate = designationDate;
+    }
+
+    public boolean isCurrent() {
+        return isCurrent;
+    }
+
+    public void setCurrent(boolean current) {
+        isCurrent = current;
     }
 }

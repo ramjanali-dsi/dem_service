@@ -75,17 +75,19 @@ public class Employee {
     @Column(name = "is_active")
     private boolean isActive;
 
+    private int version;
+
     @Transient
     private EmployeeInfo employeeInfo;
 
     @Transient
-    private EmployeeDesignation employeeDesignation;
+    private List<EmployeeDesignation> designationList = new ArrayList<>();
 
     @Transient
-    private List<EmployeeContact> employeeContactList = new ArrayList<>();
+    private List<EmployeeContact> contactList = new ArrayList<>();
 
     @Transient
-    private List<EmployeeEmail> employeeEmailList = new ArrayList<>();
+    private List<EmployeeEmail> emailList = new ArrayList<>();
 
     public String getEmployeeId() {
         return employeeId;
@@ -247,27 +249,35 @@ public class Employee {
         this.employeeInfo = employeeInfo;
     }
 
-    public EmployeeDesignation getEmployeeDesignation() {
-        return employeeDesignation;
+    public List<EmployeeDesignation> getDesignationList() {
+        return designationList;
     }
 
-    public void setEmployeeDesignation(EmployeeDesignation employeeDesignation) {
-        this.employeeDesignation = employeeDesignation;
+    public void setDesignationList(List<EmployeeDesignation> designationList) {
+        this.designationList = designationList;
     }
 
-    public List<EmployeeContact> getEmployeeContactList() {
-        return employeeContactList;
+    public List<EmployeeContact> getContactList() {
+        return contactList;
     }
 
-    public void setEmployeeContactList(List<EmployeeContact> employeeContactList) {
-        this.employeeContactList = employeeContactList;
+    public void setContactList(List<EmployeeContact> contactList) {
+        this.contactList = contactList;
     }
 
-    public List<EmployeeEmail> getEmployeeEmailList() {
-        return employeeEmailList;
+    public List<EmployeeEmail> getEmailList() {
+        return emailList;
     }
 
-    public void setEmployeeEmailList(List<EmployeeEmail> employeeEmailList) {
-        this.employeeEmailList = employeeEmailList;
+    public void setEmailList(List<EmployeeEmail> emailList) {
+        this.emailList = emailList;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

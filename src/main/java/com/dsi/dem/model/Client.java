@@ -35,6 +35,8 @@ public class Client {
     @Column(length = 50)
     private String organization;
 
+    private int version;
+
     @Transient
     private List<Project> projectList = new ArrayList<>();
 
@@ -92,5 +94,13 @@ public class Client {
 
     public void setProjectList(List<Project> projectList) {
         this.projectList = projectList;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

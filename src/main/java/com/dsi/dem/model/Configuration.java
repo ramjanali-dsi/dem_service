@@ -27,6 +27,8 @@ public class Configuration {
     @Column(name = "total_casual")
     private int totalCasual;
 
+    private int version;
+
     public String getConfigurationId() {
         return configurationId;
     }
@@ -57,5 +59,13 @@ public class Configuration {
 
     public void setTotalCasual(int totalCasual) {
         this.totalCasual = totalCasual;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

@@ -33,6 +33,8 @@ public class EmployeeDesignation {
     @Column(name = "is_current")
     private boolean isCurrent;
 
+    private int version;
+
     public Employee getEmployee() {
         return employee;
     }
@@ -71,5 +73,13 @@ public class EmployeeDesignation {
 
     public void setCurrent(boolean current) {
         isCurrent = current;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

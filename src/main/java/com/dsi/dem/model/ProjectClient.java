@@ -26,6 +26,8 @@ public class ProjectClient {
     @JoinColumn(name = "client_id")
     private Client client;
 
+    private int version;
+
     public String getProjectClientId() {
         return projectClientId;
     }
@@ -48,5 +50,13 @@ public class ProjectClient {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

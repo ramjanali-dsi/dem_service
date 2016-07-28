@@ -30,6 +30,8 @@ public class TeamMember {
     @JoinColumn(name = "team_id")
     private Team team;
 
+    private int version;
+
     public String getTeamMemberId() {
         return teamMemberId;
     }
@@ -60,5 +62,13 @@ public class TeamMember {
 
     public void setTeam(Team team) {
         this.team = team;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

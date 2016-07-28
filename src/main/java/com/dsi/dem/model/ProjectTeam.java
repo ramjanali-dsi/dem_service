@@ -26,6 +26,8 @@ public class ProjectTeam {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    private int version;
+
     public String getProjectTeamId() {
         return projectTeamId;
     }
@@ -48,5 +50,13 @@ public class ProjectTeam {
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

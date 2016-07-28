@@ -29,6 +29,8 @@ public class EmployeeEmail {
     @JoinColumn(name = "type_id")
     private EmployeeEmailType type;
 
+    private int version;
+
     public String getEmployeeEmailId() {
         return employeeEmailId;
     }
@@ -59,5 +61,13 @@ public class EmployeeEmail {
 
     public void setType(EmployeeEmailType type) {
         this.type = type;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

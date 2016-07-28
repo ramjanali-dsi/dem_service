@@ -38,6 +38,8 @@ public class EmployeeAttendance {
     @Column(name = "total_hour", length = 10)
     private String totalHour;
 
+    private int version;
+
     public String getEmployeeAttendanceId() {
         return employeeAttendanceId;
     }
@@ -92,5 +94,13 @@ public class EmployeeAttendance {
 
     public void setCheckOutTime(String checkOutTime) {
         this.checkOutTime = checkOutTime;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

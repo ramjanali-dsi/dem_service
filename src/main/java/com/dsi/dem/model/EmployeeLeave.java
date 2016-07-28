@@ -38,6 +38,8 @@ public class EmployeeLeave {
     @Column(name = "total_special_leave")
     private int totalSpecialLeave;
 
+    private int version;
+
     public String getEmployeeLeaveId() {
         return employeeLeaveId;
     }
@@ -92,5 +94,13 @@ public class EmployeeLeave {
 
     public void setTotalSpecialLeave(int totalSpecialLeave) {
         this.totalSpecialLeave = totalSpecialLeave;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

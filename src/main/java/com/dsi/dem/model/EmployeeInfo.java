@@ -50,6 +50,8 @@ public class EmployeeInfo {
     @Column(name = "blood_group", length = 15)
     private String bloodGroup;
 
+    private int version;
+
     public String getEmployeeInfoId() {
         return employeeInfoId;
     }
@@ -136,5 +138,13 @@ public class EmployeeInfo {
 
     public void setBloodGroup(String bloodGroup) {
         this.bloodGroup = bloodGroup;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }

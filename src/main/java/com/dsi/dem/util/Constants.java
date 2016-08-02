@@ -34,4 +34,7 @@ public class Constants {
 
     public static final String DEM_SERVICE_0010 = "dem_service_0010";
     public static final String DEM_SERVICE_0010_DESCRIPTION = "Read CSV file failed.";
+
+    public static final String DEM_SERVICE_0011 = "dem_service_0011";
+    public static final String DEM_SERVICE_0011_DESCRIPTION = "Convert body to object failed.";
 }

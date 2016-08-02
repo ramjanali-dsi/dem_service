@@ -11,12 +11,8 @@ import scala.collection.immutable.List;
 public interface ProjectService {
 
     void saveProject(Project project) throws CustomException;
-
     void updateProject(Project project) throws CustomException;
-
     void deleteProject(Project project) throws CustomException;
-
     Project getProjectByID(String projectID) throws CustomException;
-
     List<Project> getAllProjects() throws CustomException;
 }

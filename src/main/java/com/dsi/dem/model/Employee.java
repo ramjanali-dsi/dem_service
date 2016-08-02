@@ -55,7 +55,7 @@ public class Employee {
     private String nationalId;
 
     @Column(name = "e_tin_id", length = 50)
-    private String eTinId;
+    private String etinId;
 
     @Column(name = "joining_date")
     private Date joiningDate;
@@ -217,12 +217,12 @@ public class Employee {
         this.nationalId = nationalId;
     }
 
-    public String geteTinId() {
-        return eTinId;
+    public String getETinId() {
+        return etinId;
     }
 
-    public void seteTinId(String eTinId) {
-        this.eTinId = eTinId;
+    public void setETinId(String etinId) {
+        this.etinId = etinId;
     }
 
     public boolean isActive() {
@@ -280,4 +280,5 @@ public class Employee {
     public void setVersion(int version) {
         this.version = version;
     }
+
 }

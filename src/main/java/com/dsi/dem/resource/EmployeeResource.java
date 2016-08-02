@@ -3,6 +3,8 @@ package com.dsi.dem.resource;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.Employee;
 import com.dsi.dem.util.Utility;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiResponse;
@@ -12,6 +14,9 @@ import org.apache.log4j.Logger;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by sabbir on 7/20/16.
@@ -31,8 +36,21 @@ public class EmployeeResource {
             @ApiResponse(code = 200, message = "Employee create success"),
             @ApiResponse(code = 500, message = "Employee create failed, unauthorized.")
     })
-    public Response createEmployee(Employee employee) throws CustomException {
+    public Response createEmployee(String body) throws CustomException {
 
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> map = new HashMap<>();
+
+        try {
+            map = mapper.readValue(body, new TypeReference<Map<String, Object>>(){});
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        logger.info("Request body map: " + map);
         return null;
     }
 

@@ -21,7 +21,7 @@ public class Project {
     private String projectId;
 
     @Column(length = 50)
-    private String name;
+    private String projectName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -46,12 +46,12 @@ public class Project {
         this.projectId = projectId;
     }
 
-    public String getName() {
-        return name;
+    public String getProjectName() {
+        return projectName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
     public String getDescription() {

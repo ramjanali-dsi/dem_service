@@ -18,7 +18,7 @@ public class EmployeeDesignation {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     @Column(name = "employee_designation_id", length = 40)
-    private String employeeDesignationId;
+    private String designationId;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
@@ -51,12 +51,12 @@ public class EmployeeDesignation {
         this.name = name;
     }
 
-    public String getEmployeeDesignationId() {
-        return employeeDesignationId;
+    public String getDesignationId() {
+        return designationId;
     }
 
-    public void setEmployeeDesignationId(String employeeDesignationId) {
-        this.employeeDesignationId = employeeDesignationId;
+    public void setDesignationId(String designationId) {
+        this.designationId = designationId;
     }
 
     public Date getDesignationDate() {

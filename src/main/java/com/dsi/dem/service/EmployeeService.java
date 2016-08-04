@@ -12,7 +12,7 @@ public interface EmployeeService {
 
     void saveEmployee(Employee employee) throws CustomException;
     void updateEmployee(Employee employee) throws CustomException;
-    void deleteEmployee(Employee employee) throws CustomException;
+    void deleteEmployee(String employeeID) throws CustomException;
     Employee getEmployeeByID(String employeeID) throws CustomException;
     Employee getEmployeeByUserID(String userID) throws CustomException;
     Employee getEmployeeByEmployeeNO(String employeeNO) throws CustomException;

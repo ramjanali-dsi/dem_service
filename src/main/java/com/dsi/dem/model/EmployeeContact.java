@@ -16,7 +16,7 @@ public class EmployeeContact {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     @Column(name = "employee_contact_number_id", length = 40)
-    private String employeeContactId;
+    private String contactNumberId;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
@@ -31,12 +31,12 @@ public class EmployeeContact {
 
     private int version;
 
-    public String getEmployeeContactId() {
-        return employeeContactId;
+    public String getContactNumberId() {
+        return contactNumberId;
     }
 
-    public void setEmployeeContactId(String employeeContactId) {
-        this.employeeContactId = employeeContactId;
+    public void setContactNumberId(String contactNumberId) {
+        this.contactNumberId = contactNumberId;
     }
 
     public Employee getEmployee() {

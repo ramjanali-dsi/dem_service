@@ -19,7 +19,7 @@ public class ProjectStatus {
     private String projectStatusId;
 
     @Column(length = 50)
-    private String name;
+    private String projectStatusName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -35,12 +35,12 @@ public class ProjectStatus {
         this.projectStatusId = projectStatusId;
     }
 
-    public String getName() {
-        return name;
+    public String getProjectStatusName() {
+        return projectStatusName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProjectStatusName(String projectStatusName) {
+        this.projectStatusName = projectStatusName;
     }
 
     public String getDescription() {

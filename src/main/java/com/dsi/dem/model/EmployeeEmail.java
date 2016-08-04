@@ -16,7 +16,7 @@ public class EmployeeEmail {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     @Column(name = "employee_email_id", length = 40)
-    private String employeeEmailId;
+    private String emailId;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
@@ -31,12 +31,12 @@ public class EmployeeEmail {
 
     private int version;
 
-    public String getEmployeeEmailId() {
-        return employeeEmailId;
+    public String getEmailId() {
+        return emailId;
     }
 
-    public void setEmployeeEmailId(String employeeEmailId) {
-        this.employeeEmailId = employeeEmailId;
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
     }
 
     public Employee getEmployee() {

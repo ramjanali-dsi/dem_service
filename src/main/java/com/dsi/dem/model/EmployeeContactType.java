@@ -16,10 +16,10 @@ public class EmployeeContactType {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     @Column(name = "employee_contact_type_id", length = 40)
-    private String employeeContactTypeId;
+    private String contactTypeId;
 
-    @Column(length = 50)
-    private String name;
+    @Column(name = "name", length = 50)
+    private String contactTypeName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -27,20 +27,20 @@ public class EmployeeContactType {
     @Column(name = "is_active")
     private boolean isActive;
 
-    public String getEmployeeContactTypeId() {
-        return employeeContactTypeId;
+    public String getContactTypeId() {
+        return contactTypeId;
     }
 
-    public void setEmployeeContactTypeId(String employeeContactTypeId) {
-        this.employeeContactTypeId = employeeContactTypeId;
+    public void setContactTypeId(String contactTypeId) {
+        this.contactTypeId = contactTypeId;
     }
 
-    public String getName() {
-        return name;
+    public String getContactTypeName() {
+        return contactTypeName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setContactTypeName(String contactTypeName) {
+        this.contactTypeName = contactTypeName;
     }
 
     public String getDescription() {

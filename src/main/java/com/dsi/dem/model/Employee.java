@@ -78,16 +78,16 @@ public class Employee {
     private int version;
 
     @Transient
-    private EmployeeInfo employeeInfo;
+    private EmployeeInfo info = new EmployeeInfo();
 
     @Transient
-    private List<EmployeeDesignation> designationList = new ArrayList<>();
+    private List<EmployeeDesignation> designations = new ArrayList<>();
 
     @Transient
-    private List<EmployeeContact> contactList = new ArrayList<>();
+    private List<EmployeeContact> contactInfo = new ArrayList<>();
 
     @Transient
-    private List<EmployeeEmail> emailList = new ArrayList<>();
+    private List<EmployeeEmail> emailInfo = new ArrayList<>();
 
     public String getEmployeeId() {
         return employeeId;
@@ -241,36 +241,44 @@ public class Employee {
         this.userId = userId;
     }
 
-    public EmployeeInfo getEmployeeInfo() {
-        return employeeInfo;
+    public String getEtinId() {
+        return etinId;
     }
 
-    public void setEmployeeInfo(EmployeeInfo employeeInfo) {
-        this.employeeInfo = employeeInfo;
+    public void setEtinId(String etinId) {
+        this.etinId = etinId;
     }
 
-    public List<EmployeeDesignation> getDesignationList() {
-        return designationList;
+    public EmployeeInfo getInfo() {
+        return info;
     }
 
-    public void setDesignationList(List<EmployeeDesignation> designationList) {
-        this.designationList = designationList;
+    public void setInfo(EmployeeInfo info) {
+        this.info = info;
     }
 
-    public List<EmployeeContact> getContactList() {
-        return contactList;
+    public List<EmployeeDesignation> getDesignations() {
+        return designations;
     }
 
-    public void setContactList(List<EmployeeContact> contactList) {
-        this.contactList = contactList;
+    public void setDesignations(List<EmployeeDesignation> designations) {
+        this.designations = designations;
     }
 
-    public List<EmployeeEmail> getEmailList() {
-        return emailList;
+    public List<EmployeeContact> getContactInfo() {
+        return contactInfo;
     }
 
-    public void setEmailList(List<EmployeeEmail> emailList) {
-        this.emailList = emailList;
+    public void setContactInfo(List<EmployeeContact> contactInfo) {
+        this.contactInfo = contactInfo;
+    }
+
+    public List<EmployeeEmail> getEmailInfo() {
+        return emailInfo;
+    }
+
+    public void setEmailInfo(List<EmployeeEmail> emailInfo) {
+        this.emailInfo = emailInfo;
     }
 
     public int getVersion() {

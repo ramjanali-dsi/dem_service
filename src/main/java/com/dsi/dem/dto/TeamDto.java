@@ -1,55 +1,35 @@
-package com.dsi.dem.model;
+package com.dsi.dem.dto;
 
-import org.hibernate.annotations.GenericGenerator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by sabbir on 7/14/16.
+ * Created by sabbir on 8/4/16.
  */
+public class TeamDto {
 
-@Entity
-@Table(name = "dsi_team")
-public class Team {
-
-    @Id
-    @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid2")
-    @Column(name = "team_id", length = 40)
     private String teamId;
 
-    @Column(length = 50)
     private String name;
 
-    @Column(length = 20)
     private String floor;
 
-    @Column(length = 20)
     private String room;
 
-    @Column(name = "member_count")
     private int memberCount;
 
-    @Column(name = "is_active")
     private boolean isActive;
 
     private int version;
 
-    @Transient
-    private List<TeamMember> members = new ArrayList<>();
+    private List<TeamMemberDto> memberList = new ArrayList<>();
 
-    @Transient
-    private List<ProjectTeam> projects = new ArrayList<>();
+    private List<String> projectIds = new ArrayList<>();
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+    private List<ProjectTeamDto> projectList = new ArrayList<>();
 
     public String getTeamId() {
         return teamId;
@@ -57,6 +37,14 @@ public class Team {
 
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getFloor() {
@@ -99,19 +87,29 @@ public class Team {
         this.version = version;
     }
 
-    public List<TeamMember> getMembers() {
-        return members;
+    public List<TeamMemberDto> getMemberList() {
+        return memberList;
     }
 
-    public void setMembers(List<TeamMember> members) {
-        this.members = members;
+    public void setMemberList(List<TeamMemberDto> memberList) {
+        this.memberList = memberList;
     }
 
-    public List<ProjectTeam> getProjects() {
-        return projects;
+    @JsonIgnore
+    public List<String> getProjectIds() {
+        return projectIds;
     }
 
-    public void setProjects(List<ProjectTeam> projects) {
-        this.projects = projects;
+    @JsonProperty
+    public void setProjectIds(List<String> projectIds) {
+        this.projectIds = projectIds;
+    }
+
+    public List<ProjectTeamDto> getProjectList() {
+        return projectList;
+    }
+
+    public void setProjectList(List<ProjectTeamDto> projectList) {
+        this.projectList = projectList;
     }
 }

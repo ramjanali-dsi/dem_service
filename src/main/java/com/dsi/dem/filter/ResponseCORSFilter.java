@@ -14,6 +14,6 @@ public class ResponseCORSFilter implements ContainerResponseFilter {
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
         responseContext.getHeaders().add("Access-Control-Allow-Origin","*");
         responseContext.getHeaders().add("Access-Control-Allow-Methods", "*, Cache-Control, Pragma, Origin, Authorization, X-Requested-With, PUT, DELETE, GET, POST");
-        responseContext.getHeaders().add("Access-Control-Allow-Headers", "*, Content-Type, X-XSRF-TOKEN, ");
+        responseContext.getHeaders().add("Access-Control-Allow-Headers", "*, Content-Type, X-XSRF-TOKEN");
     }
 }

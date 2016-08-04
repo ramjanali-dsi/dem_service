@@ -12,7 +12,9 @@ public interface TeamService {
 
     void saveTeam(Team team) throws CustomException;
     void updateTeam(Team team) throws CustomException;
-    void deleteTeam(Team team) throws CustomException;
+    void deleteTeam(String teamID) throws CustomException;
     Team getTeamByID(String teamID) throws CustomException;
     List<Team> getAllTeams() throws CustomException;
+
+    void saveTeamProjects(List<String> projectIdList, Team team) throws CustomException;
 }

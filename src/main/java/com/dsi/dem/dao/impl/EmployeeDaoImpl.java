@@ -26,8 +26,31 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public boolean deleteEmployee(Employee employee) {
-        return delete(employee);
+    public boolean deleteEmployee(String employeeID) {
+        Session session = null;
+        boolean success = true;
+        try {
+            session = getSession();
+            Query query = session.createQuery("DELETE FROM Employee e WHERE e.employeeId =:employeeID");
+            query.setParameter("employeeID", employeeID);
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override
@@ -124,8 +147,31 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public boolean deleteEmployeeInfo(EmployeeInfo employeeInfo) {
-        return delete(employeeInfo);
+    public boolean deleteEmployeeInfo(String employeeID) {
+        Session session = null;
+        boolean success = true;
+        try {
+            session = getSession();
+            Query query = session.createQuery("DELETE FROM EmployeeInfo ei WHERE ei.employee.employeeId =:employeeID");
+            query.setParameter("employeeID", employeeID);
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override
@@ -160,8 +206,35 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public boolean deleteEmployeeDesignation(EmployeeDesignation employeeDesignation) {
-        return delete(employeeDesignation);
+    public boolean deleteEmployeeDesignation(String employeeID, String designationID) {
+        Session session = null;
+        boolean success = true;
+        Query query;
+        try {
+            session = getSession();
+            if(employeeID != null) {
+                query = session.createQuery("DELETE FROM EmployeeDesignation ed WHERE ed.employee.employeeId =:employeeID");
+                query.setParameter("employeeID", employeeID);
+
+            } else {
+                query = session.createQuery("DELETE FROM EmployeeDesignation ed WHERE ed.designationId =:designationID");
+                query.setParameter("designationID", designationID);
+            }
+
+            if(query.executeUpdate() > 0){
+                success = true;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override
@@ -186,8 +259,30 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
+    public EmployeeDesignation getEmployeeDesignationByDesignationIDAndEmployeeID(String designationID, String employeeID) {
+        Session session = null;
+        EmployeeDesignation designation = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeDesignation ed WHERE ed.employee.employeeId =:employeeID AND ed.designationId =:designationID");
+            query.setParameter("employeeID", employeeID);
+            query.setParameter("designationID", designationID);
+
+            designation = (EmployeeDesignation) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return designation;
+    }
+
+    @Override
     public boolean saveEmployeeEmail(EmployeeEmail employeeEmail) {
-        return saveEmployeeEmail(employeeEmail);
+        return save(employeeEmail);
     }
 
     @Override
@@ -196,8 +291,38 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public boolean deleteEmployeeEmail(EmployeeEmail employeeEmail) {
-        return delete(employeeEmail);
+    public boolean deleteEmployeeEmail(String employeeID, String emailID) {
+        Session session = null;
+        boolean success = true;
+        Query query;
+        try {
+            session = getSession();
+            if(employeeID != null) {
+                query = session.createQuery("DELETE FROM EmployeeEmail ee WHERE ee.employee.employeeId =:employeeID");
+                query.setParameter("employeeID", employeeID);
+
+            } else {
+                query = session.createQuery("DELETE FROM EmployeeEmail ee WHERE ee.emailId =:emailID");
+                query.setParameter("emailID", emailID);
+            }
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override
@@ -243,13 +368,13 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public EmployeeEmail getEmployeeEmailByEmailAndEmployeeID(String email, String employeeID) {
+    public EmployeeEmail getEmployeeEmailByEmailIDAndEmployeeID(String emailID, String employeeID) {
         Session session = null;
         EmployeeEmail employeeEmail = null;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.email =:email AND ee.employee.employeeId =:employeeID");
-            query.setParameter("email", email);
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.emailId =:emailID AND ee.employee.employeeId =:employeeID");
+            query.setParameter("emailID", emailID);
             query.setParameter("employeeID", employeeID);
 
             employeeEmail = (EmployeeEmail) query.uniqueResult();
@@ -270,7 +395,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
         EmployeeEmail employeeEmail = null;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.email =:email AND ee.type =:mode");
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.email =:email AND ee.type.emailTypeName =:mode");
             query.setParameter("email", email);
             query.setParameter("mode", type);
 
@@ -297,8 +422,38 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public boolean deleteEmployeeContactInfo(EmployeeContact employeeContact) {
-        return delete(employeeContact);
+    public boolean deleteEmployeeContactInfo(String employeeID, String contactInfoID) {
+        Session session = null;
+        boolean success = true;
+        Query query;
+        try {
+            session = getSession();
+            if(employeeID != null) {
+                query = session.createQuery("DELETE FROM EmployeeContact ec WHERE ec.employee.employeeId =:employeeID");
+                query.setParameter("employeeID", employeeID);
+
+            } else {
+                query = session.createQuery("DELETE FROM EmployeeContact ec WHERE ec.contactNumberId =:contactInfoID");
+                query.setParameter("contactInfoID", contactInfoID);
+            }
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override
@@ -323,12 +478,34 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
+    public EmployeeContact getEmployeeContactByEmailIDAndEmployeeID(String contactID, String employeeID) {
+        Session session = null;
+        EmployeeContact employeeContact = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeContact ec WHERE ec.contactNumberId =:contactID AND ec.employee.employeeId =:employeeID");
+            query.setParameter("contactID", contactID);
+            query.setParameter("employeeID", employeeID);
+
+            employeeContact = (EmployeeContact) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeContact;
+    }
+
+    @Override
     public EmployeeContact getEmployeeContactByPhoneAndType(String phone, String type) {
         Session session = null;
         EmployeeContact employeeContact = null;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM EmployeeContact ec WHERE ec.phone =:phone AND ec.type =:mode");
+            Query query = session.createQuery("FROM EmployeeContact ec WHERE ec.phone =:phone AND ec.type.contactTypeName =:mode");
             query.setParameter("phone", phone);
             query.setParameter("mode", type);
 

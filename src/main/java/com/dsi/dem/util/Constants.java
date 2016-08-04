@@ -5,6 +5,8 @@ package com.dsi.dem.util;
  */
 public class Constants {
 
+    public static final String OFFICIAL_TYPE_NAME = "Official";
+
     public static final String DEM_SERVICE_0001 = "dem_service_0001";
     public static final String DEM_SERVICE_0001_DESCRIPTION = "Not defined.";
 
@@ -24,7 +26,7 @@ public class Constants {
     public static final String DEM_SERVICE_0006_DESCRIPTION = "Params are missing.";
 
     public static final String DEM_SERVICE_0007 = "dem_service_0007";
-    public static final String DEM_SERVICE_0007_DESCRIPTION = "JSON read/write failed.";
+    public static final String DEM_SERVICE_0007_DESCRIPTION = "Dto to Object convert failed.";
 
     public static final String DEM_SERVICE_0008 = "dem_service_0008";
     public static final String DEM_SERVICE_0008_DESCRIPTION = "Not match.";

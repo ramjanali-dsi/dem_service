@@ -18,8 +18,8 @@ public class RoleType {
     @Column(name = "role_id", length = 40)
     private String roleId;
 
-    @Column(length = 50)
-    private String name;
+    @Column(name = "name", length = 50)
+    private String roleName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -35,12 +35,12 @@ public class RoleType {
         this.roleId = roleId;
     }
 
-    public String getName() {
-        return name;
+    public String getRoleName() {
+        return roleName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
     }
 
     public String getDescription() {

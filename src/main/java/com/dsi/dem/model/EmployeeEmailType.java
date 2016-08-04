@@ -16,10 +16,10 @@ public class EmployeeEmailType {
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
     @Column(name = "employee_email_type_id", length = 40)
-    private String employeeEmailTypeId;
+    private String emailTypeId;
 
-    @Column(length = 50)
-    private String name;
+    @Column(name = "name", length = 50)
+    private String emailTypeName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -27,20 +27,20 @@ public class EmployeeEmailType {
     @Column(name = "is_active")
     private boolean isActive;
 
-    public String getEmployeeEmailTypeId() {
-        return employeeEmailTypeId;
+    public String getEmailTypeId() {
+        return emailTypeId;
     }
 
-    public void setEmployeeEmailTypeId(String employeeEmailTypeId) {
-        this.employeeEmailTypeId = employeeEmailTypeId;
+    public void setEmailTypeId(String emailTypeId) {
+        this.emailTypeId = emailTypeId;
     }
 
-    public String getName() {
-        return name;
+    public String getEmailTypeName() {
+        return emailTypeName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEmailTypeName(String emailTypeName) {
+        this.emailTypeName = emailTypeName;
     }
 
     public String getDescription() {

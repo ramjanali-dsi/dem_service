@@ -1,6 +1,7 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.TeamDao;
+import com.dsi.dem.model.ProjectTeam;
 import com.dsi.dem.model.Team;
 import com.dsi.dem.model.TeamMember;
 import org.apache.log4j.Logger;
@@ -127,13 +128,20 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
     }
 
     @Override
-    public boolean deleteTeamMember(String teamMemberID) {
+    public boolean deleteTeamMember(String teamID, String teamMemberID) {
         Session session = null;
         boolean success = true;
+        Query query;
         try {
             session = getSession();
-            Query query = session.createQuery("DELETE FROM TeamMember tm WHERE tm.teamMemberId =:teamMemberID");
-            query.setParameter("teamMemberID", teamMemberID);
+            if(teamID != null){
+                query = session.createQuery("DELETE FROM TeamMember tm WHERE tm.team.teamId =:teamID");
+                query.setParameter("teamID", teamID);
+
+            } else {
+                query = session.createQuery("DELETE FROM TeamMember tm WHERE tm.teamMemberId =:teamMemberID");
+                query.setParameter("teamMemberID", teamMemberID);
+            }
 
             if(query.executeUpdate() > 0){
                 success = true;
@@ -195,5 +203,71 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
             }
         }
         return teamMemberList;
+    }
+
+    @Override
+    public boolean saveTeamProject(ProjectTeam projectTeam) {
+        return save(projectTeam);
+    }
+
+    @Override
+    public boolean updateTeamProject(ProjectTeam projectTeam) {
+        return update(projectTeam);
+    }
+
+    @Override
+    public boolean deleteProjectTeam(String teamID, String teamProjectID) {
+        Session session = null;
+        boolean success = true;
+        Query query;
+        try {
+            session = getSession();
+            if(teamID != null){
+                query = session.createQuery("DELETE FROM ProjectTeam pm WHERE pm.team.teamId =:teamID");
+                query.setParameter("teamID", teamID);
+
+            } else {
+                query = session.createQuery("DELETE FROM ProjectTeam pm WHERE pm.projectTeamId =:teamProjectID");
+                query.setParameter("teamProjectID", teamProjectID);
+            }
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public List<ProjectTeam> getProjectTeams(String teamID) {
+        Session session = null;
+        List<ProjectTeam> projectTeamList = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM ProjectTeam pm WHERE pm.team.teamId =:teamID");
+            query.setParameter("teamID", teamID);
+
+            projectTeamList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return projectTeamList;
     }
 }

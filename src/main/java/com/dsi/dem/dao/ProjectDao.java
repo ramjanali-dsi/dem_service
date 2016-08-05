@@ -15,11 +15,4 @@ public interface ProjectDao {
     boolean deleteProject(Project project);
     Project getProjectByID(String projectID);
     List<Project> getAllProjects();
-
-    boolean saveProjectTeam(ProjectTeam projectTeam);
-    boolean updateProjectTeam(ProjectTeam projectTeam);
-    boolean deleteProjectTeam(String projectTeamID);
-    ProjectTeam getProjectTeamByTeamIDAndProjectID(String teamID, String projectID);
-    List<ProjectTeam> getProjectTeamsByTeamID(String teamID);
-    List<ProjectTeam> getProjectTeamsByProjectID(String projectID);
 }

@@ -84,12 +84,47 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void updateTeam(Team team) throws CustomException {
+        validateInputForUpdate(team);
 
+        boolean res = teamDao.updateTeam(team);
+        if(!res){
+            ErrorContext errorContext = new ErrorContext(team.getTeamId(), "Team", "Team update failed.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
+                    Constants.DEM_SERVICE_0003_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        logger.info("Update team success");
+    }
+
+    private void validateInputForUpdate(Team team) throws CustomException {
+        if(team.getVersion() == 0){
+            ErrorContext errorContext = new ErrorContext(null, "Team", "Version not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        if(teamDao.getTeamByID(team.getTeamId()) == null){
+            ErrorContext errorContext = new ErrorContext(team.getTeamId(), "Team", "Team not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
     }
 
     @Override
     public void deleteTeam(String teamID) throws CustomException {
+        teamDao.deleteTeamMember(teamID, null);
+        teamDao.deleteProjectTeam(teamID, null);
 
+        boolean res = teamDao.deleteTeam(teamID);
+        if(!res){
+            ErrorContext errorContext = new ErrorContext(teamID, "Team", "Team delete failed.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        logger.info("Delete team success");
     }
 
     @Override
@@ -122,6 +157,71 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException {
+
+        if(Utility.isNullOrEmpty(teamMembers)){
+            ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member list not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        for(TeamMember member : teamMembers){
+            validateInputForMemberCreation(member);
+
+            member.setTeam(teamDao.getTeamByID(teamID));
+            boolean res = teamDao.saveTeamMember(member);
+            if(!res){
+                ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member create failed.");
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                        Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Save team member success.");
+        }
+    }
+
+    @Override
+    public void deleteTeamMember(String teamMemberID) throws CustomException {
+        boolean res = teamDao.deleteTeamMember(null, teamMemberID);
+        if(!res){
+            ErrorContext errorContext = new ErrorContext(teamMemberID, "TeamMember", "Team member delete failed.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        logger.info("Delete team member success");
+    }
+
+    @Override
+    public List<TeamMember> getTeamMembers(String teamID) throws CustomException {
+        List<TeamMember> memberList = teamDao.getTeamMembers(teamID);
+        if(memberList == null){
+            ErrorContext errorContext = new ErrorContext(teamID, "TeamMember", "Team members not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        return memberList;
+    }
+
+    private void validateInputForMemberCreation(TeamMember member) throws CustomException {
+        if(member.getEmployee().getEmployeeId() == null){
+            ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member info not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        if(member.getRole().getRoleId() == null){
+            ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member role not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+    }
+
+    @Override
     public void saveTeamProjects(List<String> projectIdList, Team team) throws CustomException {
 
         for(String projectId : projectIdList){
@@ -129,15 +229,39 @@ public class TeamServiceImpl implements TeamService {
             projectTeam.setTeam(team);
             projectTeam.setProject(projectDao.getProjectByID(projectId));
 
-            boolean res = projectDao.saveProjectTeam(projectTeam);
+            boolean res = teamDao.saveTeamProject(projectTeam);
             if(!res){
-                ErrorContext errorContext = new ErrorContext(null, "Team", "Team project create failed.");
+                ErrorContext errorContext = new ErrorContext(null, "TeamProject", "Team project create failed.");
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
                         Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
                 throw new CustomException(errorMessage);
             }
             logger.info("Save team project success");
         }
+    }
+
+    @Override
+    public void deleteTeamProject(String teamProjectID) throws CustomException {
+        boolean res = teamDao.deleteProjectTeam(null, teamProjectID);
+        if(!res){
+            ErrorContext errorContext = new ErrorContext(teamProjectID, "TeamProject", "Team project delete failed.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        logger.info("Delete team project success");
+    }
+
+    @Override
+    public List<ProjectTeam> getTeamProjects(String teamID) throws CustomException {
+        List<ProjectTeam> projectTeamList = teamDao.getProjectTeams(teamID);
+        if(projectTeamList == null){
+            ErrorContext errorContext = new ErrorContext(teamID, "TeamProject", "Team projects not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        return projectTeamList;
     }
 
     private Team setTeamAllProperty(String teamID, Team team) throws CustomException {
@@ -151,7 +275,7 @@ public class TeamServiceImpl implements TeamService {
             team.setMembers(memberList);
         }
 
-        List<ProjectTeam> projectTeams = projectDao.getProjectTeamsByTeamID(teamID);
+        List<ProjectTeam> projectTeams = teamDao.getProjectTeams(teamID);
         if(!Utility.isNullOrEmpty(projectTeams)){
             team.setProjects(projectTeams);
         }

@@ -34,7 +34,7 @@ public interface EmployeeDao {
     List<EmployeeEmail> getEmployeeEmailsByEmployeeID(String employeeID);
     EmployeeEmail getEmployeeEmailByEmailName(String email);
     EmployeeEmail getEmployeeEmailByEmailIDAndEmployeeID(String emailID, String employeeID);
-    EmployeeEmail getEmployeeEmailByEmailAndType(String email, String type);
+    EmployeeEmail getEmployeeEmailByEmployeeIDAndTypeID(String employeeID, String typeID);
 
     boolean saveEmployeeContactInfo(EmployeeContact employeeContact);
     boolean updateEmployeeContactInfo(EmployeeContact employeeContact);

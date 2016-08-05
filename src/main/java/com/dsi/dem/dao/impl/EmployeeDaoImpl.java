@@ -390,14 +390,15 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public EmployeeEmail getEmployeeEmailByEmailAndType(String email, String type) {
+    public EmployeeEmail getEmployeeEmailByEmployeeIDAndTypeID(String employeeID, String typeID) {
         Session session = null;
         EmployeeEmail employeeEmail = null;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.email =:email AND ee.type.emailTypeName =:mode");
-            query.setParameter("email", email);
-            query.setParameter("mode", type);
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.employee.employeeId =:employeeID " +
+                    "AND ee.type.emailTypeId =:typeID");
+            query.setParameter("employeeID", employeeID);
+            query.setParameter("typeID", typeID);
 
             employeeEmail = (EmployeeEmail) query.uniqueResult();
 

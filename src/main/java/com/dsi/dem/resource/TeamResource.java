@@ -62,6 +62,14 @@ public class TeamResource {
     public Response updateTeam(@PathParam("team_id") String teamID,
                                @ApiParam(value = "Team Dto", required = true) TeamDto teamDto) throws CustomException {
 
+        logger.info("Convert Dto to Object:: Start");
+        Team team = TRANSFORMER.getTeam(teamDto);
+        logger.info("Convert Dto to Object:: End");
+
+        logger.info("Team Update:: Start");
+        team.setTeamId(teamID);
+        teamService.updateTeam(team);
+        logger.info("Team Update:: End");
 
         return Response.ok().entity(TRANSFORMER.getTeamDto(teamService.getTeamByID(teamID))).build();
     }
@@ -75,39 +83,41 @@ public class TeamResource {
     })
     public Response deleteTeam(@PathParam("team_id") String teamID) throws CustomException {
 
-        return null;
+        logger.info("Team delete:: Start");
+        teamService.deleteTeam(teamID);
+        logger.info("Team delete:: End");
+
+        return Response.ok().entity("Success").build();
     }
 
     @GET
     @Path("/{team_id}")
-    @ApiOperation(value = "Read Team Or All Teams", notes = "Read Team Or All Teams", position = 4)
+    @ApiOperation(value = "Read Team", notes = "Read Team", position = 4)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Read team or all teams success"),
-            @ApiResponse(code = 500, message = "read team or all teams failed, unauthorized.")
+            @ApiResponse(code = 200, message = "Read team success"),
+            @ApiResponse(code = 500, message = "read team failed, unauthorized.")
     })
     public Response readTeamOrAllTeams(@PathParam("team_id") String teamID) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(teamID)){
-            //TODO read team info
-
-        } else {
-            //TODO read all team info
-        }
-        return null;
+        logger.info("Read a team info");
+        return Response.ok().entity(TRANSFORMER.getTeamDto(teamService.getTeamByID(teamID))).build();
     }
 
     @GET
     @Path("/search")
-    @ApiOperation(value = "Search Team Or All Teams", notes = "Search Team Or All Teams", position = 5)
+    @ApiOperation(value = "Search Or Read All Teams", notes = "Search Or Read All Teams", position = 5)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Search team or all teams success"),
-            @ApiResponse(code = 500, message = "Search team or all teams failed, unauthorized.")
+            @ApiResponse(code = 200, message = "Search or read all teams success"),
+            @ApiResponse(code = 500, message = "Search or read all teams failed, unauthorized.")
     })
     public Response searchTeamOrAllTeams(@QueryParam("search_text") String searchText) throws CustomException {
 
         if(!Utility.isNullOrEmpty(searchText)){
             //TODO search team info
 
+        } else {
+            logger.info("Read all team info");
+            return Response.ok().entity(TRANSFORMER.getTeamsDto(teamService.getAllTeams())).build();
         }
         return null;
     }

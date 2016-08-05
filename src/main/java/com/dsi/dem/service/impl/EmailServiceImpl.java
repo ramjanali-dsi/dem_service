@@ -33,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
         }
 
         for(EmployeeEmail employeeEmail : employeeEmailList) {
-            validateInputForCreation(employeeEmail);
+            validateInputForCreation(employeeEmail, employeeID);
 
             employeeEmail.setEmployee(employeeDao.getEmployeeByID(employeeID));
             boolean res = employeeDao.saveEmployeeEmail(employeeEmail);
@@ -47,7 +47,7 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private void validateInputForCreation(EmployeeEmail employeeEmail) throws CustomException {
+    private void validateInputForCreation(EmployeeEmail employeeEmail, String employeeID) throws CustomException {
         if(employeeEmail.getEmail() == null){
             ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -65,6 +65,14 @@ public class EmailServiceImpl implements EmailService {
         if(employeeDao.getEmployeeEmailByEmailName(employeeEmail.getEmail()) != null){
             ErrorContext errorContext = new ErrorContext(employeeEmail.getEmail(), "EmployeeEmail",
                     "Email already exist.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        if(employeeDao.getEmployeeEmailByEmployeeIDAndTypeID(employeeID, employeeEmail.getType().getEmailTypeId()) != null){
+            ErrorContext errorContext = new ErrorContext(employeeEmail.getType().getEmailTypeName(), "EmployeeEmail",
+                    "Email type already exist.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
                     Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
             throw new CustomException(errorMessage);

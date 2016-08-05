@@ -1,5 +1,6 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.model.ProjectTeam;
 import com.dsi.dem.model.Team;
 import com.dsi.dem.model.TeamMember;
 
@@ -19,7 +20,12 @@ public interface TeamDao {
 
     boolean saveTeamMember(TeamMember teamMember);
     boolean updateTeamMember(TeamMember teamMember);
-    boolean deleteTeamMember(String teamMemberID);
+    boolean deleteTeamMember(String teamID, String teamMemberID);
     TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID);
     List<TeamMember> getTeamMembers(String teamID);
+
+    boolean saveTeamProject(ProjectTeam projectTeam);
+    boolean updateTeamProject(ProjectTeam projectTeam);
+    boolean deleteProjectTeam(String teamID, String teamProjectID);
+    List<ProjectTeam> getProjectTeams(String teamID);
 }

@@ -71,34 +71,4 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
         }
         return projectList;
     }
-
-    @Override
-    public boolean saveProjectTeam(ProjectTeam projectTeam) {
-        return save(projectTeam);
-    }
-
-    @Override
-    public boolean updateProjectTeam(ProjectTeam projectTeam) {
-        return update(projectTeam);
-    }
-
-    @Override
-    public boolean deleteProjectTeam(String projectTeamID) {
-        return false;
-    }
-
-    @Override
-    public ProjectTeam getProjectTeamByTeamIDAndProjectID(String teamID, String projectID) {
-        return null;
-    }
-
-    @Override
-    public List<ProjectTeam> getProjectTeamsByTeamID(String teamID) {
-        return null;
-    }
-
-    @Override
-    public List<ProjectTeam> getProjectTeamsByProjectID(String projectID) {
-        return null;
-    }
 }

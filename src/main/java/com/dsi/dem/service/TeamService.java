@@ -1,7 +1,9 @@
 package com.dsi.dem.service;
 
 import com.dsi.dem.exception.CustomException;
+import com.dsi.dem.model.ProjectTeam;
 import com.dsi.dem.model.Team;
+import com.dsi.dem.model.TeamMember;
 
 import java.util.List;
 
@@ -16,5 +18,11 @@ public interface TeamService {
     Team getTeamByID(String teamID) throws CustomException;
     List<Team> getAllTeams() throws CustomException;
 
+    void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException;
+    void deleteTeamMember(String teamMemberID) throws CustomException;
+    List<TeamMember> getTeamMembers(String teamID) throws CustomException;
+
     void saveTeamProjects(List<String> projectIdList, Team team) throws CustomException;
+    void deleteTeamProject(String teamProjectID) throws CustomException;
+    List<ProjectTeam> getTeamProjects(String teamID) throws CustomException;
 }

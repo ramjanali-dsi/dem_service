@@ -43,6 +43,15 @@ public class TeamDtoTransformer {
         return team;
     }
 
+    public List<TeamMember> getTeamMembers(List<TeamMemberDto> memberDtoList) throws CustomException {
+
+        List<TeamMember> memberList = new ArrayList<>();
+        for(TeamMemberDto memberDto : memberDtoList){
+            memberList.add(getTeamMember(memberDto));
+        }
+        return memberList;
+    }
+
     public TeamMember getTeamMember(TeamMemberDto memberDto) throws CustomException {
 
         TeamMember teamMember = new TeamMember();
@@ -65,6 +74,15 @@ public class TeamDtoTransformer {
         return teamMember;
     }
 
+    public List<TeamMemberDto> getTeamMembersDto(List<TeamMember> members) throws CustomException {
+
+        List<TeamMemberDto> memberDtoList = new ArrayList<>();
+        for(TeamMember member : members){
+            memberDtoList.add(getTeamMemberDto(member));
+        }
+        return memberDtoList;
+    }
+
     public TeamMemberDto getTeamMemberDto(TeamMember teamMember) throws CustomException {
 
         TeamMemberDto memberDto = new TeamMemberDto();
@@ -72,7 +90,7 @@ public class TeamDtoTransformer {
             BeanUtils.copyProperties(memberDto, teamMember.getEmployee());
             BeanUtils.copyProperties(memberDto, teamMember.getRole());
 
-            //memberDto.setPhotoUrl(teamMember.getEmployee().getInfo().getPhotoUrl());
+            memberDto.setPhotoUrl(teamMember.getEmployee().getInfo().getPhotoUrl());
 
             if(!Utility.isNullOrEmpty(teamMember.getEmployee().getDesignations())) {
                 for (EmployeeDesignation designation : teamMember.getEmployee().getDesignations()) {
@@ -109,7 +127,6 @@ public class TeamDtoTransformer {
             throw new CustomException(errorMessage);
         }
 
-        System.out.println("Member details: " + new Gson().toJson(memberDto));
         return memberDto;
     }
 
@@ -141,6 +158,24 @@ public class TeamDtoTransformer {
         return teamDto;
     }
 
+    public List<TeamDto> getTeamsDto(List<Team> teams) throws CustomException {
+
+        List<TeamDto> dtoList = new ArrayList<>();
+        for(Team team : teams){
+            dtoList.add(getTeamDto(team));
+        }
+        return dtoList;
+    }
+
+    public List<ProjectTeamDto> getProjectTeamsDto(List<ProjectTeam> projectTeams) throws CustomException {
+
+        List<ProjectTeamDto> projectTeamDtoList = new ArrayList<>();
+        for(ProjectTeam projectTeam : projectTeams){
+            projectTeamDtoList.add(getProjectTeamDto(projectTeam));
+        }
+        return projectTeamDtoList;
+    }
+
     public ProjectTeamDto getProjectTeamDto(ProjectTeam projectTeam) throws CustomException {
 
         ProjectTeamDto projectTeamDto = new ProjectTeamDto();
@@ -150,6 +185,10 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
+            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
         }
         return projectTeamDto;
     }

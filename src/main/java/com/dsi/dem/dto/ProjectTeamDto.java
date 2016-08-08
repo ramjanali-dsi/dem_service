@@ -5,6 +5,8 @@ package com.dsi.dem.dto;
  */
 public class ProjectTeamDto {
 
+    private String projectTeamId;
+
     private String projectId;
 
     private String projectName;
@@ -14,6 +16,14 @@ public class ProjectTeamDto {
     private String projectStatusId;
 
     private String projectStatusName;
+
+    public String getProjectTeamId() {
+        return projectTeamId;
+    }
+
+    public void setProjectTeamId(String projectTeamId) {
+        this.projectTeamId = projectTeamId;
+    }
 
     public String getProjectId() {
         return projectId;

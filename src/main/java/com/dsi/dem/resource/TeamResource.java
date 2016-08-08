@@ -104,13 +104,12 @@ public class TeamResource {
     }
 
     @GET
-    @Path("/search")
     @ApiOperation(value = "Search Or Read All Teams", notes = "Search Or Read All Teams", position = 5)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Search or read all teams success"),
             @ApiResponse(code = 500, message = "Search or read all teams failed, unauthorized.")
     })
-    public Response searchTeamOrAllTeams(@QueryParam("search_text") String searchText) throws CustomException {
+    public Response searchTeamOrAllTeams(@QueryParam("search") String searchText) throws CustomException {
 
         if(!Utility.isNullOrEmpty(searchText)){
             //TODO search team info

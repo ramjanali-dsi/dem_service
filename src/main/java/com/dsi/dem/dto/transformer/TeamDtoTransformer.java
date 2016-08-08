@@ -87,6 +87,7 @@ public class TeamDtoTransformer {
 
         TeamMemberDto memberDto = new TeamMemberDto();
         try {
+            BeanUtils.copyProperties(memberDto, teamMember);
             BeanUtils.copyProperties(memberDto, teamMember.getEmployee());
             BeanUtils.copyProperties(memberDto, teamMember.getRole());
 
@@ -180,6 +181,7 @@ public class TeamDtoTransformer {
 
         ProjectTeamDto projectTeamDto = new ProjectTeamDto();
         try {
+            BeanUtils.copyProperties(projectTeamDto, projectTeam);
             BeanUtils.copyProperties(projectTeamDto, projectTeam.getProject());
             BeanUtils.copyProperties(projectTeamDto, projectTeam.getProject().getStatus());
 

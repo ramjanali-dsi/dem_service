@@ -5,6 +5,8 @@ package com.dsi.dem.dto;
  */
 public class TeamMemberDto {
 
+    private String teamMemberId;
+
     private String employeeNo;
 
     private String firstName;
@@ -28,6 +30,14 @@ public class TeamMemberDto {
     private String roleName;
 
     private int version;
+
+    public String getTeamMemberId() {
+        return teamMemberId;
+    }
+
+    public void setTeamMemberId(String teamMemberId) {
+        this.teamMemberId = teamMemberId;
+    }
 
     public String getEmployeeId() {
         return employeeId;

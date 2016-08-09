@@ -52,6 +52,27 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
     }
 
     @Override
+    public Client getClientByName(String name) {
+        Session session = null;
+        Client client = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM Client c WHERE c.memberName =:name");
+            query.setParameter("name", name);
+
+            client = (Client) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return client;
+    }
+
+    @Override
     public List<Client> getAllClients() {
         Session session = null;
         List<Client> clientList = null;

@@ -33,10 +33,10 @@ public class Project {
     private int version;
 
     @Transient
-    private List<ProjectTeam> teamList = new ArrayList<>();
+    private List<ProjectTeam> teams = new ArrayList<>();
 
     @Transient
-    private List<ProjectClient> clientList = new ArrayList<>();
+    private List<ProjectClient> clients = new ArrayList<>();
 
     public String getProjectId() {
         return projectId;
@@ -78,19 +78,19 @@ public class Project {
         this.version = version;
     }
 
-    public List<ProjectTeam> getTeamList() {
-        return teamList;
+    public List<ProjectTeam> getTeams() {
+        return teams;
     }
 
-    public void setTeamList(List<ProjectTeam> teamList) {
-        this.teamList = teamList;
+    public void setTeams(List<ProjectTeam> teams) {
+        this.teams = teams;
     }
 
-    public List<ProjectClient> getClientList() {
-        return clientList;
+    public List<ProjectClient> getClients() {
+        return clients;
     }
 
-    public void setClientList(List<ProjectClient> clientList) {
-        this.clientList = clientList;
+    public void setClients(List<ProjectClient> clients) {
+        this.clients = clients;
     }
 }

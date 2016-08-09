@@ -1,21 +1,21 @@
 package com.dsi.dem.dto;
 
 /**
- * Created by sabbir on 8/4/16.
+ * Created by sabbir on 8/8/16.
  */
 public class ProjectTeamDto {
 
     private String projectTeamId;
 
-    private String projectId;
+    private String teamId;
 
-    private String projectName;
+    private String name;
 
-    private String description;
+    private String floor;
 
-    private String projectStatusId;
+    private String room;
 
-    private String projectStatusName;
+    private boolean isActive;
 
     public String getProjectTeamId() {
         return projectTeamId;
@@ -25,43 +25,43 @@ public class ProjectTeamDto {
         this.projectTeamId = projectTeamId;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public String getTeamId() {
+        return teamId;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
-    public String getProjectName() {
-        return projectName;
+    public String getName() {
+        return name;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getProjectStatusId() {
-        return projectStatusId;
+    public String getFloor() {
+        return floor;
     }
 
-    public void setProjectStatusId(String projectStatusId) {
-        this.projectStatusId = projectStatusId;
+    public void setFloor(String floor) {
+        this.floor = floor;
     }
 
-    public String getProjectStatusName() {
-        return projectStatusName;
+    public String getRoom() {
+        return room;
     }
 
-    public void setProjectStatusName(String projectStatusName) {
-        this.projectStatusName = projectStatusName;
+    public void setRoom(String room) {
+        this.room = room;
     }
 
-    public String getDescription() {
-        return description;
+    public boolean isActive() {
+        return isActive;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

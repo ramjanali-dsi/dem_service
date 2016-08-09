@@ -44,7 +44,7 @@ public class TeamResource {
         logger.info("Team Create:: Start");
         teamService.saveTeam(team);
 
-        if(!Utility.isNullOrEmpty(teamDto.getProjectList())) {
+        if(!Utility.isNullOrEmpty(teamDto.getProjectIds())) {
             teamService.saveTeamProjects(teamDto.getProjectIds(), team);
         }
         logger.info("Team Create:: End");

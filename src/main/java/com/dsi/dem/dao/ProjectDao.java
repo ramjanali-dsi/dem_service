@@ -1,6 +1,7 @@
 package com.dsi.dem.dao;
 
 import com.dsi.dem.model.Project;
+import com.dsi.dem.model.ProjectClient;
 import com.dsi.dem.model.ProjectTeam;
 
 import java.util.List;
@@ -12,7 +13,16 @@ public interface ProjectDao {
 
     boolean saveProject(Project project);
     boolean updateProject(Project project);
-    boolean deleteProject(Project project);
+    boolean deleteProject(String projectID);
     Project getProjectByID(String projectID);
+    Project getProjectByName(String name);
     List<Project> getAllProjects();
+
+    boolean saveProjectTeam(ProjectTeam projectTeam);
+    boolean deleteProjectTeam(String projectID, String projectTeamID);
+    List<ProjectTeam> getProjectTeams(String projectID);
+
+    boolean saveProjectClient(ProjectClient projectClient);
+    boolean deleteProjectClient(String projectID, String projectClientID);
+    List<ProjectClient> getProjectClients(String projectID);
 }

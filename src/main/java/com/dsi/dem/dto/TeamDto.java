@@ -29,7 +29,7 @@ public class TeamDto {
 
     private List<String> projectIds = new ArrayList<>();
 
-    private List<ProjectTeamDto> projectList = new ArrayList<>();
+    private List<TeamProjectDto> projectList = new ArrayList<>();
 
     public String getTeamId() {
         return teamId;
@@ -105,11 +105,11 @@ public class TeamDto {
         this.projectIds = projectIds;
     }
 
-    public List<ProjectTeamDto> getProjectList() {
+    public List<TeamProjectDto> getProjectList() {
         return projectList;
     }
 
-    public void setProjectList(List<ProjectTeamDto> projectList) {
+    public void setProjectList(List<TeamProjectDto> projectList) {
         this.projectList = projectList;
     }
 }

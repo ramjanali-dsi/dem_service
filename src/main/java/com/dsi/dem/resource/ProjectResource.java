@@ -1,12 +1,13 @@
 package com.dsi.dem.resource;
 
+import com.dsi.dem.dto.ProjectDto;
+import com.dsi.dem.dto.transformer.ProjectDtoTransformer;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.Project;
+import com.dsi.dem.service.ProjectService;
+import com.dsi.dem.service.impl.ProjectServiceImpl;
 import com.dsi.dem.util.Utility;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import com.wordnik.swagger.annotations.*;
 import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
@@ -25,15 +26,35 @@ public class ProjectResource {
 
     private static final Logger logger = Logger.getLogger(ProjectResource.class);
 
+    private static final ProjectDtoTransformer TRANSFORMER = new ProjectDtoTransformer();
+    private static final ProjectService projectService = new ProjectServiceImpl();
+
     @POST
     @ApiOperation(value = "Create Project", notes = "Create Project", position = 1)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Project create success"),
             @ApiResponse(code = 500, message = "Project create failed, unauthorized.")
     })
-    public Response createProject(Project project) throws CustomException {
+    public Response createProject(@ApiParam(value = "Project Dto", required = true)ProjectDto  projectDto)
+            throws CustomException {
 
-        return null;
+        logger.info("Convert Dto to Object:: Start");
+        Project project = TRANSFORMER.getProject(projectDto);
+        logger.info("Convert Dto to Object:: End");
+
+        if(!Utility.isNullOrEmpty(projectDto.getTeamIds())){
+            logger.info("Project Create:: Start");
+            projectService.saveProject(project);
+            projectService.saveProjectTeam(projectDto.getTeamIds(), project);
+
+            if(!Utility.isNullOrEmpty(projectDto.getClientIds())){
+                projectService.saveProjectClient(projectDto.getClientIds(), project);
+            }
+        }
+        logger.info("Project Create:: End");
+
+        return Response.ok().entity(TRANSFORMER.getProjectDto(
+                projectService.getProjectByID(project.getProjectId()))).build();
     }
 
     @PUT
@@ -44,9 +65,20 @@ public class ProjectResource {
             @ApiResponse(code = 500, message = "Project update failed, unauthorized.")
     })
     public Response updateProject(@PathParam("project_id") String projectID,
-                                  Project project) throws CustomException {
+                                  @ApiParam(value = "Project Dto", required = true) ProjectDto projectDto)
+            throws CustomException {
 
-        return null;
+        logger.info("Convert Dto to Object:: Start");
+        Project project = TRANSFORMER.getProject(projectDto);
+        logger.info("Convert Dto to Object:: End");
+
+        logger.info("Project Update:: Start");
+        project.setProjectId(projectID);
+        projectService.updateProject(project);
+        logger.info("Project Update:: End");
+
+        return Response.ok().entity(TRANSFORMER.getProjectDto(
+                projectService.getProjectByID(projectID))).build();
     }
 
     @DELETE
@@ -58,7 +90,11 @@ public class ProjectResource {
     })
     public Response deleteProject(@PathParam("project_id") String projectID) throws CustomException {
 
-        return null;
+        logger.info("Project delete:: Start");
+        projectService.deleteProject(projectID);
+        logger.info("Project delete:: End");
+
+        return Response.ok().entity("Success").build();
     }
 
     @GET
@@ -70,28 +106,27 @@ public class ProjectResource {
     })
     public Response readProjectOrAllProjects(@PathParam("project_id") String projectID) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(projectID)){
-            //TODO read a project
-
-        } else {
-            //TODO read all projects
-        }
-        return null;
+        logger.info("Read a project");
+        return Response.ok().entity(TRANSFORMER.getProjectDto(
+                projectService.getProjectByID(projectID))).build();
     }
 
     @GET
-    @Path("/search")
-    @ApiOperation(value = "Search Project Or All Projects", notes = "Search Project Or All Projects", position = 4)
+    @ApiOperation(value = "Search Or Read All Projects", notes = "Search Or Read All Projects", position = 4)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Search project or all projects success"),
-            @ApiResponse(code = 500, message = "Search project or all projects failed, unauthorized.")
+            @ApiResponse(code = 200, message = "Search or read all projects success"),
+            @ApiResponse(code = 500, message = "Search or read all projects failed, unauthorized.")
     })
-    public Response searchProjectOrAllProjects(@QueryParam("search_text") String searchText) throws CustomException {
+    public Response searchProjectOrAllProjects(@QueryParam("search") String searchText) throws CustomException {
 
         if(!Utility.isNullOrEmpty(searchText)){
             //TODO search a project
+            return null;
 
+        } else {
+            logger.info("Read all projects");
+            return Response.ok().entity(TRANSFORMER.getProjectsDto(
+                    projectService.getAllProjects())).build();
         }
-        return null;
     }
 }

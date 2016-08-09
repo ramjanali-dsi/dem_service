@@ -2,6 +2,7 @@ package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.ProjectDao;
 import com.dsi.dem.model.Project;
+import com.dsi.dem.model.ProjectClient;
 import com.dsi.dem.model.ProjectTeam;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -27,8 +28,31 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
     }
 
     @Override
-    public boolean deleteProject(Project project) {
-        return delete(project);
+    public boolean deleteProject(String projectID) {
+        Session session = null;
+        boolean success = true;
+        try {
+            session = getSession();
+            Query query = session.createQuery("DELETE FROM Project p WHERE p.projectId =:projectID");
+            query.setParameter("projectID", projectID);
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override
@@ -39,6 +63,27 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
             session = getSession();
             Query query = session.createQuery("FROM Project p WHERE p.projectId =:projectID");
             query.setParameter("projectID", projectID);
+
+            project = (Project) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return project;
+    }
+
+    @Override
+    public Project getProjectByName(String name) {
+        Session session = null;
+        Project project = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM Project p WHERE p.projectName =:name");
+            query.setParameter("name", name);
 
             project = (Project) query.uniqueResult();
 
@@ -70,5 +115,127 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
             }
         }
         return projectList;
+    }
+
+    @Override
+    public boolean saveProjectTeam(ProjectTeam projectTeam) {
+        return save(projectTeam);
+    }
+
+    @Override
+    public boolean deleteProjectTeam(String projectID, String projectTeamID) {
+        Session session = null;
+        boolean success = true;
+        Query query;
+        try {
+            session = getSession();
+            if(projectID != null){
+                query = session.createQuery("DELETE FROM ProjectTeam pt WHERE pt.project.projectId =:projectID");
+                query.setParameter("projectID", projectID);
+
+            } else {
+                query = session.createQuery("DELETE FROM ProjectTeam pt WHERE pt.projectTeamId =:projectTeamID");
+                query.setParameter("projectTeamID", projectTeamID);
+            }
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public List<ProjectTeam> getProjectTeams(String projectID) {
+        Session session = null;
+        List<ProjectTeam> projectTeams = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM ProjectTeam pt WHERE pt.project.projectId =:projectID");
+            query.setParameter("projectID", projectID);
+
+            projectTeams = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return projectTeams;
+    }
+
+    @Override
+    public boolean saveProjectClient(ProjectClient projectClient) {
+        return save(projectClient);
+    }
+
+    @Override
+    public boolean deleteProjectClient(String projectID, String projectClientID) {
+        Session session = null;
+        boolean success = true;
+        Query query;
+        try {
+            session = getSession();
+            if(projectID != null){
+                query = session.createQuery("DELETE FROM ProjectClient pc WHERE pc.project.projectId =:projectID");
+                query.setParameter("projectID", projectID);
+
+            } else {
+                query = session.createQuery("DELETE FROM ProjectClient pc WHERE pc.projectClientId =:projectClientID");
+                query.setParameter("projectClientID", projectClientID);
+            }
+
+            if(query.executeUpdate() > 0){
+                success = true;
+
+            } else {
+                success = false;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public List<ProjectClient> getProjectClients(String projectID) {
+        Session session = null;
+        List<ProjectClient> projectClients = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM ProjectClient pc WHERE pc.project.projectId =:projectID");
+            query.setParameter("projectID", projectID);
+
+            projectClients = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return projectClients;
     }
 }

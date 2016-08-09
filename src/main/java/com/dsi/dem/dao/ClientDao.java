@@ -13,5 +13,6 @@ public interface ClientDao {
     boolean updateClient(Client client);
     boolean deleteClient(Client client);
     Client getClientByID(String clientID);
+    Client getClientByName(String name);
     List<Client> getAllClients();
 }

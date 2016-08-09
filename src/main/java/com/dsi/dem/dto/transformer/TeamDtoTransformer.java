@@ -1,6 +1,6 @@
 package com.dsi.dem.dto.transformer;
 
-import com.dsi.dem.dto.ProjectTeamDto;
+import com.dsi.dem.dto.TeamProjectDto;
 import com.dsi.dem.dto.TeamDto;
 import com.dsi.dem.dto.TeamMemberDto;
 import com.dsi.dem.exception.CustomException;
@@ -9,10 +9,8 @@ import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.Utility;
-import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,11 +141,11 @@ public class TeamDtoTransformer {
             }
             teamDto.setMemberList(memberDtoList);
 
-            List<ProjectTeamDto> projectTeamDtoList = new ArrayList<>();
+            List<TeamProjectDto> teamProjectDtoList = new ArrayList<>();
             for(ProjectTeam projectTeam : team.getProjects()){
-                projectTeamDtoList.add(getProjectTeamDto(projectTeam));
+                teamProjectDtoList.add(getProjectTeamDto(projectTeam));
             }
-            teamDto.setProjectList(projectTeamDtoList);
+            teamDto.setProjectList(teamProjectDtoList);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -168,22 +166,22 @@ public class TeamDtoTransformer {
         return dtoList;
     }
 
-    public List<ProjectTeamDto> getProjectTeamsDto(List<ProjectTeam> projectTeams) throws CustomException {
+    public List<TeamProjectDto> getProjectTeamsDto(List<ProjectTeam> projectTeams) throws CustomException {
 
-        List<ProjectTeamDto> projectTeamDtoList = new ArrayList<>();
+        List<TeamProjectDto> teamProjectDtoList = new ArrayList<>();
         for(ProjectTeam projectTeam : projectTeams){
-            projectTeamDtoList.add(getProjectTeamDto(projectTeam));
+            teamProjectDtoList.add(getProjectTeamDto(projectTeam));
         }
-        return projectTeamDtoList;
+        return teamProjectDtoList;
     }
 
-    public ProjectTeamDto getProjectTeamDto(ProjectTeam projectTeam) throws CustomException {
+    public TeamProjectDto getProjectTeamDto(ProjectTeam projectTeam) throws CustomException {
 
-        ProjectTeamDto projectTeamDto = new ProjectTeamDto();
+        TeamProjectDto teamProjectDto = new TeamProjectDto();
         try {
-            BeanUtils.copyProperties(projectTeamDto, projectTeam);
-            BeanUtils.copyProperties(projectTeamDto, projectTeam.getProject());
-            BeanUtils.copyProperties(projectTeamDto, projectTeam.getProject().getStatus());
+            BeanUtils.copyProperties(teamProjectDto, projectTeam);
+            BeanUtils.copyProperties(teamProjectDto, projectTeam.getProject());
+            BeanUtils.copyProperties(teamProjectDto, projectTeam.getProject().getStatus());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -192,6 +190,6 @@ public class TeamDtoTransformer {
                     Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
             throw new CustomException(errorMessage);
         }
-        return projectTeamDto;
+        return teamProjectDto;
     }
 }

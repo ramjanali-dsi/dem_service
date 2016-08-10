@@ -150,6 +150,7 @@ public class ProjectServiceImpl implements ProjectService {
             ProjectTeam projectTeam = new ProjectTeam();
             projectTeam.setTeam(teamDao.getTeamByID(teamID));
             projectTeam.setProject(project);
+            projectTeam.setVersion(project.getVersion());
 
             boolean res = teamDao.saveTeamProject(projectTeam);
             if(!res){

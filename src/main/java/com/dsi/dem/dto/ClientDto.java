@@ -1,44 +1,33 @@
-package com.dsi.dem.model;
+package com.dsi.dem.dto;
 
-import org.hibernate.annotations.GenericGenerator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by sabbir on 7/15/16.
+ * Created by sabbir on 8/9/16.
  */
+public class ClientDto {
 
-@Entity
-@Table(name = "dis_client")
-public class Client {
-
-    @Id
-    @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid2")
-    @Column(name = "client_id", length = 40)
     private String clientId;
 
-    @Column(name = "member_name", length = 50)
     private String memberName;
 
-    @Column(name = "member_postition", length = 40)
     private String memberPosition;
 
-    @Column(name = "member_email", length = 40)
     private String memberEmail;
 
-    @Column(name = "is_notify")
     private boolean isNotify;
 
-    @Column(length = 50)
     private String organization;
 
     private int version;
 
-    @Transient
-    private List<ProjectClient> projects = new ArrayList<>();
+    private List<String> projectIds = new ArrayList<>();
+
+    private List<ClientProjectDto> projectList = new ArrayList<>();
 
     public String getClientId() {
         return clientId;
@@ -88,19 +77,29 @@ public class Client {
         this.organization = organization;
     }
 
-    public List<ProjectClient> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(List<ProjectClient> projects) {
-        this.projects = projects;
-    }
-
     public int getVersion() {
         return version;
     }
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    @JsonIgnore
+    public List<String> getProjectIds() {
+        return projectIds;
+    }
+
+    @JsonProperty
+    public void setProjectIds(List<String> projectIds) {
+        this.projectIds = projectIds;
+    }
+
+    public List<ClientProjectDto> getProjectList() {
+        return projectList;
+    }
+
+    public void setProjectList(List<ClientProjectDto> projectList) {
+        this.projectList = projectList;
     }
 }

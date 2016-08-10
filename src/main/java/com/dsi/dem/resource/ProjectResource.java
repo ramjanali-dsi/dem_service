@@ -99,10 +99,10 @@ public class ProjectResource {
 
     @GET
     @Path("/{project_id}")
-    @ApiOperation(value = "Read Project Or All Projects", notes = "Read Project Or All Projects", position = 4)
+    @ApiOperation(value = "Read Project", notes = "Read Project", position = 4)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Read project or all projects success"),
-            @ApiResponse(code = 500, message = "Read project or all projects failed, unauthorized.")
+            @ApiResponse(code = 200, message = "Read project success"),
+            @ApiResponse(code = 500, message = "Read project failed, unauthorized.")
     })
     public Response readProjectOrAllProjects(@PathParam("project_id") String projectID) throws CustomException {
 

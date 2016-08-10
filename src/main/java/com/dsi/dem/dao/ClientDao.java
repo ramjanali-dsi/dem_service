@@ -1,6 +1,7 @@
 package com.dsi.dem.dao;
 
 import com.dsi.dem.model.Client;
+import com.dsi.dem.model.ProjectClient;
 
 import java.util.List;
 
@@ -11,8 +12,12 @@ public interface ClientDao {
 
     boolean saveClient(Client client);
     boolean updateClient(Client client);
-    boolean deleteClient(Client client);
+    boolean deleteClient(String clientID);
     Client getClientByID(String clientID);
     Client getClientByName(String name);
     List<Client> getAllClients();
+
+    boolean saveClientProject(ProjectClient projectClient);
+    boolean deleteClientProject(String clientID, String projectClientID);
+    List<ProjectClient> getClientProjects(String clientID);
 }

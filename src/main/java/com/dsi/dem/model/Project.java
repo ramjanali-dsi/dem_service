@@ -20,7 +20,7 @@ public class Project {
     @Column(name = "project_id", length = 40)
     private String projectId;
 
-    @Column(length = 50)
+    @Column(name = "name", length = 50)
     private String projectName;
 
     @Column(columnDefinition = "TEXT")

@@ -1,5 +1,8 @@
 package com.dsi.dem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,18 +79,22 @@ public class ProjectDto {
         this.version = version;
     }
 
+    @JsonIgnore
     public List<String> getTeamIds() {
         return teamIds;
     }
 
+    @JsonProperty
     public void setTeamIds(List<String> teamIds) {
         this.teamIds = teamIds;
     }
 
+    @JsonIgnore
     public List<String> getClientIds() {
         return clientIds;
     }
 
+    @JsonProperty
     public void setClientIds(List<String> clientIds) {
         this.clientIds = clientIds;
     }

@@ -18,7 +18,7 @@ public class ProjectStatus {
     @Column(name = "project_status_id", length = 40)
     private String projectStatusId;
 
-    @Column(length = 50)
+    @Column(name = "name", length = 50)
     private String projectStatusName;
 
     @Column(columnDefinition = "TEXT")

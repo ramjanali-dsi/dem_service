@@ -7,6 +7,8 @@ import com.dsi.dem.model.Employee;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -36,41 +38,22 @@ public class Utility {
         return false;
     }
 
-    public static final String generateRandomString(){
-        return UUID.randomUUID().toString();
-    }
-
     public static final Date today() {
         return new Date();
     }
 
-    public static final Object convertMapToObject(String body, Object object) throws CustomException {
+    public static final String getUserObject(Employee employee, String currentUserID) throws JSONException {
+        JSONObject userObj = new JSONObject();
+        userObj.put("firstName", employee.getFirstName());
+        userObj.put("lastName", employee.getLastName());
+        userObj.put("gender", employee.getInfo().getGender());
+        userObj.put("email", employee.getEmailInfo().get(0).getEmail());
+        userObj.put("phone", employee.getContactInfo().get(0).getPhone());
+        userObj.put("createBy", currentUserID);
+        userObj.put("modifiedBy", currentUserID);
+        userObj.put("roleId", employee.getRoleId());
+        userObj.put("version", 1);
 
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> bodyMap = new HashMap<>();
-        try {
-            bodyMap = mapper.readValue(body, new TypeReference<Map<String, Object>>(){});
-            logger.info("Body map: " + bodyMap);
-
-            Employee employee = mapper.convertValue(bodyMap, Employee.class);
-
-            System.out.println(employee.getBankAcNo());
-
-            /*Method[] methods = object.getClass().getMethods();
-            for(Map.Entry<String, Object> property : bodyMap.entrySet()){
-                Method setter = object.getClass().getMethod("set" + property.getKey().substring(0, 1).toUpperCase()
-                        + property.getKey().substring(1), property.getValue().getClass());
-            }*/
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0011,
-                    Constants.DEM_SERVICE_0011_DESCRIPTION, errorContext);
-            throw new CustomException(errorMessage);
-        }
-        return object;
+        return userObj.toString();
     }
 }

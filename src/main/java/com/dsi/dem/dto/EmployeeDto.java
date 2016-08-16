@@ -38,6 +38,8 @@ public class EmployeeDto {
 
     private String skypeId;
 
+    private String roleId;
+
     private String nationalId;
 
     private String etinId;
@@ -260,5 +262,15 @@ public class EmployeeDto {
 
     public void setContactList(List<EmployeeContactDto> contactList) {
         this.contactList = contactList;
+    }
+
+    @JsonIgnore
+    public String getRoleId() {
+        return roleId;
+    }
+
+    @JsonProperty
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
     }
 }

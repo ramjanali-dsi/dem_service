@@ -138,16 +138,32 @@
             <version>1.4.7</version>
         </dependency>
 
+        <!--Copy properties of class-->
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.9.2</version>
         </dependency>
 
+        <!--GSON Object-->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.6.2</version>
+        </dependency>
+
+        <!--DSI authorization-->
+        <dependency>
+            <groupId>com.dsi.checkauthorization</groupId>
+            <artifactId>check-authorization</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!--DSI httpclient-->
+        <dependency>
+            <groupId>com.dsi.httpclient</groupId>
+            <artifactId>dsi-httpclient</artifactId>
+            <version>1.0</version>
         </dependency>
 
     </dependencies>

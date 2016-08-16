@@ -29,7 +29,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void saveEmployee(Employee employee) throws CustomException {
-        validateInputForCreation(employee);
 
         List<EmployeeDesignation> employeeDesignationList = employee.getDesignations();
         List<EmployeeEmail> employeeEmailList = employee.getEmailInfo();
@@ -87,7 +86,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         logger.info("Save employee email info success");
     }
 
-    private void validateInputForCreation(Employee employee) throws CustomException {
+    public void validateInputForCreation(Employee employee) throws CustomException {
         if(employee.getFirstName() == null){
             ErrorContext errorContext = new ErrorContext(null, "Employee", "First Name not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,

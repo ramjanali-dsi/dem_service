@@ -1,5 +1,7 @@
 package com.dsi.dem.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -76,6 +78,9 @@ public class Employee {
     private boolean isActive;
 
     private int version;
+
+    @Transient
+    private String roleId;
 
     @Transient
     private EmployeeInfo info = new EmployeeInfo();
@@ -289,4 +294,11 @@ public class Employee {
         this.version = version;
     }
 
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
 }

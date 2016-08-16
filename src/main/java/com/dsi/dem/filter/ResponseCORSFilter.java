@@ -1,5 +1,7 @@
 package com.dsi.dem.filter;
 
+import com.dsi.dem.util.Constants;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -13,7 +15,7 @@ public class ResponseCORSFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
         responseContext.getHeaders().add("Access-Control-Allow-Origin","*");
-        responseContext.getHeaders().add("Access-Control-Allow-Methods", "*, Cache-Control, Pragma, Origin, Authorization, X-Requested-With, PUT, DELETE, GET, POST");
-        responseContext.getHeaders().add("Access-Control-Allow-Headers", "*, Content-Type, X-XSRF-TOKEN");
+        responseContext.getHeaders().add("Access-Control-Allow-Methods", "*, Cache-Control, Pragma, Origin, Authorization, X-Requested-With, PUT, DELETE, GET, POST, OPTIONS");
+        responseContext.getHeaders().add("Access-Control-Allow-Headers", "*, Content-Type, X-XSRF-TOKEN, " + Constants.AUTHORIZATION);
     }
 }

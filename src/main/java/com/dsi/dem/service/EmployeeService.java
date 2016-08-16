@@ -11,6 +11,7 @@ import java.util.List;
 public interface EmployeeService {
 
     void saveEmployee(Employee employee) throws CustomException;
+    void validateInputForCreation(Employee employee) throws CustomException;
     void updateEmployee(Employee employee) throws CustomException;
     void deleteEmployee(String employeeID) throws CustomException;
     Employee getEmployeeByID(String employeeID) throws CustomException;

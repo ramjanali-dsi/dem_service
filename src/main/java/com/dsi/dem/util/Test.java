@@ -29,11 +29,11 @@ public class Test {
 
     public static void main(String[] args) {
 
-        //createEmployeeTest();
+        createEmployeeTest();
 
         //updateEmployeeTest();
 
-        createTeamTest();
+        //createTeamTest();
     }
 
     private static void createEmployeeTest(){

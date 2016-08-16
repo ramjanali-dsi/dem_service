@@ -3,14 +3,23 @@ package com.dsi.dem.resource;
 import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.dto.EmployeeDto;
 import com.dsi.dem.exception.CustomException;
+import com.dsi.dem.exception.ErrorContext;
+import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Employee;
 import com.dsi.dem.service.EmployeeService;
+import com.dsi.dem.service.impl.APIProvider;
 import com.dsi.dem.service.impl.EmployeeServiceImpl;
+import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.Utility;
+import com.dsi.httpclient.HttpClient;
 import com.wordnik.swagger.annotations.*;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -28,6 +37,10 @@ public class EmployeeResource {
 
     private static final EmployeeDtoTransformer EMPLOYEE_DTO_TRANSFORMER = new EmployeeDtoTransformer();
     private static final EmployeeService employeeService = new EmployeeServiceImpl();
+    private static final HttpClient httpClient = new HttpClient();
+
+    @Context
+    HttpServletRequest request;
 
     @POST
     @ApiOperation(value = "Create Employee", notes = "Create Employee", position = 1)
@@ -38,16 +51,38 @@ public class EmployeeResource {
     public Response createEmployee(@ApiParam(value = "Employee Dto", required = true) EmployeeDto employeeDto)
             throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        Employee employee = EMPLOYEE_DTO_TRANSFORMER.getEmployee(employeeDto);
-        logger.info("Convert Dto to Object:: End");
+        String currentUserID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+        try {
+            logger.info("Convert Dto to Object:: Start");
+            Employee employee = EMPLOYEE_DTO_TRANSFORMER.getEmployee(employeeDto);
+            logger.info("Convert Dto to Object:: End");
 
-        logger.info("Employee Create:: Start");
-        employeeService.saveEmployee(employee);
-        logger.info("Employee Create:: End");
+            employeeService.validateInputForCreation(employee);
 
-        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
-                (employeeService.getEmployeeByID(employee.getEmployeeId()))).build();
+            logger.info("Employee Create:: Start");
+            String result = httpClient.sendPost(APIProvider.API_USER, Utility.getUserObject(employee, currentUserID),
+                    Constants.SYSTEM, Constants.SYSTEM_ID);
+            logger.info("v1/user api call result: " + result);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+            }
+
+            employee.setUserId(resultObj.getString("user_id"));
+            employeeService.saveEmployee(employee);
+            logger.info("Employee Create:: End");
+
+            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
+                    (employeeService.getEmployeeByID(employee.getEmployeeId()))).build();
+
+        } catch (JSONException je) {
+            ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                    Constants.DEM_SERVICE_0009_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
     }
 
     @PUT

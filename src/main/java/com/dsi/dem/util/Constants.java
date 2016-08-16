@@ -5,6 +5,12 @@ package com.dsi.dem.util;
  */
 public class Constants {
 
+    public static final String AUTHORIZATION = "authorization";
+
+    public static final String MESSAGE = "message";
+    public static final String SYSTEM = "system";
+    public static final String SYSTEM_ID = "1234";
+
     public static final String OFFICIAL_TYPE_NAME = "Official";
 
     public static final String DEM_SERVICE_0001 = "dem_service_0001";
@@ -32,7 +38,7 @@ public class Constants {
     public static final String DEM_SERVICE_0008_DESCRIPTION = "Not match.";
 
     public static final String DEM_SERVICE_0009 = "dem_service_0009";
-    public static final String DEM_SERVICE_0009_DESCRIPTION = "Password hash failed.";
+    public static final String DEM_SERVICE_0009_DESCRIPTION = "JSON read/write failed.";
 
     public static final String DEM_SERVICE_0010 = "dem_service_0010";
     public static final String DEM_SERVICE_0010_DESCRIPTION = "Read CSV file failed.";

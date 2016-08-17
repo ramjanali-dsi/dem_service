@@ -1,7 +1,9 @@
 package com.dsi.dem.dto;
 
+import com.dsi.dem.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
@@ -172,6 +174,7 @@ public class EmployeeDto {
         this.etinId = etinId;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getJoiningDate() {
         return joiningDate;
     }
@@ -180,6 +183,7 @@ public class EmployeeDto {
         this.joiningDate = joiningDate;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getDateOfConfirmation() {
         return dateOfConfirmation;
     }
@@ -188,6 +192,7 @@ public class EmployeeDto {
         this.dateOfConfirmation = dateOfConfirmation;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getResignDate() {
         return resignDate;
     }
@@ -197,6 +202,7 @@ public class EmployeeDto {
     }
 
     @JsonProperty
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getCreatedDate() {
         return createdDate;
     }
@@ -207,6 +213,7 @@ public class EmployeeDto {
     }
 
     @JsonProperty
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getLastModifiedDate() {
         return lastModifiedDate;
     }

@@ -148,13 +148,13 @@ public class EmployeeResource {
     public Response searchOrReadAllEmployees(@QueryParam("search") String searchText) throws CustomException {
 
         if(!Utility.isNullOrEmpty(searchText)){
-            //TODO search an employee info.
+
+            return null;
 
         } else {
             logger.info("Read all employees info");
             return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeesDto(
                     employeeService.getAllEmployees())).build();
         }
-        return null;
     }
 }

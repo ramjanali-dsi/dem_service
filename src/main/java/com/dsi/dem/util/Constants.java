@@ -9,7 +9,8 @@ public class Constants {
 
     public static final String MESSAGE = "message";
     public static final String SYSTEM = "system";
-    public static final String SYSTEM_ID = "1234";
+    public static final String SYSTEM_ID = "0759a760-b9df-4c8a-8a64-fa31f256d13b";
+    public static final String DATE_FORMAT="yyyy-MM-dd";
 
     public static final String OFFICIAL_TYPE_NAME = "Official";
 
@@ -44,5 +45,5 @@ public class Constants {
     public static final String DEM_SERVICE_0010_DESCRIPTION = "Read CSV file failed.";
 
     public static final String DEM_SERVICE_0011 = "dem_service_0011";
-    public static final String DEM_SERVICE_0011_DESCRIPTION = "Convert body to object failed.";
+    public static final String DEM_SERVICE_0011_DESCRIPTION = "Photo fetch error.";
 }

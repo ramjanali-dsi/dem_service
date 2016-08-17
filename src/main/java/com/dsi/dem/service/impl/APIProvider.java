@@ -14,9 +14,9 @@ public class APIProvider {
     private static final Logger logger = Logger.getLogger(APIProvider.class);
 
     public static final String API_URLS_FILE = "Api.properties";
-    private static final Properties apiProp= new Properties();
+    private static final Properties apiProp = new Properties();
 
-    static{
+    static {
         try {
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             InputStream propIS = loader.getResourceAsStream(API_URLS_FILE);
@@ -28,4 +28,9 @@ public class APIProvider {
 
     public static final String BASE_URL = apiProp.getProperty("base.url");
     public static final String API_USER = BASE_URL + apiProp.getProperty("authorization.user");
+
+    public static final String BASE_DEM_URL = apiProp.getProperty("base.dem.url");
+    public static final String PHOTO_DIRECTORY = apiProp.getProperty("dem.photoDirectory");
+
+    public static final String PHOTO_URL = BASE_DEM_URL + apiProp.getProperty("dem.photoUrl");
 }

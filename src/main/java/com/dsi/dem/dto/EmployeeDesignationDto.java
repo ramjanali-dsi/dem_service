@@ -1,7 +1,9 @@
 package com.dsi.dem.dto;
 
+import com.dsi.dem.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import java.util.Date;
@@ -41,6 +43,7 @@ public class EmployeeDesignationDto {
         this.name = name;
     }
 
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getDesignationDate() {
         return designationDate;
     }

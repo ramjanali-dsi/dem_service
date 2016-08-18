@@ -17,6 +17,8 @@ public interface ProjectDao {
     Project getProjectByID(String projectID);
     Project getProjectByName(String name);
     List<Project> getAllProjects();
+    List<Project> searchProjects(String projectName, String status, String clientName, String teamName,
+                                 String memberName);
 
     boolean saveProjectTeam(ProjectTeam projectTeam);
     boolean deleteProjectTeam(String projectID, String projectTeamID);

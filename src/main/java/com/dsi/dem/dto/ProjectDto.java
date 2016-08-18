@@ -2,6 +2,7 @@ package com.dsi.dem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +14,12 @@ public class ProjectDto {
 
     private String projectId;
 
+    @ApiModelProperty(required = true)
     private String projectName;
 
     private String description;
 
+    @ApiModelProperty(required = true)
     private String projectStatusId;
 
     private String projectStatusName;

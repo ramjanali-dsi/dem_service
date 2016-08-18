@@ -1,5 +1,7 @@
 package com.dsi.dem.dto;
 
+import com.wordnik.swagger.annotations.ApiModelProperty;
+
 /**
  * Created by sabbir on 8/4/16.
  */
@@ -23,8 +25,10 @@ public class TeamMemberDto {
 
     private String email;
 
+    @ApiModelProperty(required = true)
     private String employeeId;
 
+    @ApiModelProperty(required = true)
     private String roleId;
 
     private String roleName;

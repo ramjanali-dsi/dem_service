@@ -145,6 +145,23 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    public List<Client> searchClients(String clientName, String organization, String clientEmail) throws CustomException {
+        List<Client> clients = clientDao.searchClients(clientName, organization, clientEmail);
+        if(clients == null){
+            ErrorContext errorContext = new ErrorContext(null, "Client", "Client list not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        List<Client> clientList = new ArrayList<>();
+        for(Client client : clients){
+            clientList.add(setAllClientProperty(client));
+        }
+        return clientList;
+    }
+
+    @Override
     public void saveClientProject(List<String> projectIds, Client client) throws CustomException {
 
         for(String projectID : projectIds){

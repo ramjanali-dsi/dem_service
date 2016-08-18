@@ -145,16 +145,24 @@ public class EmployeeResource {
             @ApiResponse(code = 200, message = "Search or read all employees success"),
             @ApiResponse(code = 500, message = "Search or rea all employees failed, unauthorized.")
     })
-    public Response searchOrReadAllEmployees(@QueryParam("search") String searchText) throws CustomException {
+    public Response searchOrReadAllEmployees(@QueryParam("employeeNo") String employeeNo,
+                                             @QueryParam("firstName") String firstName,
+                                             @QueryParam("lastName") String lastName,
+                                             @QueryParam("nickName") String nickName,
+                                             @QueryParam("bankAccountId") String bankAccountId,
+                                             @QueryParam("ipAddress") String ipAddress,
+                                             @QueryParam("nationalId") String nationalId,
+                                             @QueryParam("tinId") String tinId,
+                                             @QueryParam("joiningDate") String joiningDate,
+                                             @QueryParam("phone") String phone,
+                                             @QueryParam("email") String email,
+                                             @QueryParam("isActive") String isActive,
+                                             @QueryParam("teamName") String teamName,
+                                             @QueryParam("projectName") String projectName) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(searchText)){
-
-            return null;
-
-        } else {
-            logger.info("Read all employees info");
-            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeesDto(
-                    employeeService.getAllEmployees())).build();
-        }
+        logger.info("Read all employees info");
+        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeesDto(
+                employeeService.searchEmployees(employeeNo, firstName, lastName, nickName, bankAccountId,
+                        ipAddress, nationalId, tinId, phone, email, isActive, joiningDate, teamName, projectName))).build();
     }
 }

@@ -114,17 +114,12 @@ public class ClientResource {
             @ApiResponse(code = 200, message = "Search or read all clients success"),
             @ApiResponse(code = 500, message = "Search or read all clients failed, unauthorized.")
     })
-    public Response searchClientOrAllClients(@QueryParam("search_text") String searchText) throws CustomException {
+    public Response searchClientOrAllClients(@QueryParam("clientName") String clientName,
+                                             @QueryParam("organization") String organization,
+                                             @QueryParam("clientEmail") String clientEmail) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(searchText)){
-            //TODO search a client
-
-        } else {
-            logger.info("Read all client");
-            logger.info("Client info: " + new Gson().toJson(clientService.getAllClients()));
-
-            return Response.ok().entity(TRANSFORMER.getClientsDto(clientService.getAllClients())).build();
-        }
-        return null;
+        logger.info("Read all client");
+        return Response.ok().entity(TRANSFORMER.getClientsDto(clientService.
+                searchClients(clientName, organization, clientEmail))).build();
     }
 }

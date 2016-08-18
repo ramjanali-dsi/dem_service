@@ -2,6 +2,7 @@ package com.dsi.dem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ public class TeamDto {
 
     private String teamId;
 
+    @ApiModelProperty(required = true)
     private String name;
 
     private String floor;
@@ -21,6 +23,7 @@ public class TeamDto {
 
     private int memberCount;
 
+    @ApiModelProperty(required = true)
     private boolean isActive;
 
     private int version;

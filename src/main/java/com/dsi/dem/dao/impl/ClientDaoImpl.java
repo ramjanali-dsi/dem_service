@@ -3,11 +3,14 @@ package com.dsi.dem.dao.impl;
 import com.dsi.dem.dao.ClientDao;
 import com.dsi.dem.model.Client;
 import com.dsi.dem.model.ProjectClient;
+import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sabbir on 8/1/16.
@@ -103,6 +106,64 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
         try{
             session = getSession();
             Query query = session.createQuery("FROM Client");
+
+            clientList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return clientList;
+    }
+
+    @Override
+    public List<Client> searchClients(String clientName, String organization, String clientEmail) {
+        Session session = null;
+        List<Client> clientList = null;
+        StringBuilder queryBuilder = new StringBuilder();
+        boolean hasClause = false;
+        Map<String, String> paramValue = new HashMap<>();
+        try{
+            session = getSession();
+            queryBuilder.append("FROM Client ");
+
+            if(!Utility.isNullOrEmpty(clientName)){
+                queryBuilder.append("c WHERE c.memberName like :clientName");
+                paramValue.put("clientName", clientName);
+                hasClause = true;
+            }
+
+            if(!Utility.isNullOrEmpty(organization)){
+                if(hasClause){
+                    queryBuilder.append(" AND c.organization =:organization");
+
+                } else {
+                    queryBuilder.append("c WHERE c.organization =:organization");
+                    hasClause = true;
+                }
+                paramValue.put("organization", organization);
+            }
+
+            if(!Utility.isNullOrEmpty(clientEmail)){
+                if(hasClause){
+                    queryBuilder.append(" AND c.memberEmail =:clientEmail");
+
+                } else {
+                    queryBuilder.append("c WHERE c.memberEmail =:clientEmail");
+                    //hasClause = true;
+                }
+                paramValue.put("clientEmail", clientEmail);
+            }
+
+            logger.info("Query builder: " + queryBuilder.toString());
+            Query query = session.createQuery(queryBuilder.toString());
+
+            for(Map.Entry<String, String> entry : paramValue.entrySet()){
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
 
             clientList = query.list();
 

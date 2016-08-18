@@ -144,6 +144,25 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public List<Project> searchProjects(String projectName, String status, String clientName,
+                                        String teamName, String memberName) throws CustomException {
+
+        List<Project> projectList = projectDao.searchProjects(projectName, status, clientName, teamName, memberName);
+        if(projectList == null){
+            ErrorContext errorContext = new ErrorContext(null, "Project", "Project list not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        List<Project> projects = new ArrayList<>();
+        for(Project project : projectList){
+            projects.add(setProjectAllProperty(project));
+        }
+        return projects;
+    }
+
+    @Override
     public void saveProjectTeam(List<String> teamIds, Project project) throws CustomException {
 
         for(String teamID : teamIds){

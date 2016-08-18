@@ -4,11 +4,14 @@ import com.dsi.dem.dao.ProjectDao;
 import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
 import com.dsi.dem.model.ProjectTeam;
+import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sabbir on 8/1/16.
@@ -104,6 +107,96 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
         try{
             session = getSession();
             Query query = session.createQuery("FROM Project");
+
+            projectList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return projectList;
+    }
+
+    @Override
+    public List<Project> searchProjects(String projectName, String status, String clientName,
+                                        String teamName, String memberName) {
+
+        Session session = null;
+        List<Project> projectList = null;
+        StringBuilder queryBuilder = new StringBuilder();
+        boolean hasClause = false;
+        Map<String, String> paramValue = new HashMap<>();
+        try{
+            session = getSession();
+            queryBuilder.append("FROM Project ");
+
+            if(!Utility.isNullOrEmpty(projectName)){
+                queryBuilder.append("p WHERE p.projectName like :projectName");
+                paramValue.put("projectName", "%" + projectName + "%");
+                hasClause = true;
+            }
+
+            if(!Utility.isNullOrEmpty(status)){
+                if(hasClause){
+                    queryBuilder.append(" AND p.status.projectStatusName =:status");
+
+                } else {
+                    queryBuilder.append("p WHERE p.status.projectStatusName =:status");
+                    hasClause = true;
+                }
+                paramValue.put("status", status);
+            }
+
+            if(!Utility.isNullOrEmpty(clientName)){
+                if(hasClause){
+                    queryBuilder.append(" AND p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
+                            "WHERE pc.client.memberName like :clientName)");
+
+                } else {
+                    queryBuilder.append("p WHERE p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
+                            "WHERE pc.client.memberName like :clientName)");
+                    hasClause = true;
+                }
+                paramValue.put("clientName", clientName);
+            }
+
+            if(!Utility.isNullOrEmpty(teamName)){
+                if(hasClause){
+                    queryBuilder.append(" AND p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                            "WHERE pt.team.name like :teamName)");
+
+                } else {
+                    queryBuilder.append("p WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                            "WHERE pt.team.name like :teamName)");
+                    hasClause = true;
+                }
+                paramValue.put("teamName", teamName);
+            }
+
+            if(!Utility.isNullOrEmpty(memberName)){
+                if(hasClause){
+                    queryBuilder.append(" AND p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
+                            "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.firstName like :memberName " +
+                            "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
+
+                } else {
+                    queryBuilder.append("p WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
+                            "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.firstName like :memberName " +
+                            "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
+                    //hasClause = true;
+                }
+                paramValue.put("memberName", memberName);
+            }
+
+            logger.info("Query builder: " + queryBuilder.toString());
+            Query query = session.createQuery(queryBuilder.toString());
+
+            for(Map.Entry<String, String> entry : paramValue.entrySet()){
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
 
             projectList = query.list();
 

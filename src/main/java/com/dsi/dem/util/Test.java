@@ -5,6 +5,7 @@ import com.dsi.dem.dto.TeamMemberDto;
 import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.dto.EmployeeDto;
 import com.dsi.dem.dto.transformer.TeamDtoTransformer;
+import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.Team;
 import com.dsi.dem.model.TeamMember;
@@ -29,11 +30,26 @@ public class Test {
 
     public static void main(String[] args) {
 
-        createEmployeeTest();
+        //createEmployeeTest();
 
         //updateEmployeeTest();
 
         //createTeamTest();
+
+        //searchEmployeeTest();
+
+        System.out.print(Utility.getDateFromString("2016-05-01"));
+    }
+
+    private static void searchEmployeeTest() {
+
+        try {
+            System.out.println(new Gson().toJson(employeeService.searchEmployees(null, null, null, null, null,
+                    null, null, null, null, null, "true", null, null, null)));
+
+        } catch (CustomException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void createEmployeeTest(){

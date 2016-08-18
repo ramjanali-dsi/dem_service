@@ -157,6 +157,25 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public List<Team> searchTeams(String teamName, String status, String floor, String room, String memberName,
+                                  String projectName, String clientName) throws CustomException {
+
+        List<Team> teamList = teamDao.searchTeams(teamName, status, floor, room, memberName, projectName, clientName);
+        if(teamList == null){
+            ErrorContext errorContext = new ErrorContext(null, "Team", "Team list not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        List<Team> teams = new ArrayList<>();
+        for(Team team : teamList){
+            teams.add(setTeamAllProperty(team.getTeamId(), team));
+        }
+        return teams;
+    }
+
+    @Override
     public void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException {
 
         if(Utility.isNullOrEmpty(teamMembers)){

@@ -18,4 +18,8 @@ public interface EmployeeService {
     Employee getEmployeeByUserID(String userID) throws CustomException;
     Employee getEmployeeByEmployeeNO(String employeeNO) throws CustomException;
     List<Employee> getAllEmployees() throws CustomException;
+    List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
+                                   String accountID, String ipAddress, String nationalID, String tinID,
+                                   String phone, String email, String active, String joiningDate, String teamName,
+                                   String projectName) throws CustomException;
 }

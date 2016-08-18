@@ -2,6 +2,7 @@ package com.dsi.dem.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.wordnik.swagger.annotations.ApiModelProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +14,18 @@ public class ClientDto {
 
     private String clientId;
 
+    @ApiModelProperty(required = true)
     private String memberName;
 
     private String memberPosition;
 
+    @ApiModelProperty(required = true)
     private String memberEmail;
 
+    @ApiModelProperty(required = true)
     private boolean isNotify;
 
+    @ApiModelProperty(required = true)
     private String organization;
 
     private int version;

@@ -13,6 +13,9 @@ import org.codehaus.jettison.json.JSONObject;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -40,6 +43,19 @@ public class Utility {
 
     public static final Date today() {
         return new Date();
+    }
+
+    public static final Date getDateFromString(String date) {
+
+        Date formatDate = null;
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            formatDate = dateFormat.parse(date);
+
+        } catch (ParseException e) {
+            logger.error("Date parse error occurs: " + e.getMessage());
+        }
+        return formatDate;
     }
 
     public static final String getUserObject(Employee employee, String currentUserID) throws JSONException {

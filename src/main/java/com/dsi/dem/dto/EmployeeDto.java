@@ -40,6 +40,7 @@ public class EmployeeDto {
 
     private String skypeId;
 
+    @ApiModelProperty(required = true)
     private String roleId;
 
     private String nationalId;

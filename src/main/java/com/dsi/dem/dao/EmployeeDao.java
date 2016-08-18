@@ -16,6 +16,10 @@ public interface EmployeeDao {
     Employee getEmployeeByUserID(String userID);
     Employee getEmployeeByEmployeeNO(String employeeNO);
     List<Employee> getAllEmployees();
+    List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
+                                   String accountID, String ipAddress, String nationalID, String tinID,
+                                   String phone, String email, String active, String joiningDate, String teamName,
+                                   String projectName);
 
     boolean saveEmployeeInfo(EmployeeInfo employeeInfo);
     boolean updateEmployeeInfo(EmployeeInfo employeeInfo);

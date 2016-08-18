@@ -109,15 +109,16 @@ public class TeamResource {
             @ApiResponse(code = 200, message = "Search or read all teams success"),
             @ApiResponse(code = 500, message = "Search or read all teams failed, unauthorized.")
     })
-    public Response searchTeamOrAllTeams(@QueryParam("search") String searchText) throws CustomException {
+    public Response searchTeamOrAllTeams(@QueryParam("teamName") String teamName,
+                                         @QueryParam("status") String status,
+                                         @QueryParam("floor") String floor,
+                                         @QueryParam("room") String room,
+                                         @QueryParam("memberName") String memberName,
+                                         @QueryParam("projectName") String projectName,
+                                         @QueryParam("clientName") String clientName) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(searchText)){
-            //TODO search team info
-
-        } else {
-            logger.info("Read all team info");
-            return Response.ok().entity(TRANSFORMER.getTeamsDto(teamService.getAllTeams())).build();
-        }
-        return null;
+        logger.info("Read all team info");
+        return Response.ok().entity(TRANSFORMER.getTeamsDto(teamService.searchTeams(teamName, status, floor, room,
+                memberName, projectName, clientName))).build();
     }
 }

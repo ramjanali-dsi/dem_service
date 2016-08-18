@@ -17,6 +17,8 @@ public interface ProjectService {
     void deleteProject(String projectID) throws CustomException;
     Project getProjectByID(String projectID) throws CustomException;
     List<Project> getAllProjects() throws CustomException;
+    List<Project> searchProjects(String projectName, String status, String clientName, String teamName,
+                                 String memberName) throws CustomException;
 
     void saveProjectTeam(List<String> projectIds, Project project) throws CustomException;
     void deleteProjectTeam(String projectTeamID) throws CustomException;

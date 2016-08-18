@@ -101,6 +101,13 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new CustomException(errorMessage);
         }
 
+        if(employee.getRoleId() == null){
+            ErrorContext errorContext = new ErrorContext(null, "Employee", "RoleID not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
         if(employee.getInfo().getPresentAddress() == null){
             ErrorContext errorContext = new ErrorContext(null, "EmployeeInfo", "Address not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -240,6 +247,28 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<Employee> getAllEmployees() throws CustomException {
         List<Employee> employeeList = employeeDao.getAllEmployees();
+        if(employeeList == null){
+            ErrorContext errorContext = new ErrorContext(null, "Employee", "Employee list not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        List<Employee> employees = new ArrayList<>();
+        for(Employee employee : employeeList){
+            employees.add(setEmployeesAllProperty(employee.getEmployeeId(), employee));
+        }
+        return employees;
+    }
+
+    @Override
+    public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
+                                          String accountID, String ipAddress, String nationalID, String tinID, String phone,
+                                          String email, String active, String joiningDate, String teamName, String projectName)
+            throws CustomException {
+
+        List<Employee> employeeList = employeeDao.searchEmployees(employeeNo, firstName, lastName, nickName, accountID,
+                ipAddress, nationalID, tinID, phone, email, active, joiningDate, teamName, projectName);
         if(employeeList == null){
             ErrorContext errorContext = new ErrorContext(null, "Employee", "Employee list not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,

@@ -17,6 +17,8 @@ public interface TeamService {
     void deleteTeam(String teamID) throws CustomException;
     Team getTeamByID(String teamID) throws CustomException;
     List<Team> getAllTeams() throws CustomException;
+    List<Team> searchTeams(String teamName, String status, String floor, String room,
+                           String memberName, String projectName, String clientName) throws CustomException;
 
     void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException;
     void deleteTeamMember(String teamMemberID) throws CustomException;

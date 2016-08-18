@@ -117,16 +117,14 @@ public class ProjectResource {
             @ApiResponse(code = 200, message = "Search or read all projects success"),
             @ApiResponse(code = 500, message = "Search or read all projects failed, unauthorized.")
     })
-    public Response searchProjectOrAllProjects(@QueryParam("search") String searchText) throws CustomException {
+    public Response searchProjectOrAllProjects(@QueryParam("projectName") String projectName,
+                                               @QueryParam("status") String status,
+                                               @QueryParam("clientName") String clientName,
+                                               @QueryParam("teamName") String teamName,
+                                               @QueryParam("memberName") String memberName) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(searchText)){
-            //TODO search a project
-            return null;
-
-        } else {
-            logger.info("Read all projects");
-            return Response.ok().entity(TRANSFORMER.getProjectsDto(
-                    projectService.getAllProjects())).build();
-        }
+        logger.info("Read all projects");
+        return Response.ok().entity(TRANSFORMER.getProjectsDto(projectService.
+                searchProjects(projectName, status, clientName, teamName, memberName))).build();
     }
 }

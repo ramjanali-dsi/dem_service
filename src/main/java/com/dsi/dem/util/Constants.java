@@ -36,7 +36,7 @@ public class Constants {
     public static final String DEM_SERVICE_0007_DESCRIPTION = "Dto to Object convert failed.";
 
     public static final String DEM_SERVICE_0008 = "dem_service_0008";
-    public static final String DEM_SERVICE_0008_DESCRIPTION = "Not match.";
+    public static final String DEM_SERVICE_0008_DESCRIPTION = "Upload file failed.";
 
     public static final String DEM_SERVICE_0009 = "dem_service_0009";
     public static final String DEM_SERVICE_0009_DESCRIPTION = "JSON read/write failed.";

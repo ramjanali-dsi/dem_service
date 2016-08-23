@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -41,6 +41,10 @@ public class Utility {
         return false;
     }
 
+    public static final String generateRandomString(){
+        return UUID.randomUUID().toString();
+    }
+
     public static final Date today() {
         return new Date();
     }
@@ -58,20 +62,46 @@ public class Utility {
         return formatDate;
     }
 
-    public static final String getUserObject(Employee employee, String currentUserID) throws JSONException {
-        JSONObject userObj = new JSONObject();
-        userObj.put("firstName", employee.getFirstName());
-        userObj.put("lastName", employee.getLastName());
-        userObj.put("gender", employee.getInfo().getGender());
-        userObj.put("email", employee.getEmailInfo().get(0).getEmail());
-        userObj.put("phone", employee.getContactInfo().get(0).getPhone());
-        userObj.put("createBy", currentUserID);
-        userObj.put("modifiedBy", currentUserID);
-        userObj.put("roleId", employee.getRoleId());
-        userObj.put("version", 1);
+    public static final String getLoginObject(Employee employee, String currentUserId) throws JSONException {
+        JSONObject loginObject = new JSONObject();
+        loginObject.put("firstName", employee.getFirstName());
+        loginObject.put("lastName", employee.getLastName());
+        loginObject.put("gender", employee.getInfo().getGender());
+        loginObject.put("email", employee.getEmailInfo().get(0).getEmail());
+        loginObject.put("phone", employee.getContactInfo().get(0).getPhone());
+        loginObject.put("roleId", employee.getRoleId());
+        loginObject.put("createdBy", currentUserId);
+        loginObject.put("modifiedBy", currentUserId);
+        loginObject.put("version", 1);
 
-        return userObj.toString();
+        return loginObject.toString();
     }
 
+    public static final void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {
+        logger.debug("Uploaded File Location: " + uploadedFileLocation);
 
+        OutputStream out = null;
+        int read = 0;
+        byte[] bytes = new byte[1024];
+
+        try {
+            out = new FileOutputStream(new File(uploadedFileLocation));
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
+            }
+        } catch (Exception e){
+            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0008,
+                    Constants.DEM_SERVICE_0008_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+
+        } finally {
+            try {
+                out.flush();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

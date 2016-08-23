@@ -13,15 +13,19 @@ import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.Utility;
 import com.dsi.httpclient.HttpClient;
 import com.wordnik.swagger.annotations.*;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 
 /**
  * Created by sabbir on 7/20/16.
@@ -30,7 +34,7 @@ import javax.ws.rs.core.Response;
 @Path("/v1/employee")
 @Api(value = "/Employee", description = "Operations about Employee Management")
 @Produces({MediaType.APPLICATION_JSON})
-@Consumes({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.WILDCARD})
 public class EmployeeResource {
 
     private static final Logger logger = Logger.getLogger(EmployeeResource.class);
@@ -42,7 +46,7 @@ public class EmployeeResource {
     @Context
     HttpServletRequest request;
 
-    @POST
+    /*@POST
     @ApiOperation(value = "Create Employee", notes = "Create Employee", position = 1)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Employee create success"),
@@ -68,6 +72,64 @@ public class EmployeeResource {
             JSONObject resultObj = new JSONObject(result);
             if(!resultObj.has(Constants.MESSAGE)){
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+            }
+
+            employee.setUserId(resultObj.getString("user_id"));
+            employeeService.saveEmployee(employee);
+            logger.info("Employee Create:: End");
+
+            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
+                    (employeeService.getEmployeeByID(employee.getEmployeeId()))).build();
+
+        } catch (JSONException je) {
+            ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                    Constants.DEM_SERVICE_0009_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+    }*/
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @ApiOperation(value = "Create Employee", notes = "Create Employee", position = 1)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Employee create success"),
+            @ApiResponse(code = 500, message = "Employee create failed, unauthorized.")
+    })
+    public Response createEmployee(@FormDataParam("file") InputStream fileInputStream,
+                                   @FormDataParam("file") FormDataContentDisposition fileDetails,
+                                   @FormDataParam("employee") EmployeeDto employeeDto)
+            throws CustomException {
+
+        String currentUserID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+        try {
+            logger.info("Convert Dto to Object:: Start");
+            Employee employee = EMPLOYEE_DTO_TRANSFORMER.getEmployee(employeeDto);
+            logger.info("Convert Dto to Object:: End");
+
+            employeeService.validateInputForCreation(employee);
+
+            logger.info("Employee Create:: Start");
+
+            String result = httpClient.sendPost(APIProvider.API_LOGIN_SESSION_CREATE, Utility.getLoginObject(employee, currentUserID),
+                    Constants.SYSTEM, Constants.SYSTEM_ID);
+            logger.info("v1/login_session/create api call result: " + result);
+
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+            }
+
+            if (fileInputStream != null) {
+                String photoName = Utility.generateRandomString() + "." + FilenameUtils.getExtension(fileDetails.getFileName());
+                logger.info("---- Photo file name: " + photoName);
+
+                String uploadFileLocation = APIProvider.PHOTO_DIRECTORY + photoName;
+                Utility.saveToFile(fileInputStream, uploadFileLocation);
+                logger.info("Photo uploaded successfully.");
+
+                employee.getInfo().setPhotoUrl(photoName);
             }
 
             employee.setUserId(resultObj.getString("user_id"));

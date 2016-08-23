@@ -23,7 +23,7 @@ import java.io.InputStream;
  */
 @Path("/v1/photo")
 @Api(value = "/Photo", description = "Operations about Employees Photo")
-@Consumes({MediaType.APPLICATION_JSON})
+@Consumes({MediaType.TEXT_PLAIN})
 public class PhotoResource {
 
     private static final Logger logger = Logger.getLogger(PhotoResource.class);

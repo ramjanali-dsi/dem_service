@@ -143,7 +143,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     @Override
     public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                           String accountID, String ipAddress, String nationalID, String tinID, String phone,
-                                          String email, String active, String joiningDate, String teamName, String projectName) {
+                                          String email, String active, String joiningDate, String teamName, String projectName, String userID) {
 
         Session session = null;
         List<Employee> employeeList = null;
@@ -303,6 +303,11 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     //hasClause = true;
                 }
                 paramValue.put("projectName", "%" + projectName + "%");
+            }
+
+            if(!Utility.isNullOrEmpty(userID)){
+                queryBuilder.append("e WHERE e.userId =:userID");
+                paramValue.put("userID", userID);
             }
 
             logger.info("Query builder: " + queryBuilder.toString());

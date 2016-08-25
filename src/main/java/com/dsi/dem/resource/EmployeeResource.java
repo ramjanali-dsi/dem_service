@@ -220,11 +220,12 @@ public class EmployeeResource {
                                              @QueryParam("email") String email,
                                              @QueryParam("isActive") String isActive,
                                              @QueryParam("teamName") String teamName,
-                                             @QueryParam("projectName") String projectName) throws CustomException {
+                                             @QueryParam("projectName") String projectName,
+                                             @QueryParam("userId") String userID) throws CustomException {
 
         logger.info("Read all employees info");
         return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeesDto(
                 employeeService.searchEmployees(employeeNo, firstName, lastName, nickName, bankAccountId,
-                        ipAddress, nationalId, tinId, phone, email, isActive, joiningDate, teamName, projectName))).build();
+                        ipAddress, nationalId, tinId, phone, email, isActive, joiningDate, teamName, projectName, userID))).build();
     }
 }

@@ -32,5 +32,5 @@ public class APIProvider {
     public static final String BASE_DEM_URL = apiProp.getProperty("base.dem.url");
     public static final String PHOTO_DIRECTORY = apiProp.getProperty("dem.photoDirectory");
 
-    public static final String PHOTO_URL = BASE_DEM_URL + apiProp.getProperty("dem.photoUrl");
+    //public static final String PHOTO_URL = BASE_DEM_URL + apiProp.getProperty("dem.photoUrl");
 }

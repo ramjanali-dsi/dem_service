@@ -19,7 +19,7 @@ public interface EmployeeDao {
     List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                    String accountID, String ipAddress, String nationalID, String tinID,
                                    String phone, String email, String active, String joiningDate, String teamName,
-                                   String projectName);
+                                   String projectName, String userID);
 
     boolean saveEmployeeInfo(EmployeeInfo employeeInfo);
     boolean updateEmployeeInfo(EmployeeInfo employeeInfo);

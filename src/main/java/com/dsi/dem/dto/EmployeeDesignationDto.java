@@ -20,17 +20,16 @@ public class EmployeeDesignationDto {
 
     private Date designationDate;
 
-    @ApiModelProperty(required = true)
     private boolean isCurrent;
 
     private int version;
 
-    @JsonProperty
+    private int activity;
+
     public String getDesignationId() {
         return designationId;
     }
 
-    @JsonIgnore
     public void setDesignationId(String designationId) {
         this.designationId = designationId;
     }
@@ -66,5 +65,13 @@ public class EmployeeDesignationDto {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public int getActivity() {
+        return activity;
+    }
+
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 }

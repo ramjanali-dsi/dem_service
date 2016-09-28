@@ -11,6 +11,7 @@ import java.util.List;
 public interface EmailService {
 
     void saveEmployeeEmail(List<EmployeeEmail> employeeEmailList, String employeeID) throws CustomException;
+    void saveEmployeeEmail(EmployeeEmail employeeEmail, String employeeID) throws CustomException;
     void updateEmployeeEmail(EmployeeEmail employeeEmail, String employeeID) throws CustomException;
     void deleteEmployeeEmail(String emailID) throws CustomException;
     List<EmployeeEmail> getEmployeesEmailByEmployeeID(String employeeID) throws CustomException;

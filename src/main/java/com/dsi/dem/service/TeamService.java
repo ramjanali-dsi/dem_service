@@ -18,11 +18,12 @@ public interface TeamService {
     Team getTeamByID(String teamID) throws CustomException;
     List<Team> getAllTeams() throws CustomException;
     List<Team> searchTeams(String teamName, String status, String floor, String room,
-                           String memberName, String projectName, String clientName) throws CustomException;
+                           String memberName, String projectName, String clientName, String from,
+                           String range) throws CustomException;
 
     void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException;
     void deleteTeamMember(String teamMemberID) throws CustomException;
-    List<TeamMember> getTeamMembers(String teamID) throws CustomException;
+    List<TeamMember> getTeamMembers(String teamID, String employeeID) throws CustomException;
 
     void saveTeamProjects(List<String> projectIdList, Team team) throws CustomException;
     void deleteTeamProject(String teamProjectID) throws CustomException;

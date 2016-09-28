@@ -9,10 +9,7 @@ import com.dsi.dem.dao.impl.TeamDaoImpl;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
-import com.dsi.dem.model.Project;
-import com.dsi.dem.model.ProjectClient;
-import com.dsi.dem.model.ProjectTeam;
-import com.dsi.dem.model.Team;
+import com.dsi.dem.model.*;
 import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.Utility;
@@ -36,6 +33,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void saveProject(Project project) throws CustomException {
         validateInputForCreation(project);
 
+        project.setVersion(1);
         boolean res = projectDao.saveProject(project);
         if(!res){
             ErrorContext errorContext = new ErrorContext(null, "Project", "Project create failed.");
@@ -145,9 +143,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<Project> searchProjects(String projectName, String status, String clientName,
-                                        String teamName, String memberName) throws CustomException {
+                                        String teamName, String memberName, String from, String range) throws CustomException {
 
-        List<Project> projectList = projectDao.searchProjects(projectName, status, clientName, teamName, memberName);
+        List<Project> projectList = projectDao.searchProjects(projectName, status, clientName, teamName, memberName, from, range);
         if(projectList == null){
             ErrorContext errorContext = new ErrorContext(null, "Project", "Project list not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
@@ -164,6 +162,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void saveProjectTeam(List<String> teamIds, Project project) throws CustomException {
+
+        if(projectDao.deleteProjectTeam(project.getProjectId(), null))
+            logger.info("Delete all project teams");
 
         for(String teamID : teamIds){
             ProjectTeam projectTeam = new ProjectTeam();
@@ -209,19 +210,26 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void saveProjectClient(List<String> clientIds, Project project) throws CustomException {
 
-        for(String clientID : clientIds){
-            ProjectClient projectClient = new ProjectClient();
-            projectClient.setProject(project);
-            projectClient.setClient(clientDao.getClientByID(clientID));
+        if(projectDao.deleteProjectClient(project.getProjectId(), null))
+            logger.info("Delete all project clients.");
 
-            boolean res = projectDao.saveProjectClient(projectClient);
-            if(!res){
-                ErrorContext errorContext = new ErrorContext(null, "ProjectClient", "Project client create failed.");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
-                throw new CustomException(errorMessage);
+        if(!Utility.isNullOrEmpty(clientIds)) {
+            for (String clientID : clientIds) {
+                Client client = clientDao.getClientByID(clientID);
+                ProjectClient projectClient = new ProjectClient();
+                projectClient.setProject(project);
+                projectClient.setClient(client);
+                projectClient.setVersion(client.getVersion());
+
+                boolean res = projectDao.saveProjectClient(projectClient);
+                if (!res) {
+                    ErrorContext errorContext = new ErrorContext(null, "ProjectClient", "Project client create failed.");
+                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                            Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+                    throw new CustomException(errorMessage);
+                }
+                logger.info("Save project client success");
             }
-            logger.info("Save project client success");
         }
     }
 

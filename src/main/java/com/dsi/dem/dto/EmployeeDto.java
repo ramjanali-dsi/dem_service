@@ -63,6 +63,8 @@ public class EmployeeDto {
 
     private EmployeeInfoDto employeeInfo = new EmployeeInfoDto();
 
+    private LeaveSummaryDto leaveSummary = new LeaveSummaryDto();
+
     private List<EmployeeDesignationDto> designationList = new ArrayList<>();
 
     private List<EmployeeEmailDto> emailList = new ArrayList<>();
@@ -280,5 +282,13 @@ public class EmployeeDto {
     @JsonProperty
     public void setRoleId(String roleId) {
         this.roleId = roleId;
+    }
+
+    public LeaveSummaryDto getLeaveSummary() {
+        return leaveSummary;
+    }
+
+    public void setLeaveSummary(LeaveSummaryDto leaveSummary) {
+        this.leaveSummary = leaveSummary;
     }
 }

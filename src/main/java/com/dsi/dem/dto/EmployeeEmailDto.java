@@ -19,14 +19,16 @@ public class EmployeeEmailDto {
 
     private String emailTypeName;
 
+    private boolean isPreferred;
+
     private int version;
 
-    @JsonProperty
+    private int activity;
+
     public String getEmailId() {
         return emailId;
     }
 
-    @JsonIgnore
     public void setEmailId(String emailId) {
         this.emailId = emailId;
     }
@@ -61,5 +63,21 @@ public class EmployeeEmailDto {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public boolean isPreferred() {
+        return isPreferred;
+    }
+
+    public void setPreferred(boolean preferred) {
+        isPreferred = preferred;
+    }
+
+    public int getActivity() {
+        return activity;
+    }
+
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 }

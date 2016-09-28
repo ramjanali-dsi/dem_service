@@ -120,7 +120,7 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
     }
 
     @Override
-    public List<Client> searchClients(String clientName, String organization, String clientEmail) {
+    public List<Client> searchClients(String clientName, String organization, String clientEmail, String from, String range) {
         Session session = null;
         List<Client> clientList = null;
         StringBuilder queryBuilder = new StringBuilder();
@@ -128,10 +128,10 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
         Map<String, String> paramValue = new HashMap<>();
         try{
             session = getSession();
-            queryBuilder.append("FROM Client ");
+            queryBuilder.append("FROM Client c");
 
             if(!Utility.isNullOrEmpty(clientName)){
-                queryBuilder.append("c WHERE c.memberName like :clientName");
+                queryBuilder.append(" WHERE c.memberName like :clientName");
                 paramValue.put("clientName", clientName);
                 hasClause = true;
             }
@@ -141,7 +141,7 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
                     queryBuilder.append(" AND c.organization =:organization");
 
                 } else {
-                    queryBuilder.append("c WHERE c.organization =:organization");
+                    queryBuilder.append(" WHERE c.organization =:organization");
                     hasClause = true;
                 }
                 paramValue.put("organization", organization);
@@ -152,11 +152,13 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
                     queryBuilder.append(" AND c.memberEmail =:clientEmail");
 
                 } else {
-                    queryBuilder.append("c WHERE c.memberEmail =:clientEmail");
+                    queryBuilder.append(" WHERE c.memberEmail =:clientEmail");
                     //hasClause = true;
                 }
                 paramValue.put("clientEmail", clientEmail);
             }
+
+            queryBuilder.append(" ORDER BY c.memberName ASC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
@@ -164,6 +166,9 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
             for(Map.Entry<String, String> entry : paramValue.entrySet()){
                 query.setParameter(entry.getKey(), entry.getValue());
             }
+
+            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+                query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
 
             clientList = query.list();
 

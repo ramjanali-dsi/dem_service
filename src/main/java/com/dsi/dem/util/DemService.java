@@ -16,6 +16,6 @@ public class DemService extends ResourceConfig {
         register(MultiPartFeature.class);
         register(CheckAuthorizationFilter.class);
 
-        SessionUtil.getSession();
+        //SessionUtil.getSession();
     }
 }

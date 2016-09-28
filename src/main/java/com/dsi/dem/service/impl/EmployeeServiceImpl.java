@@ -1,8 +1,10 @@
 package com.dsi.dem.service.impl;
 
 import com.dsi.dem.dao.EmployeeDao;
+import com.dsi.dem.dao.TeamDao;
 import com.dsi.dem.dao.impl.BaseDao;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
+import com.dsi.dem.dao.impl.TeamDaoImpl;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
@@ -26,6 +28,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private static final Logger logger = Logger.getLogger(EmployeeServiceImpl.class);
 
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
+    private static final TeamDao teamDao = new TeamDaoImpl();
 
     @Override
     public void saveEmployee(Employee employee) throws CustomException {
@@ -34,6 +37,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<EmployeeEmail> employeeEmailList = employee.getEmailInfo();
         List<EmployeeContact> employeeContactList = employee.getContactInfo();
 
+        employee.setVersion(1);
         employee.setCreatedDate(Utility.today());
         employee.setLastModifiedDate(Utility.today());
 
@@ -48,9 +52,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         EmployeeInfo employeeInfo = employee.getInfo();
         employeeInfo.setEmployee(employee);
+        employeeInfo.setVersion(1);
 
         employeeDao.saveEmployeeInfo(employeeInfo);
         logger.info("Save employee info success");
+
+        EmployeeLeave employeeLeave = new EmployeeLeave();
+        employeeLeave.setEmployee(employee);
+        employeeLeave.setVersion(1);
+
+        employeeDao.saveEmployeeLeaveSummary(employeeLeave);
+        logger.info("Save employee leave summary success");
 
         saveEmployeesDesignation(employeeDesignationList, employee);
 
@@ -62,6 +74,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private void saveEmployeesDesignation(List<EmployeeDesignation> employeeDesignationList, Employee employee) {
         for(EmployeeDesignation employeeDesignation : employeeDesignationList){
             employeeDesignation.setEmployee(employee);
+            employeeDesignation.setVersion(1);
 
             employeeDao.saveEmployeeDesignation(employeeDesignation);
         }
@@ -71,6 +84,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private void saveEmployeesContacts(List<EmployeeContact> employeeContactList, Employee employee) {
         for(EmployeeContact employeeContact : employeeContactList){
             employeeContact.setEmployee(employee);
+            employeeContact.setVersion(1);
 
             employeeDao.saveEmployeeContactInfo(employeeContact);
         }
@@ -80,6 +94,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private void saveEmployeesEmails(List<EmployeeEmail> employeeEmailList, Employee employee) {
         for(EmployeeEmail employeeEmail : employeeEmailList){
             employeeEmail.setEmployee(employee);
+            employeeEmail.setVersion(1);
+            employeeEmail.setPreferred(true);
 
             employeeDao.saveEmployeeEmail(employeeEmail);
         }
@@ -193,7 +209,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void deleteEmployee(String employeeID) throws CustomException {
+        logger.info("Employees Info delete start.");
         employeeDao.deleteEmployeeInfo(employeeID);
+        employeeDao.deleteEmployeeLeaveSummary(employeeID);
         employeeDao.deleteEmployeeEmail(employeeID, null);
         employeeDao.deleteEmployeeContactInfo(employeeID, null);
         employeeDao.deleteEmployeeDesignation(employeeID, null);
@@ -264,11 +282,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                           String accountID, String ipAddress, String nationalID, String tinID, String phone,
-                                          String email, String active, String joiningDate, String teamName, String projectName, String userID)
+                                          String email, String active, String joiningDate, String teamName, String projectName,
+                                          String userID, String from, String range)
             throws CustomException {
 
         List<Employee> employeeList = employeeDao.searchEmployees(employeeNo, firstName, lastName, nickName, accountID,
-                ipAddress, nationalID, tinID, phone, email, active, joiningDate, teamName, projectName);
+                ipAddress, nationalID, tinID, phone, email, active, joiningDate, teamName, projectName, userID, from, range);
         if(employeeList == null){
             ErrorContext errorContext = new ErrorContext(null, "Employee", "Employee list not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
@@ -287,6 +306,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeInfo info = employeeDao.getEmployeeInfoByEmployeeID(employeeID);
         if(info != null){
             employee.setInfo(info);
+        }
+
+        EmployeeLeave leave = employeeDao.getEmployeeLeaveSummaryByEmployeeID(employeeID);
+        if(leave != null){
+            employee.setLeaveInfo(leave);
         }
 
         List<EmployeeDesignation> designations = employeeDao.getEmployeeDesignationsByEmployeeID(employeeID);

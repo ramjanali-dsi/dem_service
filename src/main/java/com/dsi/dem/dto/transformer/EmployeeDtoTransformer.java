@@ -55,6 +55,25 @@ public class EmployeeDtoTransformer {
         return employee;
     }
 
+    public Employee getEmployeeWithInfo(EmployeeDto employeeDto) throws CustomException {
+        Employee employee = new Employee();
+        try {
+            BeanUtils.copyProperties(employee, employeeDto);
+
+            EmployeeInfo employeeInfo = new EmployeeInfo();
+            BeanUtils.copyProperties(employeeInfo, employeeDto.getEmployeeInfo());
+            employee.setInfo(employeeInfo);
+
+        } catch (Exception e) {
+            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+
+        return employee;
+    }
+
     public List<EmployeeDesignation> getDesignationList(List<EmployeeDesignationDto> designationDtoList) throws CustomException {
 
         List<EmployeeDesignation> designationList = new ArrayList<>();
@@ -154,6 +173,13 @@ public class EmployeeDtoTransformer {
             BeanUtils.copyProperties(infoDto, employee.getInfo());
             employeeDto.setEmployeeInfo(infoDto);
 
+            LeaveSummaryDto leaveDto = new LeaveSummaryDto();
+            BeanUtils.copyProperties(leaveDto, employee.getLeaveInfo());
+            leaveDto.setTotalCasual(Constants.TOTAL_CASUAL);
+            leaveDto.setTotalSick(Constants.TOTAL_SICK);
+            leaveDto.setTotalLeave(Constants.TOTAL_CASUAL + Constants.TOTAL_SICK);
+            employeeDto.setLeaveSummary(leaveDto);
+
             List<EmployeeDesignationDto> designationList = new ArrayList<>();
             for(EmployeeDesignation designation : employee.getDesignations()){
                 designationList.add(getEmployeeDesignationDto(designation));
@@ -209,6 +235,7 @@ public class EmployeeDtoTransformer {
         EmployeeDesignationDto designationDto = new EmployeeDesignationDto();
         try{
             BeanUtils.copyProperties(designationDto, designation);
+            designationDto.setActivity(2);
 
         } catch (Exception e) {
             ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
@@ -237,6 +264,7 @@ public class EmployeeDtoTransformer {
         try{
             BeanUtils.copyProperties(emailDto, email);
             BeanUtils.copyProperties(emailDto, email.getType());
+            emailDto.setActivity(2);
 
         } catch (Exception e) {
             ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
@@ -265,6 +293,7 @@ public class EmployeeDtoTransformer {
         try{
             BeanUtils.copyProperties(contactDto, contact);
             BeanUtils.copyProperties(contactDto, contact.getType());
+            contactDto.setActivity(2);
 
         } catch (Exception e) {
             ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());

@@ -16,8 +16,10 @@ import com.dsi.dem.service.impl.TeamServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by sabbir on 7/29/16.
@@ -38,14 +40,28 @@ public class Test {
 
         //searchEmployeeTest();
 
-        System.out.print(Utility.getDateFromString("2016-05-01"));
+        /*String date = "2016-05-01";
+        Date format = null;
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        DateFormat sdf1 = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a");
+        try {
+            format = sdf.parse(date);
+            System.out.print(sdf1.format(format));
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }*/
+
+        //System.out.print(Utility.getDateFromString("2016-05-01"));
+
     }
 
     private static void searchEmployeeTest() {
 
         try {
             System.out.println(new Gson().toJson(employeeService.searchEmployees(null, null, null, null, null,
-                    null, null, null, null, null, "true", null, null, null)));
+                    null, null, null, null, null, null, null, null, null, null, "0", "5")));
 
         } catch (CustomException e) {
             e.printStackTrace();

@@ -70,7 +70,7 @@ public class Utility {
         loginObject.put("email", employee.getEmailInfo().get(0).getEmail());
         loginObject.put("phone", employee.getContactInfo().get(0).getPhone());
         loginObject.put("roleId", employee.getRoleId());
-        loginObject.put("createdBy", currentUserId);
+        loginObject.put("createBy", currentUserId);
         loginObject.put("modifiedBy", currentUserId);
         loginObject.put("version", 1);
 

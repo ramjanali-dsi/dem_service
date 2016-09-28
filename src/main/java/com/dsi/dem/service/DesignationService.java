@@ -12,6 +12,7 @@ import java.util.List;
 public interface DesignationService {
 
     void saveEmployeeDesignation(List<EmployeeDesignation> designationList, String employeeID) throws CustomException;
+    void saveEmployeeDesignation(EmployeeDesignation designation, String employeeID) throws CustomException;
     void updateEmployeeDesignation(EmployeeDesignation designation, String employeeID) throws CustomException;
     void deleteEmployeeDesignation(String designationID) throws CustomException;
     List<EmployeeDesignation> getEmployeesDesignationByEmployeeID(String employeeID) throws CustomException;

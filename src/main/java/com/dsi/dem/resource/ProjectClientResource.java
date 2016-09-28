@@ -42,13 +42,6 @@ public class ProjectClientResource {
             throws CustomException {
 
         logger.info("Project client create:: start");
-        if(Utility.isNullOrEmpty(projectDto.getClientIds())){
-            ErrorContext errorContext = new ErrorContext(null, "ProjectClient", "Project client list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
-            throw new CustomException(errorMessage);
-        }
-
         projectService.saveProjectClient(projectDto.getClientIds(), projectService.getProjectByID(projectID));
         logger.info("Project client create:: end");
 
@@ -69,6 +62,6 @@ public class ProjectClientResource {
         projectService.deleteProjectClient(clientID);
         logger.info("Project client delete:: end");
 
-        return Response.ok().entity("Success").build();
+        return null;
     }
 }

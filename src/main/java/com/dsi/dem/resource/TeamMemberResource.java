@@ -48,7 +48,7 @@ public class TeamMemberResource {
         teamService.saveTeamMembers(teamMemberList, teamID);
         logger.info("Team member create:: end");
 
-        return Response.ok().entity(TRANSFORMER.getTeamMembersDto(teamService.getTeamMembers(teamID))).build();
+        return Response.ok().entity(TRANSFORMER.getTeamMembersDto(teamService.getTeamMembers(teamID, null))).build();
     }
 
     @DELETE
@@ -65,6 +65,6 @@ public class TeamMemberResource {
         teamService.deleteTeamMember(memberID);
         logger.info("Team member delete:: end");
 
-        return Response.ok().entity("Success").build();
+        return null;
     }
 }

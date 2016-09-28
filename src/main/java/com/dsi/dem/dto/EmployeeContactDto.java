@@ -21,12 +21,12 @@ public class EmployeeContactDto {
 
     private int version;
 
-    @JsonProperty
+    private int activity;
+
     public String getContactNumberId() {
         return contactNumberId;
     }
 
-    @JsonIgnore
     public void setContactNumberId(String contactNumberId) {
         this.contactNumberId = contactNumberId;
     }
@@ -61,5 +61,13 @@ public class EmployeeContactDto {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public int getActivity() {
+        return activity;
+    }
+
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 }

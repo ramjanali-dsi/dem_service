@@ -5,6 +5,7 @@ import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
+import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.EmployeeDesignation;
 import com.dsi.dem.service.DesignationService;
 import com.dsi.dem.util.Constants;
@@ -33,18 +34,35 @@ public class DesignationServiceImpl implements DesignationService {
         }
 
         for(EmployeeDesignation designation : designationList){
-            validateInputForCreation(designation);
-
-            designation.setEmployee(employeeDao.getEmployeeByID(employeeID));
-            boolean res = employeeDao.saveEmployeeDesignation(designation);
-            if(!res){
-                ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Employees designation create failed.");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
-                throw new CustomException(errorMessage);
-            }
-            logger.info("Save employees designation success.");
+            saveDesignation(designation, employeeID);
         }
+    }
+
+    @Override
+    public void saveEmployeeDesignation(EmployeeDesignation designation, String employeeID) throws CustomException {
+        saveDesignation(designation, employeeID);
+    }
+
+    private void saveDesignation(EmployeeDesignation designation, String employeeID) throws CustomException {
+        validateInputForCreation(designation);
+
+        if(employeeDao.getEmployeeDesignationsByEmployeeID(employeeID).size() > 0){
+            logger.info("Updating previous designations");
+            employeeDao.updatePrevEmployeeDesignations(employeeID);
+        }
+
+        Employee employee = employeeDao.getEmployeeByID(employeeID);
+        designation.setVersion(employee.getVersion());
+        designation.setCurrent(true);
+        designation.setEmployee(employee);
+        boolean res = employeeDao.saveEmployeeDesignation(designation);
+        if(!res){
+            ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Employees designation create failed.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        logger.info("Save employees designation success.");
     }
 
     private void validateInputForCreation(EmployeeDesignation designation) throws CustomException {

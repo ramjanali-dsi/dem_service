@@ -122,7 +122,7 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
 
     @Override
     public List<Project> searchProjects(String projectName, String status, String clientName,
-                                        String teamName, String memberName) {
+                                        String teamName, String memberName, String from, String range) {
 
         Session session = null;
         List<Project> projectList = null;
@@ -131,10 +131,10 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
         Map<String, String> paramValue = new HashMap<>();
         try{
             session = getSession();
-            queryBuilder.append("FROM Project ");
+            queryBuilder.append("FROM Project p");
 
             if(!Utility.isNullOrEmpty(projectName)){
-                queryBuilder.append("p WHERE p.projectName like :projectName");
+                queryBuilder.append(" WHERE p.projectName like :projectName");
                 paramValue.put("projectName", "%" + projectName + "%");
                 hasClause = true;
             }
@@ -144,7 +144,7 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
                     queryBuilder.append(" AND p.status.projectStatusName =:status");
 
                 } else {
-                    queryBuilder.append("p WHERE p.status.projectStatusName =:status");
+                    queryBuilder.append(" WHERE p.status.projectStatusName =:status");
                     hasClause = true;
                 }
                 paramValue.put("status", status);
@@ -156,7 +156,7 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
                             "WHERE pc.client.memberName like :clientName)");
 
                 } else {
-                    queryBuilder.append("p WHERE p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
+                    queryBuilder.append(" WHERE p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
                             "WHERE pc.client.memberName like :clientName)");
                     hasClause = true;
                 }
@@ -169,7 +169,7 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
                             "WHERE pt.team.name like :teamName)");
 
                 } else {
-                    queryBuilder.append("p WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                    queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
                             "WHERE pt.team.name like :teamName)");
                     hasClause = true;
                 }
@@ -183,7 +183,7 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
                             "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
 
                 } else {
-                    queryBuilder.append("p WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
+                    queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
                             "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.firstName like :memberName " +
                             "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
                     //hasClause = true;
@@ -191,12 +191,17 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
                 paramValue.put("memberName", memberName);
             }
 
+            queryBuilder.append(" ORDER BY p.projectName ASC");
+
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
 
             for(Map.Entry<String, String> entry : paramValue.entrySet()){
                 query.setParameter(entry.getKey(), entry.getValue());
             }
+
+            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+                query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
 
             projectList = query.list();
 

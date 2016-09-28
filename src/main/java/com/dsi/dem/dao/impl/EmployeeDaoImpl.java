@@ -6,7 +6,6 @@ import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import scala.util.parsing.combinator.testing.Str;
 
 import java.util.HashMap;
 import java.util.List;
@@ -38,12 +37,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             Query query = session.createQuery("DELETE FROM Employee e WHERE e.employeeId =:employeeID");
             query.setParameter("employeeID", employeeID);
 
-            if(query.executeUpdate() > 0){
-                success = true;
-
-            } else {
-                success = false;
-            }
+            success = query.executeUpdate() > 0;
 
         } catch (Exception e) {
             logger.error("Database error occurs when delete: " + e.getMessage());
@@ -143,7 +137,8 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     @Override
     public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                           String accountID, String ipAddress, String nationalID, String tinID, String phone,
-                                          String email, String active, String joiningDate, String teamName, String projectName, String userID) {
+                                          String email, String active, String joiningDate, String teamName, String projectName,
+                                          String userID, String from, String range) {
 
         Session session = null;
         List<Employee> employeeList = null;
@@ -152,10 +147,10 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
         Map<String, String> paramValue = new HashMap<>();
         try{
             session = getSession();
-            queryBuilder.append("FROM Employee ");
+            queryBuilder.append("FROM Employee e");
 
             if(!Utility.isNullOrEmpty(employeeNo)){
-                queryBuilder.append("e WHERE e.employeeNo like :employeeNo");
+                queryBuilder.append(" WHERE e.employeeNo like :employeeNo");
                 paramValue.put("employeeNo", "%" + employeeNo + "%");
                 hasClause = true;
             }
@@ -165,7 +160,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.firstName like :firstName");
 
                 } else {
-                    queryBuilder.append("e WHERE e.firstName like :firstName");
+                    queryBuilder.append(" WHERE e.firstName like :firstName");
                     hasClause = true;
                 }
                 paramValue.put("firstName", "%" + firstName + "%");
@@ -176,7 +171,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.lastName like :lastName");
 
                 } else {
-                    queryBuilder.append("e WHERE e.lastName like :lastName");
+                    queryBuilder.append(" WHERE e.lastName like :lastName");
                     hasClause = true;
                 }
                 paramValue.put("lastName", "%" + lastName + "%");
@@ -187,7 +182,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.nickName like :nickName");
 
                 } else {
-                    queryBuilder.append("e WHERE e.nickName like :nickName");
+                    queryBuilder.append(" WHERE e.nickName like :nickName");
                     hasClause = true;
                 }
                 paramValue.put("nickName", "%" + nickName + "%");
@@ -198,7 +193,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
 
                 } else {
-                    queryBuilder.append("e WHERE e.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
+                    queryBuilder.append(" WHERE e.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
                     hasClause = true;
                 }
                 paramValue.put("email", "%" + email + "%");
@@ -209,7 +204,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
 
                 } else {
-                    queryBuilder.append("e WHERE e.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
+                    queryBuilder.append(" WHERE e.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
                     hasClause = true;
                 }
                 paramValue.put("phone", "%" + phone + "%");
@@ -220,7 +215,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.isActive =:active");
 
                 } else {
-                    queryBuilder.append("e WHERE e.isActive =:active");
+                    queryBuilder.append(" WHERE e.isActive =:active");
                     hasClause = true;
                 }
                 paramValue.put("active", active);
@@ -231,7 +226,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.bankAcNo =:accountID");
 
                 } else {
-                    queryBuilder.append("e WHERE e.bankAcNo =:accountID");
+                    queryBuilder.append(" WHERE e.bankAcNo =:accountID");
                     hasClause = true;
                 }
                 paramValue.put("accountID", accountID);
@@ -242,7 +237,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.ipAddress =:ipAddress");
 
                 } else {
-                    queryBuilder.append("e WHERE e.ipAddress =:ipAddress");
+                    queryBuilder.append(" WHERE e.ipAddress =:ipAddress");
                     hasClause = true;
                 }
                 paramValue.put("ipAddress", ipAddress);
@@ -253,7 +248,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.nationalId =:nationalID");
 
                 } else {
-                    queryBuilder.append("e WHERE e.nationalId =:nationalID");
+                    queryBuilder.append(" WHERE e.nationalId =:nationalID");
                     hasClause = true;
                 }
                 paramValue.put("nationalID", nationalID);
@@ -264,7 +259,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.etinId =:tinID");
 
                 } else {
-                    queryBuilder.append("e WHERE e.etinId =:tinID");
+                    queryBuilder.append(" WHERE e.etinId =:tinID");
                     hasClause = true;
                 }
                 paramValue.put("tinID", tinID);
@@ -275,7 +270,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.joiningDate =:joiningDate");
 
                 } else {
-                    queryBuilder.append("e WHERE e.joiningDate =:joiningDate");
+                    queryBuilder.append(" WHERE e.joiningDate =:joiningDate");
                     hasClause = true;
                 }
                 paramValue.put("joiningDate", joiningDate);
@@ -286,7 +281,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     queryBuilder.append(" AND e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
 
                 } else {
-                    queryBuilder.append("e WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                    queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
                     hasClause = true;
                 }
                 paramValue.put("teamName", "%" + teamName + "%");
@@ -298,7 +293,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                             "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
 
                 } else {
-                    queryBuilder.append("e WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
+                    queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
                             "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
                     //hasClause = true;
                 }
@@ -306,9 +301,11 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             }
 
             if(!Utility.isNullOrEmpty(userID)){
-                queryBuilder.append("e WHERE e.userId =:userID");
+                queryBuilder.append(" WHERE e.userId =:userID");
                 paramValue.put("userID", userID);
             }
+
+            queryBuilder.append(" ORDER BY e.firstName ASC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
@@ -324,6 +321,9 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
+
+            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+                query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
 
             employeeList = query.list();
 
@@ -356,12 +356,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             Query query = session.createQuery("DELETE FROM EmployeeInfo ei WHERE ei.employee.employeeId =:employeeID");
             query.setParameter("employeeID", employeeID);
 
-            if(query.executeUpdate() > 0){
-                success = true;
-
-            } else {
-                success = false;
-            }
+            success = query.executeUpdate() > 0;
 
         } catch (Exception e) {
             logger.error("Database error occurs when delete: " + e.getMessage());
@@ -397,6 +392,55 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
+    public boolean saveEmployeeLeaveSummary(EmployeeLeave employeeLeave) {
+        return save(employeeLeave);
+    }
+
+    @Override
+    public boolean deleteEmployeeLeaveSummary(String employeeID) {
+        Session session = null;
+        boolean success = true;
+        try {
+            session = getSession();
+            Query query = session.createQuery("DELETE FROM EmployeeLeave el WHERE el.employee.employeeId =:employeeID");
+            query.setParameter("employeeID", employeeID);
+
+            success = query.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public EmployeeLeave getEmployeeLeaveSummaryByEmployeeID(String employeeID) {
+        Session session = null;
+        EmployeeLeave employeeLeave = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeLeave el WHERE el.employee.employeeId =:employeeID");
+            query.setParameter("employeeID", employeeID);
+
+            employeeLeave = (EmployeeLeave) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeLeave;
+    }
+
+    @Override
     public boolean saveEmployeeDesignation(EmployeeDesignation employeeDesignation) {
         return save(employeeDesignation);
     }
@@ -404,6 +448,33 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     @Override
     public boolean updateEmployeeDesignation(EmployeeDesignation employeeDesignation) {
         return update(employeeDesignation);
+    }
+
+    @Override
+    public boolean updatePrevEmployeeDesignations(String employeeID) {
+        Session session = null;
+        boolean success = true;
+        try{
+            session = getSession();
+            Query query = session.createQuery("UPDATE EmployeeDesignation SET isCurrent =:current " +
+                    "WHERE employee.employeeId =:employeeID");
+            query.setParameter("current", false);
+            query.setParameter("employeeID", employeeID);
+
+            if(query.executeUpdate() > 0){
+                success = true;
+            }
+
+        } catch (Exception e) {
+            logger.error("Database error occurs when delete: " + e.getMessage());
+            success = false;
+
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override
@@ -422,9 +493,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 query.setParameter("designationID", designationID);
             }
 
-            if(query.executeUpdate() > 0){
-                success = true;
-            }
+            success = query.executeUpdate() > 0;
 
         } catch (Exception e) {
             logger.error("Database error occurs when delete: " + e.getMessage());
@@ -639,12 +708,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 query.setParameter("contactInfoID", contactInfoID);
             }
 
-            if(query.executeUpdate() > 0){
-                success = true;
-
-            } else {
-                success = false;
-            }
+            success = query.executeUpdate() > 0;
 
         } catch (Exception e) {
             logger.error("Database error occurs when delete: " + e.getMessage());

@@ -91,7 +91,7 @@ public class ContactResource {
         contactService.deleteEmployeeContactInfo(contactID);
         logger.info("Employees contact info delete:: End");
 
-        return Response.ok().entity("Success").build();
+        return null;
     }
 
     @GET

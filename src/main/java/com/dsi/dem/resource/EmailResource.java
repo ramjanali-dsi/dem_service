@@ -102,7 +102,7 @@ public class EmailResource {
             @ApiResponse(code = 500, message = "Read employees an email failed, unauthorized.")
     })
     public Response readEmployeesEmail(@PathParam("employee_id") String employeeID,
-                                                  @PathParam("email_id") String emailID) throws CustomException {
+                                       @PathParam("email_id") String emailID) throws CustomException {
 
         logger.info("Read an employees email info");
         return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeEmailDto(

@@ -5,6 +5,7 @@ import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
+import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.EmployeeEmail;
 import com.dsi.dem.service.EmailService;
 import com.dsi.dem.util.Constants;
@@ -33,21 +34,33 @@ public class EmailServiceImpl implements EmailService {
         }
 
         for(EmployeeEmail employeeEmail : employeeEmailList) {
-            validateInputForCreation(employeeEmail, employeeID);
-
-            employeeEmail.setEmployee(employeeDao.getEmployeeByID(employeeID));
-            boolean res = employeeDao.saveEmployeeEmail(employeeEmail);
-            if(!res){
-                ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Employees email create failed.");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
-                throw new CustomException(errorMessage);
-            }
-            logger.info("Save employees email success.");
+            saveEmail(employeeEmail, employeeID);
         }
     }
 
-    private void validateInputForCreation(EmployeeEmail employeeEmail, String employeeID) throws CustomException {
+    @Override
+    public void saveEmployeeEmail(EmployeeEmail employeeEmail, String employeeID) throws CustomException {
+        saveEmail(employeeEmail, employeeID);
+    }
+
+    private void saveEmail(EmployeeEmail employeeEmail, String employeeID) throws CustomException {
+        validateInputForCreation(employeeEmail);
+
+        Employee employee = employeeDao.getEmployeeByID(employeeID);
+        employeeEmail.setVersion(employee.getVersion());
+        employeeEmail.setPreferred(false);
+        employeeEmail.setEmployee(employee);
+        boolean res = employeeDao.saveEmployeeEmail(employeeEmail);
+        if(!res){
+            ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Employees email create failed.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        logger.info("Save employees email success.");
+    }
+
+    private void validateInputForCreation(EmployeeEmail employeeEmail) throws CustomException {
         if(employeeEmail.getEmail() == null){
             ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -70,13 +83,13 @@ public class EmailServiceImpl implements EmailService {
             throw new CustomException(errorMessage);
         }
 
-        if(employeeDao.getEmployeeEmailByEmployeeIDAndTypeID(employeeID, employeeEmail.getType().getEmailTypeId()) != null){
+        /*if(employeeDao.getEmployeeEmailByEmployeeIDAndTypeID(employeeID, employeeEmail.getType().getEmailTypeId()) != null){
             ErrorContext errorContext = new ErrorContext(employeeEmail.getType().getEmailTypeName(), "EmployeeEmail",
                     "Email type already exist.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
                     Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
             throw new CustomException(errorMessage);
-        }
+        }*/
     }
 
     @Override

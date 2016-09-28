@@ -10,9 +10,16 @@ public class Constants {
     public static final String MESSAGE = "message";
     public static final String SYSTEM = "system";
     public static final String SYSTEM_ID = "0759a760-b9df-4c8a-8a64-fa31f256d13b";
-    public static final String DATE_FORMAT="yyyy-MM-dd";
+
+    static final String DATE_FORMAT="yyyy-MM-dd";
+    //public static final String DATE_FORMAT="MMM dd, yyyy hh:mm:ss a";
+
+    public static final int TOTAL_SICK = 10;
+    public static final int TOTAL_CASUAL = 10;
 
     public static final String OFFICIAL_TYPE_NAME = "Official";
+    public static final String CASUAL_TYPE_NAME = "Casual";
+    public static final String SICK_TYPE_NAME = "Sick";
 
     public static final String DEM_SERVICE_0001 = "dem_service_0001";
     public static final String DEM_SERVICE_0001_DESCRIPTION = "Not defined.";
@@ -46,4 +53,7 @@ public class Constants {
 
     public static final String DEM_SERVICE_0011 = "dem_service_0011";
     public static final String DEM_SERVICE_0011_DESCRIPTION = "Photo fetch error.";
+
+    public static final String DEM_SERVICE_0012 = "dem_service_0012";
+    public static final String DEM_SERVICE_0012_DESCRIPTION = "An exception occurs.";
 }

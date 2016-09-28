@@ -21,22 +21,34 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <url>http://103.245.204.114:8081/manager/text</url>
+                    <server>dsiproductserver</server>
+                    <path>/dem</path>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
     <properties>
         <jersey.version>2.11</jersey.version>
-        <hibernate.version>4.3.6.Final</hibernate.version>
+        <hibernate.version>4.0.1.Final</hibernate.version>
     </properties>
 
     <dependencies>
 
         <!--Hibernate property-->
-        <dependency>
+        <!--<dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
-        </dependency>
+        </dependency>-->
 
         <!--Mysql connector-->
         <dependency>
@@ -140,6 +152,13 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
+        </dependency>
+
+        <!-- Hibernate c3p0 connection pool -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-c3p0</artifactId>
+            <version>4.1.5.Final</version>
         </dependency>
 
         <!-- Connection pool-->

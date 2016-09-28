@@ -70,6 +70,6 @@ public class ClientProjectResource {
         clientService.deleteClientProject(clientID);
         logger.info("Project client delete:: end");
 
-        return Response.ok().entity("Success").build();
+        return null;
     }
 }

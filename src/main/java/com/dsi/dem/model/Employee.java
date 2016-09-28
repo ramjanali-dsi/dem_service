@@ -86,6 +86,9 @@ public class Employee {
     private EmployeeInfo info = new EmployeeInfo();
 
     @Transient
+    private EmployeeLeave leaveInfo = new EmployeeLeave();
+
+    @Transient
     private List<EmployeeDesignation> designations = new ArrayList<>();
 
     @Transient
@@ -182,18 +185,22 @@ public class Employee {
         this.resignDate = resignDate;
     }
 
+    @JsonProperty
     public Date getCreatedDate() {
         return createdDate;
     }
 
+    @JsonIgnore
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
+    @JsonProperty
     public Date getLastModifiedDate() {
         return lastModifiedDate;
     }
 
+    @JsonIgnore
     public void setLastModifiedDate(Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
@@ -300,5 +307,13 @@ public class Employee {
 
     public void setRoleId(String roleId) {
         this.roleId = roleId;
+    }
+
+    public EmployeeLeave getLeaveInfo() {
+        return leaveInfo;
+    }
+
+    public void setLeaveInfo(EmployeeLeave leaveInfo) {
+        this.leaveInfo = leaveInfo;
     }
 }

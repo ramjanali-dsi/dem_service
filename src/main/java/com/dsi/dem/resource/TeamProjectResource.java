@@ -40,13 +40,6 @@ public class TeamProjectResource {
     public Response createTeamProject(@PathParam("team_id") String teamID, TeamDto teamDto) throws CustomException {
 
         logger.info("Team project create:: start");
-        if(Utility.isNullOrEmpty(teamDto.getProjectIds())){
-            ErrorContext errorContext = new ErrorContext(null, "TeamProject", "Team project list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
-            throw new CustomException(errorMessage);
-        }
-
         teamService.saveTeamProjects(teamDto.getProjectIds(), teamService.getTeamByID(teamID));
         logger.info("Team project create:: end");
 
@@ -67,6 +60,6 @@ public class TeamProjectResource {
         teamService.deleteTeamProject(projectID);
         logger.info("Team project delete:: end");
 
-        return Response.ok().entity("Success").build();
+        return null;
     }
 }

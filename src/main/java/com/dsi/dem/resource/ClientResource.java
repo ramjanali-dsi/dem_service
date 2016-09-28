@@ -91,7 +91,7 @@ public class ClientResource {
         clientService.deleteClient(clientID);
         logger.info("Client delete:: End");
 
-        return Response.ok().entity("Success").build();
+        return Response.ok().entity(null).build();
     }
     
     @GET
@@ -116,10 +116,12 @@ public class ClientResource {
     })
     public Response searchClientOrAllClients(@QueryParam("clientName") String clientName,
                                              @QueryParam("organization") String organization,
-                                             @QueryParam("clientEmail") String clientEmail) throws CustomException {
+                                             @QueryParam("clientEmail") String clientEmail,
+                                             @QueryParam("from") String from,
+                                             @QueryParam("range") String range) throws CustomException {
 
         logger.info("Read all client");
         return Response.ok().entity(TRANSFORMER.getClientsDto(clientService.
-                searchClients(clientName, organization, clientEmail))).build();
+                searchClients(clientName, organization, clientEmail, from, range))).build();
     }
 }

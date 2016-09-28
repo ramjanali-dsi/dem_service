@@ -19,15 +19,20 @@ public interface EmployeeDao {
     List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                    String accountID, String ipAddress, String nationalID, String tinID,
                                    String phone, String email, String active, String joiningDate, String teamName,
-                                   String projectName, String userID);
+                                   String projectName, String userID, String from, String range);
 
     boolean saveEmployeeInfo(EmployeeInfo employeeInfo);
     boolean updateEmployeeInfo(EmployeeInfo employeeInfo);
     boolean deleteEmployeeInfo(String employeeID);
     EmployeeInfo getEmployeeInfoByEmployeeID(String employeeID);
 
+    boolean saveEmployeeLeaveSummary(EmployeeLeave employeeLeave);
+    boolean deleteEmployeeLeaveSummary(String employeeID);
+    EmployeeLeave getEmployeeLeaveSummaryByEmployeeID(String employeeID);
+
     boolean saveEmployeeDesignation(EmployeeDesignation employeeDesignation);
     boolean updateEmployeeDesignation(EmployeeDesignation employeeDesignation);
+    boolean updatePrevEmployeeDesignations(String employeeID);
     boolean deleteEmployeeDesignation(String employeeID, String designationID);
     List<EmployeeDesignation> getEmployeeDesignationsByEmployeeID(String employeeID);
     EmployeeDesignation getEmployeeDesignationByDesignationIDAndEmployeeID(String designationID, String employeeID);

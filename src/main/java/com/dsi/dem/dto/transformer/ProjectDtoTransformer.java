@@ -48,6 +48,7 @@ public class ProjectDtoTransformer {
         try{
             BeanUtils.copyProperties(projectDto, project);
             BeanUtils.copyProperties(projectDto, project.getStatus());
+            projectDto.setDescription(project.getDescription());
 
             List<ProjectTeamDto> teamDtoList = new ArrayList<>();
             for(ProjectTeam projectTeam : project.getTeams()){

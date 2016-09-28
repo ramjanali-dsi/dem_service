@@ -37,3 +37,5 @@ alter table dsi_team_member add constraint FK_employee_id_team foreign key (empl
 alter table dsi_team_member add constraint FK_role_id_team foreign key (role_id) references ref_role (role_id);
 
 alter table dsi_team_member add constraint FK_team_id_team foreign key (team_id) references dsi_team (team_id);
+
+ALTER TABLE `dsi_employee_email` CHANGE `is_preferred` `is_preferred` BIT(1) NULL DEFAULT NULL;

@@ -8,6 +8,7 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Client;
+import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
 import com.dsi.dem.service.ClientService;
 import com.dsi.dem.util.Constants;
@@ -145,8 +146,9 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public List<Client> searchClients(String clientName, String organization, String clientEmail) throws CustomException {
-        List<Client> clients = clientDao.searchClients(clientName, organization, clientEmail);
+    public List<Client> searchClients(String clientName, String organization, String clientEmail,
+                                      String from, String range) throws CustomException {
+        List<Client> clients = clientDao.searchClients(clientName, organization, clientEmail, from, range);
         if(clients == null){
             ErrorContext errorContext = new ErrorContext(null, "Client", "Client list not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
@@ -164,10 +166,15 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void saveClientProject(List<String> projectIds, Client client) throws CustomException {
 
+        if(clientDao.deleteClientProject(client.getClientId(), null))
+            logger.info("Delete all client projects.");
+
         for(String projectID : projectIds){
+            Project project = projectDao.getProjectByID(projectID);
             ProjectClient projectClient = new ProjectClient();
             projectClient.setClient(client);
-            projectClient.setProject(projectDao.getProjectByID(projectID));
+            projectClient.setProject(project);
+            projectClient.setVersion(1);
 
             boolean res = clientDao.saveClientProject(projectClient);
             if(!res){

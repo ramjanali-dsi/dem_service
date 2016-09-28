@@ -91,7 +91,7 @@ public class DesignationResource {
         designationService.deleteEmployeeDesignation(designationID);
         logger.info("Employees designation info delete:: End");
 
-        return Response.ok().entity("Success").build();
+        return null;
     }
 
     @GET
@@ -107,25 +107,5 @@ public class DesignationResource {
         logger.info("Read an employees designation info");
         return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeDesignationDto(
                 designationService.getEmployeeDesignation(designationID, employeeID))).build();
-    }
-
-    @GET
-    @ApiOperation(value = "Search Or Read Employees All Designations", notes = "Search Or Read Employees All Designations", position = 4)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Search or read employees designations success"),
-            @ApiResponse(code = 500, message = "Search or read employees designations failed, unauthorized.")
-    })
-    public Response searchOrReadEmployeesAllDesignation(@PathParam("employee_id") String employeeID,
-                                                        @QueryParam("search") String searchText) throws CustomException {
-
-        if(!Utility.isNullOrEmpty(searchText)){
-            //TODO search employees designation info
-
-        } else {
-            logger.info("Read employees all designation info");
-            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getDesignationDtoList(
-                    designationService.getEmployeesDesignationByEmployeeID(employeeID))).build();
-        }
-        return null;
     }
 }

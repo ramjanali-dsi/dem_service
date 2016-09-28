@@ -122,7 +122,7 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
 
     @Override
     public List<Team> searchTeams(String teamName, String status, String floor, String room, String memberName,
-                                  String projectName, String clientName) {
+                                  String projectName, String clientName, String from, String range) {
 
         Session session = null;
         List<Team> teamList = null;
@@ -131,10 +131,10 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
         Map<String, String> paramValue = new HashMap<>();
         try{
             session = getSession();
-            queryBuilder.append("FROM Team ");
+            queryBuilder.append("FROM Team t");
 
             if(!Utility.isNullOrEmpty(teamName)){
-                queryBuilder.append("t WHERE t.name like :teamName");
+                queryBuilder.append(" WHERE t.name like :teamName");
                 paramValue.put("teamName", "%" + teamName + "%");
                 hasClause = true;
             }
@@ -144,7 +144,7 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
                     queryBuilder.append(" AND t.isActive =:active");
 
                 } else {
-                    queryBuilder.append("t WHERE t.isActive =:active");
+                    queryBuilder.append(" WHERE t.isActive =:active");
                     hasClause = true;
                 }
                 paramValue.put("active", status);
@@ -155,7 +155,7 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
                     queryBuilder.append(" AND t.floor =:floor");
 
                 } else {
-                    queryBuilder.append("t WHERE t.floor =:floor");
+                    queryBuilder.append(" WHERE t.floor =:floor");
                     hasClause = true;
                 }
                 paramValue.put("floor", floor);
@@ -166,7 +166,7 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
                     queryBuilder.append(" AND t.room =:room");
 
                 } else {
-                    queryBuilder.append("t WHERE t.room =:room");
+                    queryBuilder.append(" WHERE t.room =:room");
                     hasClause = true;
                 }
                 paramValue.put("room", room);
@@ -178,7 +178,7 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
                             "tm.employee.firstName like :memberName OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName)");
 
                 } else {
-                    queryBuilder.append("t WHERE t.teamId in (SELECT tm.team.teamId FROM TeamMember tm WHERE " +
+                    queryBuilder.append(" WHERE t.teamId in (SELECT tm.team.teamId FROM TeamMember tm WHERE " +
                             "tm.employee.firstName like :memberName OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName)");
                     hasClause = true;
                 }
@@ -191,7 +191,7 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
                             "pt.project.projectName like :projectName)");
 
                 } else {
-                    queryBuilder.append("t WHERE t.teamId in (SELECT pt.team.teamId FROM ProjectTeam pt WHERE " +
+                    queryBuilder.append(" WHERE t.teamId in (SELECT pt.team.teamId FROM ProjectTeam pt WHERE " +
                             "pt.project.projectName like :projectName)");
                     hasClause = true;
                 }
@@ -204,12 +204,14 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
                             "(SELECT pc.project.projectId FROM ProjectClient pc WHERE pc.client.memberName like :clientName))");
 
                 } else {
-                    queryBuilder.append("t WHERE t.teamId in (SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectId in " +
+                    queryBuilder.append(" WHERE t.teamId in (SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectId in " +
                             "(SELECT pc.project.projectId FROM ProjectClient pc WHERE pc.client.memberName like :clientName))");
                     //hasClause = true;
                 }
                 paramValue.put("clientName", "%" + clientName + "%");
             }
+
+            queryBuilder.append(" ORDER BY t.name ASC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
@@ -222,6 +224,9 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
+
+            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+                query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
 
             teamList = query.list();
 
@@ -303,13 +308,20 @@ public class TeamDaoImpl extends BaseDao implements TeamDao {
     }
 
     @Override
-    public List<TeamMember> getTeamMembers(String teamID) {
+    public List<TeamMember> getTeamMembers(String teamID, String employeeID) {
         Session session = null;
         List<TeamMember> teamMemberList = null;
+        Query query;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId =:teamID");
-            query.setParameter("teamID", teamID);
+            if(teamID != null) {
+                query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId =:teamID");
+                query.setParameter("teamID", teamID);
+
+            } else {
+                query = session.createQuery("FROM TeamMember tm WHERE tm.employee.employeeId =:employeeID");
+                query.setParameter("employeeID", employeeID);
+            }
 
             teamMemberList = query.list();
 

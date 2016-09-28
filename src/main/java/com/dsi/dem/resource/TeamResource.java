@@ -87,7 +87,7 @@ public class TeamResource {
         teamService.deleteTeam(teamID);
         logger.info("Team delete:: End");
 
-        return Response.ok().entity("Success").build();
+        return Response.ok().entity(null).build();
     }
 
     @GET
@@ -115,10 +115,12 @@ public class TeamResource {
                                          @QueryParam("room") String room,
                                          @QueryParam("memberName") String memberName,
                                          @QueryParam("projectName") String projectName,
-                                         @QueryParam("clientName") String clientName) throws CustomException {
+                                         @QueryParam("clientName") String clientName,
+                                         @QueryParam("from") String from,
+                                         @QueryParam("range") String range) throws CustomException {
 
         logger.info("Read all team info");
         return Response.ok().entity(TRANSFORMER.getTeamsDto(teamService.searchTeams(teamName, status, floor, room,
-                memberName, projectName, clientName))).build();
+                memberName, projectName, clientName, from, range))).build();
     }
 }

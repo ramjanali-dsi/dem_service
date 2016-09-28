@@ -18,13 +18,13 @@ public interface TeamDao {
     Team getTeamByName(String teamName);
     List<Team> getAllTeams();
     List<Team> searchTeams(String teamName, String status, String floor, String room,
-                           String memberName, String projectName, String clientName);
+                           String memberName, String projectName, String clientName, String from, String range);
 
     boolean saveTeamMember(TeamMember teamMember);
     boolean updateTeamMember(TeamMember teamMember);
     boolean deleteTeamMember(String teamID, String teamMemberID);
     TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID);
-    List<TeamMember> getTeamMembers(String teamID);
+    List<TeamMember> getTeamMembers(String teamID, String employeeID);
 
     boolean saveTeamProject(ProjectTeam projectTeam);
     boolean updateTeamProject(ProjectTeam projectTeam);

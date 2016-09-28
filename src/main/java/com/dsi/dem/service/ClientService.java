@@ -16,7 +16,8 @@ public interface ClientService {
     void deleteClient(String clientID) throws CustomException;
     Client getClientByID(String clientID) throws CustomException;
     List<Client> getAllClients() throws CustomException;
-    List<Client> searchClients(String clientName, String organization, String clientEmail) throws CustomException;
+    List<Client> searchClients(String clientName, String organization, String clientEmail,
+                               String from, String range) throws CustomException;
 
     void saveClientProject(List<String> projectIds, Client client) throws CustomException;
     void deleteClientProject(String clientProjectID) throws CustomException;

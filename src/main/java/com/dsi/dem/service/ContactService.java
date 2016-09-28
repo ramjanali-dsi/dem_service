@@ -12,6 +12,7 @@ import java.util.List;
 public interface ContactService {
 
     void saveEmployeeContactInfo(List<EmployeeContact> contactList, String employeeID) throws CustomException;
+    void saveEmployeeContactInfo(EmployeeContact contact, String employeeID) throws CustomException;
     void updateEmployeeContactInfo(EmployeeContact employeeContact, String employeeID) throws CustomException;
     void deleteEmployeeContactInfo(String contactInfoID) throws CustomException;
     List<EmployeeContact> getEmployeesContactInfoByEmployeeID(String employeeID) throws CustomException;

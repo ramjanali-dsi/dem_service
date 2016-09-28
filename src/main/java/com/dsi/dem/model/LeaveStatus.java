@@ -18,8 +18,8 @@ public class LeaveStatus {
     @Column(name = "leave_status_id", length = 40)
     private String leaveStatusId;
 
-    @Column(length = 50)
-    private String name;
+    @Column(name = "name", length = 50)
+    private String leaveStatusName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -35,12 +35,12 @@ public class LeaveStatus {
         this.leaveStatusId = leaveStatusId;
     }
 
-    public String getName() {
-        return name;
+    public String getLeaveStatusName() {
+        return leaveStatusName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLeaveStatusName(String leaveStatusName) {
+        this.leaveStatusName = leaveStatusName;
     }
 
     public String getDescription() {

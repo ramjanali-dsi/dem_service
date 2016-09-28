@@ -29,6 +29,9 @@ public class EmployeeEmail {
     @JoinColumn(name = "type_id")
     private EmployeeEmailType type;
 
+    @Column(name = "is_preferred")
+    private boolean isPreferred;
+
     private int version;
 
     public String getEmailId() {
@@ -69,5 +72,13 @@ public class EmployeeEmail {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public boolean isPreferred() {
+        return isPreferred;
+    }
+
+    public void setPreferred(boolean preferred) {
+        isPreferred = preferred;
     }
 }

@@ -16,7 +16,8 @@ public interface ClientDao {
     Client getClientByID(String clientID);
     Client getClientByName(String name);
     List<Client> getAllClients();
-    List<Client> searchClients(String clientName, String organization, String clientEmail);
+    List<Client> searchClients(String clientName, String organization, String clientEmail,
+                               String from, String range);
 
     boolean saveClientProject(ProjectClient projectClient);
     boolean deleteClientProject(String clientID, String projectClientID);

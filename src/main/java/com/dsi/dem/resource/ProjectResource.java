@@ -94,7 +94,7 @@ public class ProjectResource {
         projectService.deleteProject(projectID);
         logger.info("Project delete:: End");
 
-        return Response.ok().entity("Success").build();
+        return Response.ok().entity(null).build();
     }
 
     @GET
@@ -121,10 +121,12 @@ public class ProjectResource {
                                                @QueryParam("status") String status,
                                                @QueryParam("clientName") String clientName,
                                                @QueryParam("teamName") String teamName,
-                                               @QueryParam("memberName") String memberName) throws CustomException {
+                                               @QueryParam("memberName") String memberName,
+                                               @QueryParam("from") String from,
+                                               @QueryParam("range") String range) throws CustomException {
 
         logger.info("Read all projects");
         return Response.ok().entity(TRANSFORMER.getProjectsDto(projectService.
-                searchProjects(projectName, status, clientName, teamName, memberName))).build();
+                searchProjects(projectName, status, clientName, teamName, memberName, from, range))).build();
     }
 }

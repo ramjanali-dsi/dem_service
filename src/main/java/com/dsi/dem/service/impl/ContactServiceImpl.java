@@ -5,6 +5,7 @@ import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
+import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.EmployeeContact;
 import com.dsi.dem.service.ContactService;
 import com.dsi.dem.util.Constants;
@@ -33,18 +34,29 @@ public class ContactServiceImpl implements ContactService {
         }
 
         for(EmployeeContact contact : contactList){
-            validateInputForCreation(contact);
-
-            contact.setEmployee(employeeDao.getEmployeeByID(employeeID));
-            boolean res = employeeDao.saveEmployeeContactInfo(contact);
-            if(!res){
-                ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Employees contact info create failed.");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
-                throw new CustomException(errorMessage);
-            }
-            logger.info("Save employees contact info success.");
+            saveContact(contact, employeeID);
         }
+    }
+
+    @Override
+    public void saveEmployeeContactInfo(EmployeeContact contact, String employeeID) throws CustomException {
+        saveContact(contact, employeeID);
+    }
+
+    private void saveContact(EmployeeContact contact, String employeeID) throws CustomException {
+        validateInputForCreation(contact);
+
+        Employee employee = employeeDao.getEmployeeByID(employeeID);
+        contact.setVersion(employee.getVersion());
+        contact.setEmployee(employee);
+        boolean res = employeeDao.saveEmployeeContactInfo(contact);
+        if(!res){
+            ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Employees contact info create failed.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+            throw new CustomException(errorMessage);
+        }
+        logger.info("Save employees contact info success.");
     }
 
     private void validateInputForCreation(EmployeeContact contact) throws CustomException {

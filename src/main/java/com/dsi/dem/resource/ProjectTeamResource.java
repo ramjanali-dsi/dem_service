@@ -70,6 +70,6 @@ public class ProjectTeamResource {
         projectService.deleteProjectTeam(teamID);
         logger.info("Project team delete:: end");
 
-        return Response.ok().entity("Success").build();
+        return null;
     }
 }

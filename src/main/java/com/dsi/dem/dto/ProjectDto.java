@@ -14,12 +14,10 @@ public class ProjectDto {
 
     private String projectId;
 
-    @ApiModelProperty(required = true)
     private String projectName;
 
     private String description;
 
-    @ApiModelProperty(required = true)
     private String projectStatusId;
 
     private String projectStatusName;

@@ -24,13 +24,13 @@ public class EmployeeLeave {
     private Employee employee;
 
     @Column(name = "total_leave")
-    private int totalLeave;
+    private int totalLeaveUsed;
 
     @Column(name = "total_sick")
-    private int totalSick;
+    private int totalSickUsed;
 
     @Column(name = "total_casual")
-    private int totalCasual;
+    private int totalCasualUsed;
 
     @Column(name = "total_not_notify")
     private int totalNotNotify;
@@ -56,30 +56,6 @@ public class EmployeeLeave {
         this.employee = employee;
     }
 
-    public int getTotalLeave() {
-        return totalLeave;
-    }
-
-    public void setTotalLeave(int totalLeave) {
-        this.totalLeave = totalLeave;
-    }
-
-    public int getTotalSick() {
-        return totalSick;
-    }
-
-    public void setTotalSick(int totalSick) {
-        this.totalSick = totalSick;
-    }
-
-    public int getTotalCasual() {
-        return totalCasual;
-    }
-
-    public void setTotalCasual(int totalCasual) {
-        this.totalCasual = totalCasual;
-    }
-
     public int getTotalNotNotify() {
         return totalNotNotify;
     }
@@ -88,19 +64,43 @@ public class EmployeeLeave {
         this.totalNotNotify = totalNotNotify;
     }
 
-    public int getTotalSpecialLeave() {
-        return totalSpecialLeave;
-    }
-
-    public void setTotalSpecialLeave(int totalSpecialLeave) {
-        this.totalSpecialLeave = totalSpecialLeave;
-    }
-
     public int getVersion() {
         return version;
     }
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public int getTotalLeaveUsed() {
+        return totalLeaveUsed;
+    }
+
+    public void setTotalLeaveUsed(int totalLeaveUsed) {
+        this.totalLeaveUsed = totalLeaveUsed;
+    }
+
+    public int getTotalSickUsed() {
+        return totalSickUsed;
+    }
+
+    public void setTotalSickUsed(int totalSickUsed) {
+        this.totalSickUsed = totalSickUsed;
+    }
+
+    public int getTotalCasualUsed() {
+        return totalCasualUsed;
+    }
+
+    public void setTotalCasualUsed(int totalCasualUsed) {
+        this.totalCasualUsed = totalCasualUsed;
+    }
+
+    public int getTotalSpecialLeave() {
+        return totalSpecialLeave;
+    }
+
+    public void setTotalSpecialLeave(int totalSpecialLeave) {
+        this.totalSpecialLeave = totalSpecialLeave;
     }
 }

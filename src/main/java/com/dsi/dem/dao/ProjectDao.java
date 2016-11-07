@@ -22,7 +22,7 @@ public interface ProjectDao {
 
     boolean saveProjectTeam(ProjectTeam projectTeam);
     boolean deleteProjectTeam(String projectID, String projectTeamID);
-    List<ProjectTeam> getProjectTeams(String projectID);
+    List<ProjectTeam> getProjectTeams(String projectID, String employeeID);
 
     boolean saveProjectClient(ProjectClient projectClient);
     boolean deleteProjectClient(String projectID, String projectClientID);

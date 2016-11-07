@@ -1,8 +1,8 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.LeaveDao;
-import com.dsi.dem.model.EmployeeLeave;
-import com.dsi.dem.model.LeaveRequest;
+import com.dsi.dem.model.*;
+import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -18,6 +18,46 @@ import java.util.Map;
 public class LeaveDaoImpl extends BaseDao implements LeaveDao {
 
     private static final Logger logger = Logger.getLogger(LeaveDaoImpl.class);
+
+    @Override
+    public boolean isAvailableLeaveTypes(String leaveTypeID, String userId) {
+        Session session = null;
+        EmployeeLeave leaveSummary;
+        LeaveType leaveType;
+        boolean success = false;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeLeave el WHERE el.employee.userId =:userId");
+            query.setParameter("userId", userId);
+
+            leaveSummary = (EmployeeLeave) query.uniqueResult();
+
+            query = session.createQuery("FROM LeaveType lt WHERE lt.leaveTypeId =:leaveTypeID");
+            query.setParameter("leaveTypeID", leaveTypeID);
+
+            leaveType = (LeaveType) query.uniqueResult();
+
+            if(leaveType.getLeaveTypeName().equals(Constants.CASUAL_TYPE_NAME)){
+                if(leaveSummary.getTotalCasualUsed() < Constants.TOTAL_CASUAL){
+                    success = true;
+                }
+            }
+
+            if(leaveType.getLeaveTypeName().equals(Constants.SICK_TYPE_NAME)){
+                if(leaveSummary.getTotalSickUsed() < Constants.TOTAL_SICK){
+                    success = true;
+                }
+            }
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
+    }
 
     @Override
     public EmployeeLeave getEmployeeLeaveSummary(String employeeID) {
@@ -41,18 +81,23 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
     }
 
     @Override
+    public boolean updateEmployeeLeaveSummary(EmployeeLeave leaveSummary) {
+        return update(leaveSummary);
+    }
+
+    @Override
     public List<EmployeeLeave> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
                                                                  String email, String phone, String teamName, String projectName,
-                                                                 String employeeId, String from, String range) {
+                                                                 String employeeId, String from, String range, String userId) {
 
         Session session = null;
         List<EmployeeLeave> employeeLeaveList = null;
         StringBuilder queryBuilder = new StringBuilder();
-        boolean hasClause = false;
         Map<String, String> paramValue = new HashMap<>();
+        boolean hasClause = false;
         try{
             session = getSession();
-            queryBuilder.append("FROM EmployeeLeave el");
+            queryBuilder.append("FROM EmployeeLeave el ");
 
             if(!Utility.isNullOrEmpty(employeeNo)){
                 queryBuilder.append(" WHERE el.employee.employeeNo like :employeeNo");
@@ -64,7 +109,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 if(hasClause){
                     queryBuilder.append(" AND el.employee.firstName like :firstName");
 
-                } else {
+                }else{
                     queryBuilder.append(" WHERE el.employee.firstName like :firstName");
                     hasClause = true;
                 }
@@ -83,7 +128,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(nickName)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND el.employee.nickName like :nickName");
 
                 } else {
@@ -94,7 +139,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(email)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND el.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
 
                 } else {
@@ -105,7 +150,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(phone)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND el.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
 
                 } else {
@@ -116,7 +161,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(teamName)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
 
                 } else {
@@ -134,16 +179,22 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 } else {
                     queryBuilder.append(" WHERE el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
                             "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                    hasClause = true;
                 }
                 paramValue.put("projectName", "%" + projectName + "%");
             }
 
             if(!Utility.isNullOrEmpty(employeeId)){
-                queryBuilder.append(" WHERE el.employee.employeeId =:employeeID");
+                if(hasClause) {
+                    queryBuilder.append(" AND el.employee.employeeId =:employeeID");
+
+                } else {
+                    queryBuilder.append(" WHERE el.employee.employeeId =:employeeID");
+                }
                 paramValue.put("employeeID", employeeId);
             }
 
-            queryBuilder.append(" ORDER BY el.employee.firstName ASC");
+            queryBuilder.append(" ORDER BY el.employee.createdDate DESC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
@@ -152,8 +203,10 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 query.setParameter(entry.getKey(), entry.getValue());
             }
 
-            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range)){
+                logger.info("From: " + from + ", Range: " + range);
                 query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
+            }
 
             employeeLeaveList = query.list();
 
@@ -164,6 +217,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 close(session);
             }
         }
+        logger.info("Total employee leave summary list: " + employeeLeaveList);
         return employeeLeaveList;
     }
 
@@ -189,20 +243,43 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
     }
 
     @Override
+    public int getLeaveCountByStatus(String employeeID, String statusName) {
+        Session session = null;
+        Long total = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("SELECT COUNT(*) FROM LeaveRequest lr WHERE lr.employee.employeeId =:employeeId " +
+                    "AND lr.leaveStatus.leaveStatusName =:statusName");
+            query.setParameter("employeeId", employeeID);
+            query.setParameter("statusName", statusName);
+
+            total = (Long) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return total.intValue();
+    }
+
+    @Override
     public List<LeaveRequest> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName,
                                                        String email, String phone, String teamName, String projectName, String employeeId,
                                                        String leaveType, String requestType, String approvedStartDate, String approvedEndDate,
                                                        String approvedFirstName, String approvedLastName, String approvedNickName, String appliedStartDate,
-                                                       String appliedEndDate, String leaveStatus, String from, String range) {
+                                                       String appliedEndDate, String leaveStatus, String from, String range, String userId) {
 
         Session session = null;
         List<LeaveRequest> leaveRequestList = null;
         StringBuilder queryBuilder = new StringBuilder();
-        boolean hasClause = false;
         Map<String, String> paramValue = new HashMap<>();
+        boolean hasClause = false;
         try{
             session = getSession();
-            queryBuilder.append("FROM LeaveRequest lr");
+            queryBuilder.append("FROM LeaveRequest lr ");
 
             if(!Utility.isNullOrEmpty(employeeNo)){
                 queryBuilder.append(" WHERE lr.employee.employeeNo like :employeeNo");
@@ -214,7 +291,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 if(hasClause){
                     queryBuilder.append(" AND lr.employee.firstName like :firstName");
 
-                } else {
+                }else{
                     queryBuilder.append(" WHERE lr.employee.firstName like :firstName");
                     hasClause = true;
                 }
@@ -233,7 +310,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(nickName)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND lr.employee.nickName like :nickName");
 
                 } else {
@@ -244,7 +321,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(email)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND lr.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
 
                 } else {
@@ -255,7 +332,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(phone)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND lr.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
 
                 } else {
@@ -266,7 +343,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(teamName)){
-                if(hasClause){
+                if(hasClause) {
                     queryBuilder.append(" AND lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
 
                 } else {
@@ -291,119 +368,131 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
 
             if(!Utility.isNullOrEmpty(leaveType)){
                 if(hasClause){
-                    queryBuilder.append(" AND lr.leaveType.leaveTypeId =:leaveType)");
+                    queryBuilder.append(" AND lr.leaveType.leaveTypeName =:leaveType");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.leaveType.leaveTypeId =:leaveType)");
+                    queryBuilder.append(" WHERE lr.leaveType.leaveTypeName =:leaveType");
                     hasClause = true;
                 }
                 paramValue.put("leaveType", leaveType);
             }
 
             if(!Utility.isNullOrEmpty(requestType)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.requestType =:requestType)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.requestType.leaveRequestTypeName =:requestType");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.requestType =:requestType)");
+                    queryBuilder.append(" WHERE lr.requestType.leaveRequestTypeName =:requestType");
                     hasClause = true;
                 }
                 paramValue.put("requestType", requestType);
             }
 
             if(!Utility.isNullOrEmpty(leaveStatus)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.leaveStatus.leaveStatusName =:leaveStatus");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                    queryBuilder.append(" WHERE lr.leaveStatus.leaveStatusName =:leaveStatus");
                     hasClause = true;
                 }
                 paramValue.put("leaveStatus", leaveStatus);
             }
 
-            /*if(!Utility.isNullOrEmpty(approvedFirstName)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.approvalId =:leaveStatus)");
+            if(!Utility.isNullOrEmpty(approvedFirstName)){
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.approvalId in (SELECT e.employeeId FROM Employee e WHERE " +
+                            "e.firstName like :approvedFirstName)");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                    queryBuilder.append(" WHERE lr.approvalId in (SELECT e.employeeId FROM Employee e WHERE " +
+                            "e.firstName like :approvedFirstName)");
                     hasClause = true;
                 }
-                paramValue.put("leaveStatus", leaveStatus);
+                paramValue.put("approvedFirstName", approvedFirstName);
             }
 
             if(!Utility.isNullOrEmpty(approvedLastName)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.approvalId in (SELECT e.employeeId FROM Employee e WHERE " +
+                            "e.lastName like :approvedLastName)");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                    queryBuilder.append(" WHERE lr.approvalId in (SELECT e.employeeId FROM Employee e WHERE " +
+                            "e.lastName like :approvedLastName)");
                     hasClause = true;
                 }
-                paramValue.put("leaveStatus", leaveStatus);
+                paramValue.put("approvedLastName", approvedLastName);
             }
 
             if(!Utility.isNullOrEmpty(approvedNickName)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.approvalId in (SELECT e.employeeId FROM Employee e WHERE " +
+                            "e.nickName like :approvedNickName)");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                    queryBuilder.append(" WHERE lr.approvalId in (SELECT e.employeeId FROM Employee e WHERE " +
+                            "e.nickName like :approvedNickName)");
                     hasClause = true;
                 }
-                paramValue.put("leaveStatus", leaveStatus);
-            }*/
+                paramValue.put("approvedNickName", approvedNickName);
+            }
 
             if(!Utility.isNullOrEmpty(approvedStartDate)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.approvedStartDate like :approvedStartDate)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.approvedStartDate =:approvedStartDate");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.approvedStartDate like :approvedStartDate)");
+                    queryBuilder.append(" WHERE lr.approvedStartDate =:approvedStartDate");
                     hasClause = true;
                 }
-                paramValue.put("approvedStartDate", "%" + approvedStartDate + "%");
+                paramValue.put("approvedStartDate", approvedStartDate);
             }
 
             if(!Utility.isNullOrEmpty(approvedEndDate)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.approvedEndDate like :approvedEndDate)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.approvedEndDate =:approvedEndDate");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.approvedEndDate like :approvedEndDate)");
+                    queryBuilder.append(" WHERE lr.approvedEndDate =:approvedEndDate");
                     hasClause = true;
                 }
-                paramValue.put("approvedEndDate", "%" + approvedEndDate + "%");
+                paramValue.put("approvedEndDate", approvedEndDate);
             }
 
             if(!Utility.isNullOrEmpty(appliedStartDate)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.startDate like :appliedStartDate)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.startDate =:appliedStartDate");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.startDate like :appliedStartDate)");
+                    queryBuilder.append(" WHERE lr.startDate =:appliedStartDate");
                     hasClause = true;
                 }
-                paramValue.put("appliedStartDate", "%" + appliedStartDate + "%");
+                paramValue.put("appliedStartDate", appliedStartDate);
             }
 
             if(!Utility.isNullOrEmpty(appliedEndDate)){
-                if(hasClause){
-                    queryBuilder.append(" AND lr.endDate like :appliedEndDate)");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.endDate =:appliedEndDate");
 
                 } else {
-                    queryBuilder.append(" WHERE lr.endDate like :appliedEndDate)");
+                    queryBuilder.append(" WHERE lr.endDate =:appliedEndDate");
+                    hasClause = true;
                 }
-                paramValue.put("appliedEndDate", "%" + appliedEndDate + "%");
+                paramValue.put("appliedEndDate", appliedEndDate);
             }
 
             if(!Utility.isNullOrEmpty(employeeId)){
-                queryBuilder.append(" WHERE lr.employee.employeeId =:employeeID");
+                if(hasClause) {
+                    queryBuilder.append(" AND lr.employee.employeeId =:employeeID");
+
+                } else {
+                    queryBuilder.append(" WHERE lr.employee.employeeId =:employeeID");
+                }
                 paramValue.put("employeeID", employeeId);
             }
 
-            queryBuilder.append(" ORDER BY lr.employee.firstName ASC");
+            queryBuilder.append(" ORDER BY lr.applyDate DESC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
@@ -418,8 +507,10 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 }
             }
 
-            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range)){
+                logger.info("From: " + from + ", Range: " + range);
                 query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
+            }
 
             leaveRequestList = query.list();
 
@@ -430,7 +521,50 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 close(session);
             }
         }
+        logger.info("Total leave request details size: " + leaveRequestList.size());
         return leaveRequestList;
+    }
+
+    @Override
+    public LeaveType getLeaveTypeByID(String leaveTypeId) {
+        Session session = null;
+        LeaveType leaveType = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM LeaveType lt WHERE lt.leaveTypeId =:leaveTypeId");
+            query.setParameter("leaveTypeId", leaveTypeId);
+
+            leaveType = (LeaveType) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return leaveType;
+    }
+
+    @Override
+    public LeaveRequestType getLeaveRequestTypeByID(String leaveRequestTypeId) {
+        Session session = null;
+        LeaveRequestType leaveRequestType = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM LeaveRequestType lrt WHERE lrt.leaveRequestTypeId =:leaveRequestTypeId");
+            query.setParameter("leaveRequestTypeId", leaveRequestTypeId);
+
+            leaveRequestType = (LeaveRequestType) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return leaveRequestType;
     }
 
     @Override
@@ -472,14 +606,21 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
     }
 
     @Override
-    public LeaveRequest getLeaveRequestById(String leaveRequestID) {
+    public LeaveRequest getLeaveRequestById(String leaveRequestID, String employeeId) {
         Session session = null;
         LeaveRequest leaveRequest = null;
+        Query query;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.leaveRequestId =:leaveRequestId");
-            query.setParameter("leaveRequestId", leaveRequestID);
+            if(employeeId != null){
+                query = session.createQuery("FROM LeaveRequest lr WHERE lr.leaveRequestId =:leaveRequestId AND lr.employee.employeeId =:employeeId");
+                query.setParameter("leaveRequestId", leaveRequestID);
+                query.setParameter("employeeId", employeeId);
 
+            } else {
+                query = session.createQuery("FROM LeaveRequest lr WHERE lr.leaveRequestId =:leaveRequestId");
+                query.setParameter("leaveRequestId", leaveRequestID);
+            }
             leaveRequest = (LeaveRequest) query.uniqueResult();
 
         } catch (Exception e){
@@ -583,47 +724,47 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
             }
 
             if(!Utility.isNullOrEmpty(leaveCnt)){
-                queryBuilder.append(" AND lr.daysCount =:leaveCnt)");
+                queryBuilder.append(" AND lr.daysCount =:leaveCnt");
                 paramValue.put("leaveCnt", leaveCnt);
             }
 
             if(!Utility.isNullOrEmpty(leaveReason)){
-                queryBuilder.append(" AND lr.leaveReason like :leaveReason)");
+                queryBuilder.append(" AND lr.leaveReason like :leaveReason");
                 paramValue.put("leaveReason", "%" + leaveReason + "%");
             }
 
             if(!Utility.isNullOrEmpty(leaveType)){
-                queryBuilder.append(" AND lr.leaveType.leaveTypeId =:leaveType)");
+                queryBuilder.append(" AND lr.leaveType.leaveTypeName =:leaveType");
                 paramValue.put("leaveType", leaveType);
             }
 
             if(!Utility.isNullOrEmpty(requestType)){
-                queryBuilder.append(" AND lr.requestType =:requestType)");
+                queryBuilder.append(" AND lr.requestType.leaveRequestTypeName =:requestType");
                 paramValue.put("requestType", requestType);
             }
 
             if(!Utility.isNullOrEmpty(leaveStatus)){
-                queryBuilder.append(" AND lr.leaveStatus.leaveStatusId =:leaveStatus)");
+                queryBuilder.append(" AND lr.leaveStatus.leaveStatusName =:leaveStatus");
                 paramValue.put("leaveStatus", leaveStatus);
             }
 
             if(!Utility.isNullOrEmpty(appliedStartDate)){
-                queryBuilder.append(" AND lr.startDate like :appliedStartDate)");
-                paramValue.put("appliedStartDate", "%" + appliedStartDate + "%");
+                queryBuilder.append(" AND lr.startDate =:appliedStartDate");
+                paramValue.put("appliedStartDate", appliedStartDate);
             }
 
             if(!Utility.isNullOrEmpty(appliedEndDate)){
-                queryBuilder.append(" AND lr.endDate like :appliedEndDate)");
-                paramValue.put("appliedEndDate", "%" + appliedEndDate + "%");
+                queryBuilder.append(" AND lr.endDate =:appliedEndDate");
+                paramValue.put("appliedEndDate", appliedEndDate);
             }
 
             if(!Utility.isNullOrEmpty(deniedReason)){
-                queryBuilder.append(" AND lr.deniedReason like :deniedReason)");
+                queryBuilder.append(" AND lr.deniedReason like :deniedReason");
                 paramValue.put("deniedReason", "%" + deniedReason + "%");
             }
 
             if(!Utility.isNullOrEmpty(deniedBy)){
-                queryBuilder.append(" AND lr.approvalId like :deniedBy)");
+                queryBuilder.append(" AND lr.approvalId like :deniedBy");
                 paramValue.put("deniedBy", "%" + deniedBy + "%");
             }
 
@@ -632,7 +773,7 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 paramValue.put("leaveRequestId", leaveRequestId);
             }
 
-            queryBuilder.append(" ORDER BY lr.leaveStatus.leaveStatusName ASC");
+            queryBuilder.append(" ORDER BY lr.leaveStatus.priority ASC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
@@ -661,6 +802,78 @@ public class LeaveDaoImpl extends BaseDao implements LeaveDao {
                 close(session);
             }
         }
+        logger.info("Size:: " + leaveRequestList.size());
         return leaveRequestList;
+    }
+
+    @Override
+    public LeaveStatus getLeaveStatusByName(String typeName) {
+        Session session = null;
+        LeaveStatus leaveStatus = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM LeaveStatus lr WHERE lr.leaveStatusName =:statusName");
+            query.setParameter("statusName", typeName);
+
+            leaveStatus = (LeaveStatus) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return leaveStatus;
+    }
+
+    @Override
+    public boolean getLeaveRequestByRequestTypeAndEmployeeNo(String employeeNo, String date) {
+        Session session = null;
+        boolean success = false;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.employee.employeeNo =:employeeNo AND " +
+                    "lr.leaveStatus.leaveStatusName =:leaveStatusName AND (lr.approvedStartDate <=:date AND lr.approvedEndDate >=:date)");
+            query.setParameter("employeeNo", employeeNo);
+            query.setParameter("leaveStatusName", Constants.APPROVED_LEAVE_REQUEST);
+            query.setParameter("date", Utility.getDateFromString(date));
+
+            if(query.list().size() > 0){
+                success = true;
+            }
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public LeaveRequest getLeaveRequestByStatusAndEmployee(String employeeNo, String date) {
+        Session session = null;
+        LeaveRequest leaveRequest = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.employee.employeeNo =:employeeNo AND " +
+                    "lr.leaveStatus.leaveStatusName =:leaveStatusName AND (lr.approvedStartDate <=:date AND lr.approvedEndDate >=:date)");
+            query.setParameter("employeeNo", employeeNo);
+            query.setParameter("leaveStatusName", Constants.APPROVED_LEAVE_REQUEST);
+            query.setParameter("date", Utility.getDateFromString(date));
+
+            leaveRequest = (LeaveRequest) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return leaveRequest;
     }
 }

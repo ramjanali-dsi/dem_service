@@ -1,6 +1,8 @@
 alter table dsi_employee add constraint UK_employee_no  unique (employee_no);
 
-alter table dsi_employee_attendance add constraint FK_employee_id_attendance foreign key (employee_id) references dsi_employee (employee_id);
+alter table dsi_employee_attendance add index FK6023EB152BA9B222 (employee_id), add constraint FK6023EB152BA9B222 foreign key (employee_id) references dsi_employee (employee_id);
+
+alter table dsi_temp_attendance add index FKE0492FAF2BA9B222 (employee_id), add constraint FKE0492FAF2BA9B222 foreign key (employee_id) references dsi_employee (employee_id);
 
 alter table dsi_employee_contact_number add constraint FK_employee_id_contact_no foreign key (employee_id) references dsi_employee (employee_id);
 
@@ -22,6 +24,8 @@ alter table dsi_leave_request add constraint FK_leave_status_id_request foreign 
 
 alter table dsi_leave_request add constraint FK_leave_type_id_request foreign key (leave_type_id) references ref_leave_type (leave_type_id);
 
+alter table dsi_leave_request add constraint FK_leave_request_id_request foreign key (request_type_id) references ref_leave_request_type (leave_request_type_id);
+
 alter table dsi_project add constraint FK_status_id_project foreign key (status_id) references ref_project_status (project_status_id);
 
 alter table dsi_project_client add constraint FK_client_id foreign key (client_id) references dis_client (client_id);
@@ -39,3 +43,5 @@ alter table dsi_team_member add constraint FK_role_id_team foreign key (role_id)
 alter table dsi_team_member add constraint FK_team_id_team foreign key (team_id) references dsi_team (team_id);
 
 ALTER TABLE `dsi_employee_email` CHANGE `is_preferred` `is_preferred` BIT(1) NULL DEFAULT NULL;
+
+ALTER TABLE  `ref_leave_status` ADD  `priority` INT NOT NULL AFTER  `name` ;

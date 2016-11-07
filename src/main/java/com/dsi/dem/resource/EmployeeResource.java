@@ -9,6 +9,7 @@ import com.dsi.dem.model.*;
 import com.dsi.dem.service.*;
 import com.dsi.dem.service.impl.*;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import com.dsi.httpclient.HttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,9 +116,9 @@ public class EmployeeResource {
             return Response.ok().entity(employeeDto).build();
 
         } catch (JSONException | IOException je) {
-            ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                    Constants.DEM_SERVICE_0009_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
         }
     }
@@ -161,9 +162,9 @@ public class EmployeeResource {
             return Response.ok().entity(employeeDto).build();
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
-                    Constants.DEM_SERVICE_0012_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
         }
     }
@@ -197,10 +198,9 @@ public class EmployeeResource {
 
             List<TeamMember> memberList = teamService.getTeamMembers(null, employeeID);
             if(!Utility.isNullOrEmpty(memberList)){
-                ErrorContext errorContext = new ErrorContext(employeeID, "Employee", "Employee delete failed, " +
-                        "because this employee associated with a team members");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                        Constants.DEM_SERVICE_0004_DESCRIPTION, errorContext);
+                //ErrorContext errorContext = new ErrorContext(employeeID, "Employee", "Employee delete failed, because this employee associated with a team members");
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                        Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0003);
                 throw new CustomException(errorMessage);
             }
 
@@ -232,9 +232,9 @@ public class EmployeeResource {
             return Response.ok().entity(null).build();
 
         } catch (JSONException je) {
-            ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                    Constants.DEM_SERVICE_0009_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
         }
     }
@@ -279,7 +279,16 @@ public class EmployeeResource {
                                              @QueryParam("from") String from,
                                              @QueryParam("range") String range) throws CustomException {
 
-        logger.info("Read all employees info");
+        if(!Utility.isNullOrEmpty(userID)){
+            userID = request.getAttribute("user_id") != null ?
+                    request.getAttribute("user_id").toString() : null;
+
+            logger.info("User id: " + userID);
+
+        } else {
+            logger.info("Read all employees info");
+        }
+
         return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeesDto(
                 employeeService.searchEmployees(employeeNo, firstName, lastName, nickName, bankAccountId,
                         ipAddress, nationalId, tinId, phone, email, isActive, joiningDate, teamName,
@@ -414,9 +423,9 @@ public class EmployeeResource {
                         designationService.getEmployeesDesignationByEmployeeID(employeeID))).build();
         }
 
-        ErrorContext errorContext = new ErrorContext(null, null, "Additional info not found.");
-        ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+        //ErrorContext errorContext = new ErrorContext(null, null, "Additional info not found.");
+        ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
         throw new CustomException(errorMessage);
     }
 }

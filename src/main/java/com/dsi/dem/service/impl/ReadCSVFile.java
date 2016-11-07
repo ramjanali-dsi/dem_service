@@ -4,6 +4,7 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -27,9 +28,9 @@ public class ReadCSVFile {
             }
 
         } catch (IOException e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0010,
-                    Constants.DEM_SERVICE_0010_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0010_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_005);
             throw new CustomException(errorMessage);
 
         } finally {
@@ -37,9 +38,9 @@ public class ReadCSVFile {
                 if (csvBuffer != null) csvBuffer.close();
 
             } catch (IOException ie) {
-                ErrorContext errorContext = new ErrorContext(null, null, ie.getMessage());
+                //ErrorContext errorContext = new ErrorContext(null, null, ie.getMessage());
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0010,
-                        Constants.DEM_SERVICE_0010_DESCRIPTION, errorContext);
+                        Constants.DEM_SERVICE_0010_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_005);
                 throw new CustomException(errorMessage);
             }
         }

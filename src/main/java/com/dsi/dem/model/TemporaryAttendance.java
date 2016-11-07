@@ -9,19 +9,19 @@ import javax.persistence.Table;
 import java.util.Date;
 
 /**
- * Created by sabbir on 7/14/16.
+ * Created by sabbir on 10/25/16.
  */
 
 @Entity
-@Table(name = "dsi_employee_attendance")
-//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "dsi_employee_attendance")
-public class EmployeeAttendance {
+@Table(name = "dsi_temp_attendance")
+//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "dsi_temp_attendance")
+public class TemporaryAttendance {
 
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
-    @Column(name = "employee_attendance_id", length = 40)
-    private String employeeAttendanceId;
+    @Column(name = "temp_attendance_id", length = 40)
+    private String tempAttendanceId;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
@@ -43,6 +43,9 @@ public class EmployeeAttendance {
     @Column(name = "total_hour", length = 10)
     private String totalHour;
 
+    @Column(name = "is_transferred")
+    private boolean isTransferred;
+
     @Column(name = "created_date")
     @Type(type = "date")
     private Date createdDate;
@@ -59,12 +62,12 @@ public class EmployeeAttendance {
 
     private int version;
 
-    public String getEmployeeAttendanceId() {
-        return employeeAttendanceId;
+    public String getTempAttendanceId() {
+        return tempAttendanceId;
     }
 
-    public void setEmployeeAttendanceId(String employeeAttendanceId) {
-        this.employeeAttendanceId = employeeAttendanceId;
+    public void setTempAttendanceId(String tempAttendanceId) {
+        this.tempAttendanceId = tempAttendanceId;
     }
 
     public Employee getEmployee() {
@@ -81,14 +84,6 @@ public class EmployeeAttendance {
 
     public void setAbsent(boolean absent) {
         isAbsent = absent;
-    }
-
-    public String getTotalHour() {
-        return totalHour;
-    }
-
-    public void setTotalHour(String totalHour) {
-        this.totalHour = totalHour;
     }
 
     public Date getAttendanceDate() {
@@ -113,6 +108,22 @@ public class EmployeeAttendance {
 
     public void setCheckOutTime(String checkOutTime) {
         this.checkOutTime = checkOutTime;
+    }
+
+    public String getTotalHour() {
+        return totalHour;
+    }
+
+    public void setTotalHour(String totalHour) {
+        this.totalHour = totalHour;
+    }
+
+    public boolean isTransferred() {
+        return isTransferred;
+    }
+
+    public void setTransferred(boolean transferred) {
+        isTransferred = transferred;
     }
 
     public Date getCreatedDate() {

@@ -134,4 +134,24 @@ public class ReferenceDaoImpl extends BaseDao implements ReferenceDao {
         }
         return leaveTypes;
     }
+
+    @Override
+    public List<LeaveRequestType> getAllLeaveRequestTypes() {
+        Session session = null;
+        List<LeaveRequestType> leaveRequestTypes = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM LeaveRequestType");
+
+            leaveRequestTypes = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return leaveRequestTypes;
+    }
 }

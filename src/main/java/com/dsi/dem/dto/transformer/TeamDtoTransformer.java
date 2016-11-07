@@ -8,6 +8,7 @@ import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -33,9 +34,9 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return team;
@@ -64,9 +65,9 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return teamMember;
@@ -120,9 +121,9 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -149,9 +150,9 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return teamDto;
@@ -185,9 +186,9 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return teamProjectDto;

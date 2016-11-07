@@ -1,6 +1,7 @@
 package com.dsi.dem.model;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -45,6 +46,7 @@ public class EmployeeInfo {
     private String permanentAddress;
 
     @Column(name = "date_of_birth")
+    @Type(type = "date")
     private Date dateOfBirth;
 
     @Column(name = "blood_group", length = 15)

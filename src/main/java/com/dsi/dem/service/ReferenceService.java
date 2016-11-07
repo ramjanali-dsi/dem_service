@@ -15,4 +15,5 @@ public interface ReferenceService {
     List<ProjectStatus> getAllProjectStatusNames();
     List<LeaveStatus> getAllLeaveStatusNames();
     List<LeaveType> getAllLeaveTypes();
+    List<LeaveRequestType> getAllLeaveRequestTypes();
 }

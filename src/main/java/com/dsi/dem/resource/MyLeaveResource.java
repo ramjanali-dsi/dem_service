@@ -35,7 +35,23 @@ public class MyLeaveResource {
     HttpServletRequest request;
 
     @GET
-    @ApiOperation(value = "Search Or Read Employees Leave Requests", notes = "Search Or Read Employees Leave Requests", position = 1)
+    @Path("is_available")
+    @ApiOperation(value = "Check Leave Requests Availability", notes = "Check Leave Requests Availability", position = 1)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Check leave requests availability success"),
+            @ApiResponse(code = 500, message = "Check leave requests availability failed, unauthorized.")
+    })
+    public Response checkAvailableLeave(@QueryParam("type") String typeID) throws CustomException {
+
+        String userID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+
+        logger.info("User id: " + userID);
+        return Response.ok().entity(leaveService.isAvailableLeaveTypes(typeID, userID)).build();
+    }
+
+    @GET
+    @ApiOperation(value = "Search Or Read Employees Leave Requests", notes = "Search Or Read Employees Leave Requests", position = 2)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Search or read employees leave requests success"),
             @ApiResponse(code = 500, message = "Search or read employees leave requests failed, unauthorized.")
@@ -66,7 +82,7 @@ public class MyLeaveResource {
 
     @PATCH
     @Path("/{leave_request_id}")
-    @ApiOperation(value = "Update Employees Leave Request", notes = "Update Employees Leave Request", position = 2)
+    @ApiOperation(value = "Update Employees Leave Request", notes = "Update Employees Leave Request", position = 3)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Employees leave request update success"),
             @ApiResponse(code = 500, message = "Employees leave request update failed, unauthorized.")
@@ -82,15 +98,15 @@ public class MyLeaveResource {
         LeaveRequest leaveRequest = LEAVE_DTO_TRANSFORMER.getLeaveRequest(leaveRequestDto);
 
         leaveRequest.setLeaveRequestId(leaveRequestID);
-        leaveService.updateLeaveRequest(leaveRequest, userID);
+        leaveService.updateLeaveRequest(leaveRequest, userID, leaveRequestDto.getMode());
         logger.info("Employees leave request update:: End");
 
         return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(
-                leaveService.getLeaveRequestById(leaveRequestID))).build();
+                leaveService.getLeaveRequestById(leaveRequestID, null))).build();
     }
 
     @POST
-    @ApiOperation(value = "Create Employees Leave Request", notes = "Create Employees Leave Request", position = 3)
+    @ApiOperation(value = "Create Employees Leave Request", notes = "Create Employees Leave Request", position = 4)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Employees leave request create success"),
             @ApiResponse(code = 500, message = "Employees leave request create failed, unauthorized.")
@@ -107,12 +123,12 @@ public class MyLeaveResource {
         logger.info("Employees leave request create:: End");
 
         return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(
-                leaveService.getLeaveRequestById(leaveRequest.getLeaveRequestId()))).build();
+                leaveService.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null))).build();
     }
 
     @DELETE
     @Path("/{leave_request_id}")
-    @ApiOperation(value = "Delete Employees Leave Request", notes = "Delete Employees Leave Request", position = 4)
+    @ApiOperation(value = "Delete Employees Leave Request", notes = "Delete Employees Leave Request", position = 5)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Employees leave request delete success"),
             @ApiResponse(code = 500, message = "Employees leave request delete failed, unauthorized.")

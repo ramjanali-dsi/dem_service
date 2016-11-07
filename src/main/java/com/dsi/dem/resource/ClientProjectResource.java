@@ -9,6 +9,7 @@ import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.service.ClientService;
 import com.dsi.dem.service.impl.ClientServiceImpl;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
 import org.apache.log4j.Logger;
@@ -44,9 +45,9 @@ public class ClientProjectResource {
 
         logger.info("Client project create:: start");
         if(Utility.isNullOrEmpty(clientDto.getProjectIds())){
-            ErrorContext errorContext = new ErrorContext(null, "ClientProject", "Client project list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "ClientProject", "Client project list not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
         }
 

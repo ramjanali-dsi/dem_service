@@ -1,60 +1,47 @@
-package com.dsi.dem.model;
+package com.dsi.dem.dto;
 
-import org.hibernate.annotations.*;
-import org.hibernate.annotations.Cache;
+import com.dsi.dem.util.JsonDateSerializer;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import javax.persistence.*;
-import javax.persistence.Entity;
-import javax.persistence.Table;
 import java.util.Date;
 
 /**
- * Created by sabbir on 7/14/16.
+ * Created by sabbir on 10/19/16.
  */
+public class AttendanceDto {
 
-@Entity
-@Table(name = "dsi_employee_attendance")
-//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "dsi_employee_attendance")
-public class EmployeeAttendance {
-
-    @Id
-    @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid2")
-    @Column(name = "employee_attendance_id", length = 40)
     private String employeeAttendanceId;
 
-    @ManyToOne
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    private String tempAttendanceId;
 
-    @Column(name = "is_absent")
+    private String employeeId;
+
+    private String employeeNo;
+
+    private String firstName;
+
+    private String lastName;
+
+    private String nickName;
+
     private boolean isAbsent;
 
-    @Column(name = "attendance_date")
-    @Type(type = "date")
     private Date attendanceDate;
 
-    @Column(name = "check_in_time", length = 10)
     private String checkInTime;
 
-    @Column(name = "check_out_time", length = 10)
     private String checkOutTime;
 
-    @Column(name = "total_hour", length = 10)
     private String totalHour;
 
-    @Column(name = "created_date")
-    @Type(type = "date")
     private Date createdDate;
 
-    @Column(name = "last_modified_date")
-    @Type(type = "date")
     private Date lastModifiedDate;
 
-    @Column(name = "created_by", length = 40)
     private String createdBy;
 
-    @Column(name = "modified_by", length = 40)
     private String modifiedBy;
 
     private int version;
@@ -67,12 +54,52 @@ public class EmployeeAttendance {
         this.employeeAttendanceId = employeeAttendanceId;
     }
 
-    public Employee getEmployee() {
-        return employee;
+    public String getTempAttendanceId() {
+        return tempAttendanceId;
     }
 
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
+    public void setTempAttendanceId(String tempAttendanceId) {
+        this.tempAttendanceId = tempAttendanceId;
+    }
+
+    public String getEmployeeId() {
+        return employeeId;
+    }
+
+    public void setEmployeeId(String employeeId) {
+        this.employeeId = employeeId;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public boolean isAbsent() {
@@ -83,14 +110,7 @@ public class EmployeeAttendance {
         isAbsent = absent;
     }
 
-    public String getTotalHour() {
-        return totalHour;
-    }
-
-    public void setTotalHour(String totalHour) {
-        this.totalHour = totalHour;
-    }
-
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getAttendanceDate() {
         return attendanceDate;
     }
@@ -115,18 +135,32 @@ public class EmployeeAttendance {
         this.checkOutTime = checkOutTime;
     }
 
+    public String getTotalHour() {
+        return totalHour;
+    }
+
+    public void setTotalHour(String totalHour) {
+        this.totalHour = totalHour;
+    }
+
+    @JsonProperty
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getCreatedDate() {
         return createdDate;
     }
 
+    @JsonIgnore
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 
+    @JsonProperty
+    @JsonSerialize(using = JsonDateSerializer.class)
     public Date getLastModifiedDate() {
         return lastModifiedDate;
     }
 
+    @JsonIgnore
     public void setLastModifiedDate(Date lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }

@@ -1,5 +1,7 @@
 package com.dsi.dem.util;
 
+import scala.util.parsing.combinator.testing.Str;
+
 /**
  * Created by sabbir on 7/13/16.
  */
@@ -7,22 +9,44 @@ public class Constants {
 
     public static final String AUTHORIZATION = "authorization";
 
+    public static final String SUCCESS = "Success";
     public static final String MESSAGE = "message";
     public static final String SYSTEM = "system";
     public static final String SYSTEM_ID = "0759a760-b9df-4c8a-8a64-fa31f256d13b";
 
+    public static final int CSV_TYPE_COLUMN = 4;
+    public static final int CSV_EMPLOYEE_ID_COLUMN = 1;
+    public static final int CSV_DATE_TIME_COLUMN = 0;
+
+    public static final String INT_TIME = "1";
+    public static final String OUT_TIME = "2";
+
     static final String DATE_FORMAT="yyyy-MM-dd";
     //public static final String DATE_FORMAT="MMM dd, yyyy hh:mm:ss a";
 
+    public static final int DAYS_AGO_COUNT = 5;
     public static final int TOTAL_SICK = 10;
     public static final int TOTAL_CASUAL = 10;
 
-    public static final String OFFICIAL_TYPE_NAME = "Official";
-    public static final String CASUAL_TYPE_NAME = "Casual";
-    public static final String SICK_TYPE_NAME = "Sick";
+    public static final String PRE_REQUEST_TYPE_NAME = "Pre Request";
+    public static final String POST_REQUEST_TYPE_NAME = "Post Request";
 
+    public static final String APPLIED_LEAVE_REQUEST = "Applied";
+    public static final String APPROVED_LEAVE_REQUEST = "Approved";
+    public static final String DENIED_LEAVE_REQUEST = "Denied";
+    public static final String CANCELLER_LEAVE_REQUEST = "Cancelled";
+
+    public static final String CASUAL_TYPE_NAME = "Casual Leave Application";
+    public static final String SICK_TYPE_NAME = "Sick Leave Application";
+
+    public static final String OFFICIAL_TYPE_NAME = "Official";
+
+    public static final String TEMPORARY_LEAVE_TYPE = "Temporary";
+    public static final String CONFIRM_LEAVE_TYPE = "Confirm";
+
+    //Error code
     public static final String DEM_SERVICE_0001 = "dem_service_0001";
-    public static final String DEM_SERVICE_0001_DESCRIPTION = "Not defined.";
+    public static final String DEM_SERVICE_0001_DESCRIPTION = "Internal server error.";
 
     public static final String DEM_SERVICE_0002 = "dem_service_0002";
     public static final String DEM_SERVICE_0002_DESCRIPTION = "Create failed.";
@@ -37,7 +61,7 @@ public class Constants {
     public static final String DEM_SERVICE_0005_DESCRIPTION = "Not found.";
 
     public static final String DEM_SERVICE_0006 = "dem_service_0006";
-    public static final String DEM_SERVICE_0006_DESCRIPTION = "Params are missing.";
+    public static final String DEM_SERVICE_0006_DESCRIPTION = "Already exist.";
 
     public static final String DEM_SERVICE_0007 = "dem_service_0007";
     public static final String DEM_SERVICE_0007_DESCRIPTION = "Dto to Object convert failed.";
@@ -55,5 +79,11 @@ public class Constants {
     public static final String DEM_SERVICE_0011_DESCRIPTION = "Photo fetch error.";
 
     public static final String DEM_SERVICE_0012 = "dem_service_0012";
-    public static final String DEM_SERVICE_0012_DESCRIPTION = "An exception occurs.";
+    public static final String DEM_SERVICE_0012_DESCRIPTION = "Parse error.";
+
+    public static final String DEM_SERVICE_0013 = "dem_service_0013";
+    public static final String DEM_SERVICE_0013_DESCRIPTION = "Not allowed.";
+
+    public static final String DEM_SERVICE_0014 = "dem_service_0001";
+    public static final String DEM_SERVICE_0014_DESCRIPTION = "Not defined.";
 }

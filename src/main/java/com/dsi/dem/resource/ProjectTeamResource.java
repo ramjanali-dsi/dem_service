@@ -9,6 +9,7 @@ import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.service.impl.ProjectServiceImpl;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
 import org.apache.log4j.Logger;
@@ -44,16 +45,16 @@ public class ProjectTeamResource {
 
         logger.info("Project team create:: start");
         if(Utility.isNullOrEmpty(projectDto.getTeamIds())){
-            ErrorContext errorContext = new ErrorContext(null, "ProjectTeam", "Project team list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "ProjectTeam", "Project team list not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
         }
 
         projectService.saveProjectTeam(projectDto.getTeamIds(), projectService.getProjectByID(projectID));
         logger.info("Project team create:: end");
 
-        return Response.ok().entity(TRANSFORMER.getProjectTeamsDto(projectService.getProjectTeams(projectID))).build();
+        return Response.ok().entity(TRANSFORMER.getProjectTeamsDto(projectService.getProjectTeams(projectID, null))).build();
     }
 
     @DELETE

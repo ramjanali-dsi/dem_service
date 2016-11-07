@@ -5,6 +5,7 @@ import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.service.impl.APIProvider;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.wordnik.swagger.annotations.Api;
 import org.apache.log4j.Logger;
 
@@ -38,9 +39,9 @@ public class PhotoResource {
             return getPhoto(photo);
 
         } catch (Exception e){
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0011,
-                    Constants.DEM_SERVICE_0011_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0011_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_003);
             throw new CustomException(errorMessage);
         }
     }

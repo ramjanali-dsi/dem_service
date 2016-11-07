@@ -6,6 +6,7 @@ import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -46,9 +47,9 @@ public class EmployeeDtoTransformer {
             employee.setContactInfo(contactList);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -65,9 +66,9 @@ public class EmployeeDtoTransformer {
             employee.setInfo(employeeInfo);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -92,9 +93,9 @@ public class EmployeeDtoTransformer {
             BeanUtils.copyProperties(designation, designationDto);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -123,9 +124,9 @@ public class EmployeeDtoTransformer {
             email.setType(emailType);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -154,9 +155,9 @@ public class EmployeeDtoTransformer {
             contact.setType(contactType);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -199,9 +200,9 @@ public class EmployeeDtoTransformer {
             employeeDto.setContactList(contactList);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -238,9 +239,9 @@ public class EmployeeDtoTransformer {
             designationDto.setActivity(2);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -267,9 +268,9 @@ public class EmployeeDtoTransformer {
             emailDto.setActivity(2);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 
@@ -296,9 +297,9 @@ public class EmployeeDtoTransformer {
             contactDto.setActivity(2);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
 

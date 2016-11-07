@@ -305,7 +305,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 paramValue.put("userID", userID);
             }
 
-            queryBuilder.append(" ORDER BY e.firstName ASC");
+            queryBuilder.append(" ORDER BY e.createdDate DESC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());
@@ -322,8 +322,10 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 }
             }
 
-            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range)) {
+                logger.info("From: " + from + ", Range: " + range);
                 query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
+            }
 
             employeeList = query.list();
 
@@ -334,6 +336,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 close(session);
             }
         }
+        logger.info("Total employee list size: " + employeeList.size());
         return employeeList;
     }
 
@@ -744,7 +747,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public EmployeeContact getEmployeeContactByEmailIDAndEmployeeID(String contactID, String employeeID) {
+    public EmployeeContact getEmployeeContactByIDAndEmployeeID(String contactID, String employeeID) {
         Session session = null;
         EmployeeContact employeeContact = null;
         try{

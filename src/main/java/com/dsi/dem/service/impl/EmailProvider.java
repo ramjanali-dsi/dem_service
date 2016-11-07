@@ -37,33 +37,29 @@ public class EmailProvider {
     public static final String EMAIL_USERNAME = emailProp.getProperty("mail.your_mail_username");
     public static final String EMAIL_PASSWORD = emailProp.getProperty("mail.your_mail_password");
 
-    /*public static boolean constructResetPasswordRequestToken(String recipientEmail, String url){
-        new Thread(new Runnable() {
+    public static boolean constructResetPasswordRequestToken(String recipientEmail, String url){
+        new Thread(() -> {
+            try {
+                String subject = "Reset Password";
+                logger.info("Confirm Url: " + url);
 
-            @Override
-            public void run() {
-                try {
-                    String subject = "Reset Password";
-                    logger.info("Confirm Url: " + url);
+                Session session = Session.getDefaultInstance(emailProp, null);
+                MimeMessage message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(EmailProvider.EMAIL_USERNAME));
+                message.addRecipient(Message.RecipientType.TO,new InternetAddress(recipientEmail));
+                message.setSubject(subject);
+                message.setText("<b> Reset Password: </b>" + " \r\t " + url);
 
-                    Session session = Session.getDefaultInstance(emailProp, null);
-                    MimeMessage message = new MimeMessage(session);
-                    message.setFrom(new InternetAddress(EmailProvider.EMAIL_USERNAME));
-                    message.addRecipient(Message.RecipientType.TO,new InternetAddress(recipientEmail));
-                    message.setSubject(subject);
-                    message.setText("<b> Reset Password: </b>" + " \r\t " + url);
+                //send message
+                Transport transport = session.getTransport(EmailProvider.EMAIL_TRANSPORT);
+                transport.connect(EmailProvider.EMAIL_HOST, EmailProvider.EMAIL_USERNAME, EmailProvider.EMAIL_PASSWORD);
+                transport.sendMessage(message, message.getAllRecipients());
+                transport.close();
 
-                    //send message
-                    Transport transport = session.getTransport(EmailProvider.EMAIL_TRANSPORT);
-                    transport.connect(EmailProvider.EMAIL_HOST, EmailProvider.EMAIL_USERNAME, EmailProvider.EMAIL_PASSWORD);
-                    transport.sendMessage(message, message.getAllRecipients());
-                    transport.close();
-
-                } catch (Exception e){
-                    logger.error("Email confirmation failed: " + e.getMessage());
-                }
+            } catch (Exception e){
+                logger.error("Email confirmation failed: " + e.getMessage());
             }
         }).start();
         return true;
-    }*/
+    }
 }

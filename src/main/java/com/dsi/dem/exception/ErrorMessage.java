@@ -6,13 +6,14 @@ package com.dsi.dem.exception;
 public class ErrorMessage {
 
     private String errorCode;
+    private String errorType;
     private String errorMessage;
-    private ErrorContext errorContext;
+    //private ErrorContext errorContext;
 
-    public ErrorMessage(String errorCode, String errorMessage, ErrorContext errorContext) {
+    public ErrorMessage(String errorCode, String errorMessage, String errorType) {
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
-        this.errorContext = errorContext;
+        this.errorType = errorType;
     }
 
     public String getErrorCode() {
@@ -23,6 +24,14 @@ public class ErrorMessage {
         this.errorCode = errorCode;
     }
 
+    public String getErrorType() {
+        return errorType;
+    }
+
+    public void setErrorType(String errorType) {
+        this.errorType = errorType;
+    }
+
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -31,11 +40,11 @@ public class ErrorMessage {
         this.errorMessage = errorMessage;
     }
 
-    public ErrorContext getErrorContext() {
+    /*public ErrorContext getErrorContext() {
         return errorContext;
     }
 
     public void setErrorContext(ErrorContext errorContext) {
         this.errorContext = errorContext;
-    }
+    }*/
 }

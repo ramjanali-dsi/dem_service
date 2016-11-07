@@ -49,6 +49,6 @@ public interface EmployeeDao {
     boolean updateEmployeeContactInfo(EmployeeContact employeeContact);
     boolean deleteEmployeeContactInfo(String employeeID, String contactInfoID);
     List<EmployeeContact> getEmployeeContactsByEmployeeID(String employeeID);
-    EmployeeContact getEmployeeContactByEmailIDAndEmployeeID(String contactID, String employeeID);
+    EmployeeContact getEmployeeContactByIDAndEmployeeID(String contactID, String employeeID);
     EmployeeContact getEmployeeContactByPhoneAndType(String phone, String type);
 }

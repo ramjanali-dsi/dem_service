@@ -19,7 +19,9 @@ public class LeaveRequestDto {
 
     private Date applyDate;
 
-    private String requestType;
+    private String leaveRequestTypeId;
+
+    private String leaveRequestTypeName;
 
     private String leaveTypeId;
 
@@ -45,6 +47,8 @@ public class LeaveRequestDto {
 
     private String approvalId;
 
+    private String approvedBy;
+
     private Date approvedDate;
 
     private String leaveReason;
@@ -52,6 +56,8 @@ public class LeaveRequestDto {
     private String deniedReason;
 
     private boolean isClientNotify;
+
+    private int mode;
 
     private int version;
 
@@ -210,12 +216,28 @@ public class LeaveRequestDto {
         this.deniedReason = deniedReason;
     }
 
-    public String getRequestType() {
-        return requestType;
+    public String getLeaveRequestTypeId() {
+        return leaveRequestTypeId;
     }
 
-    public void setRequestType(String requestType) {
-        this.requestType = requestType;
+    public void setLeaveRequestTypeId(String leaveRequestTypeId) {
+        this.leaveRequestTypeId = leaveRequestTypeId;
+    }
+
+    public String getLeaveRequestTypeName() {
+        return leaveRequestTypeName;
+    }
+
+    public void setLeaveRequestTypeName(String leaveRequestTypeName) {
+        this.leaveRequestTypeName = leaveRequestTypeName;
+    }
+
+    public String getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(String approvedBy) {
+        this.approvedBy = approvedBy;
     }
 
     public boolean isClientNotify() {
@@ -224,6 +246,16 @@ public class LeaveRequestDto {
 
     public void setClientNotify(boolean clientNotify) {
         isClientNotify = clientNotify;
+    }
+
+    @JsonIgnore
+    public int getMode() {
+        return mode;
+    }
+
+    @JsonProperty
+    public void setMode(int mode) {
+        this.mode = mode;
     }
 
     public int getVersion() {

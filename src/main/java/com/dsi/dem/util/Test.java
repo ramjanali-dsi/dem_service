@@ -1,21 +1,33 @@
 package com.dsi.dem.util;
 
+import com.dsi.dem.dao.LeaveDao;
+import com.dsi.dem.dao.impl.LeaveDaoImpl;
 import com.dsi.dem.dto.TeamDto;
 import com.dsi.dem.dto.TeamMemberDto;
+import com.dsi.dem.dto.TempAttendanceDto;
 import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.dto.EmployeeDto;
+import com.dsi.dem.dto.transformer.LeaveDtoTransformer;
 import com.dsi.dem.dto.transformer.TeamDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.Employee;
-import com.dsi.dem.model.Team;
-import com.dsi.dem.model.TeamMember;
+import com.dsi.dem.model.*;
 import com.dsi.dem.service.EmployeeService;
+import com.dsi.dem.service.LeaveService;
 import com.dsi.dem.service.TeamService;
 import com.dsi.dem.service.impl.EmployeeServiceImpl;
+import com.dsi.dem.service.impl.LeaveServiceImpl;
 import com.dsi.dem.service.impl.TeamServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.joda.time.DateTime;
+import scala.util.parsing.combinator.testing.Str;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,9 +38,15 @@ import java.util.*;
  */
 public class Test {
 
+    private static final LeaveDao leaveDao = new LeaveDaoImpl();
+
     private static final EmployeeService employeeService = new EmployeeServiceImpl();
     private static final TeamService teamService = new TeamServiceImpl();
+    private static final LeaveService leaveService = new LeaveServiceImpl();
     private static final ObjectMapper mapper = new ObjectMapper();
+
+    private static final EmployeeDtoTransformer dtoTransformer = new EmployeeDtoTransformer();
+    private static final LeaveDtoTransformer LEAVE_DTO_TRANSFORMER = new LeaveDtoTransformer();
 
     public static void main(String[] args) {
 
@@ -55,13 +73,223 @@ public class Test {
 
         //System.out.print(Utility.getDateFromString("2016-05-01"));
 
+        //System.out.println(Utility.getDaysBetween(Utility.getDateFormatFromDate(new Date()), Utility.getDateFromString("2016-10-31")));
+
+        /*Date date = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        dateFormat.format(date);
+        System.out.println(dateFormat.format(date));
+
+        try {
+            if(dateFormat.parse(dateFormat.format(date)).after(dateFormat.parse("14:00"))){
+                System.out.println("Greater");
+            } else {
+                System.out.println("Less");
+            }
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }*/
+
+        //searchLeaveSummaryTest();
+        //searchEmployeeTest();
+        //searchLeaveTests();
+
+        /*Date approveStart = Utility.getDateFromString("2016-10-21");
+        Date approveEnd = Utility.getDateFromString("2016-10-22");
+
+        Date start = Utility.getDateFromString("2016-10-20");
+        Date end = Utility.getDateFromString("2016-10-22");
+
+        System.out.println(approveStart.after(start) && approveStart.before(end) && approveEnd.compareTo(start) >= 0 && approveEnd.compareTo(end) <= 0);
+        System.out.println(approveStart.after(start) && approveStart.before(end) && approveEnd.after(start) && approveEnd.before(end));*/
+
+
+        /*Date start = Utility.getDateFromString("2016-10-22");
+        Date end = Utility.getDateFromString("2016-10-23");
+
+        Date check = Utility.getDateFromString("2016-10-23");
+
+        System.out.println(Utility.checkDate(start, end, check));*/
+
+        //leaveCheckTest();
+
+        //attendanceRead();
+
+        /*String time1 = "08:08:19";
+        String time2 = "17:23:21";
+
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        Date date1 = null;
+        String time = "";
+        try {
+            date1 = format.parse(time1);
+            Date date2 = format.parse(time2);
+
+            long difference = date2.getTime() - date1.getTime();
+
+            System.out.println(difference);
+
+            difference = difference/1000;
+
+            long s = difference % 60;
+            long m = (difference / 60) % 60;
+            long h = (difference / (60 * 60)) % 24;
+
+            time += String.format("%02d:%02d:%02d", h,m,s);
+            System.out.println(time);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }*/
+
+        /*String date = "2016-10-01";
+        String date2 = "2016-10-02";
+
+        System.out.println(Utility.getDaysBetween(Utility.getDateFromString(date), Utility.getDateFromString(date2)) + 1);*/
+
+        //myLeaveRequestPatch();
+
+        //attendanceTest();
+
+    }
+
+    private static void attendanceTest() {
+        System.out.println(new Gson().toJson(leaveDao.getLeaveRequestByStatusAndEmployee("0310", "2016-10-23")));
+    }
+
+    private static void myLeaveRequestPatch() {
+        LeaveRequest leaveRequest = new LeaveRequest();
+        leaveRequest.setLeaveRequestId("dd1566c9-1b2e-496f-b6bf-fc70b8f83e73");
+        leaveRequest.setVersion(1);
+
+        try {
+            leaveService.updateLeaveRequest(leaveRequest, "f9e9a19f-4859-4e8c-a8f4-dc134629a57b", 2);
+
+            System.out.println(new Gson().toJson(LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(
+                    leaveService.getLeaveRequestById("dd1566c9-1b2e-496f-b6bf-fc70b8f83e73", null))));
+
+        } catch (CustomException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void attendanceRead() {
+        /*String csvFile = "/home/sabbir/Downloads/attendance.csv";
+        BufferedReader br = null;
+        String line = "";
+        String cvsSplitBy = ",";
+
+        Map<String, String> inMap = new HashMap<>();
+        Map<String, String> outMap = new HashMap<>();
+        try {
+
+            List<TempAttendanceDto> tempAttendances = new ArrayList<>();
+
+            br = new BufferedReader(new FileReader(csvFile));
+            int i=0;
+            while ((line = br.readLine()) != null) {
+                String[] lineSplit = line.split(cvsSplitBy);
+
+                if(lineSplit.length > 0) {
+                    i++;
+
+                    if(i > 2){
+
+                        if(lineSplit[lineSplit.length - 1].equals(Constants.SUCCESS)) {
+
+                            if(lineSplit[Constants.CSV_TYPE_COLUMN].equals(Constants.INT_TIME)){
+                                if(inMap.get(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN]) != null){
+                                    Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[Constants.CSV_DATE_TIME_COLUMN]);
+                                    Timestamp prevDate = Utility.getTimeStampFromString(inMap.get(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN]));
+
+                                    if(prevDate.after(nextDate)){
+                                        inMap.put(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN],
+                                                lineSplit[Constants.CSV_DATE_TIME_COLUMN]);
+                                    }
+
+                                } else {
+                                    inMap.put(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN],
+                                            lineSplit[Constants.CSV_DATE_TIME_COLUMN]);
+                                }
+
+                            } else if(lineSplit[Constants.CSV_TYPE_COLUMN].equals(Constants.OUT_TIME)){
+                                if(outMap.get(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN]) != null){
+                                    Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[Constants.CSV_DATE_TIME_COLUMN]);
+                                    Timestamp prevDate = Utility.getTimeStampFromString(outMap.get(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN]));
+
+                                    if(prevDate.before(nextDate)){
+                                        outMap.put(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN],
+                                                lineSplit[Constants.CSV_DATE_TIME_COLUMN]);
+                                    }
+
+                                } else {
+                                    outMap.put(lineSplit[Constants.CSV_EMPLOYEE_ID_COLUMN],
+                                            lineSplit[Constants.CSV_DATE_TIME_COLUMN]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            *//*System.out.println(new Gson().toJson(inMap));
+            System.out.println("\n\n\n\n");
+            System.out.println(new Gson().toJson(outMap));*//*
+
+            for(Map.Entry<String, String> map : inMap.entrySet()){
+                TempAttendanceDto tempAttendance = new TempAttendanceDto();
+                tempAttendance.setDate(map.getValue());
+                tempAttendance.setEmployeeId(map.getKey());
+                tempAttendance.setInTime(map.getValue());
+                tempAttendance.setOutTime(outMap.get(map.getKey()));
+
+                tempAttendances.add(tempAttendance);
+            }
+
+            System.out.println(new Gson().toJson(tempAttendances));
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }*/
+    }
+
+    private static void leaveCheckTest(){
+        try {
+            System.out.println(new Gson().toJson(leaveService.isAvailableLeaveTypes("553fb999-2ceb-4bf0-90f2-ccf52742c8a1",
+                    "f9e9a19f-4859-4e8c-a8f4-dc134629a57b")));
+
+        } catch (CustomException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void searchLeaveTests() {
+        try{
+            System.out.println(new Gson().toJson(LEAVE_DTO_TRANSFORMER.getAllLeaveRequestDto(leaveService.searchOrReadLeaveRequests(
+                    "5546e9ae-1eff-41fd-906d-879584315118", null, null, null, null, null, null, null, null, null, null, null, null, null, null
+            ))));
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private static void searchEmployeeTest() {
 
         try {
-            System.out.println(new Gson().toJson(employeeService.searchEmployees(null, null, null, null, null,
-                    null, null, null, null, null, null, null, null, null, null, "0", "5")));
+            System.out.println(new Gson().toJson(dtoTransformer.getEmployeesDto(employeeService.searchEmployees(null, null, null, null, null,
+                    null, null, null, null, null, "true", null, null, null, "mine", "0", "10"))));
 
         } catch (CustomException e) {
             e.printStackTrace();
@@ -227,6 +455,16 @@ public class Test {
             System.out.println("Final object: " + new Gson().toJson(teamDto));
 
         } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private static void searchLeaveSummaryTest(){
+        try {
+            System.out.println(leaveService.searchOrReadEmployeesLeaveSummary(null, null, null, null, null, null,
+                    null, null, null, "0", "10", "f9e9a19f-4859-4e8c-a8f4-dc134629a57b").size());
+
+        } catch (CustomException e) {
             e.printStackTrace();
         }
     }

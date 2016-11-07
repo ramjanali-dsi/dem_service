@@ -9,6 +9,7 @@ import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.EmployeeContact;
 import com.dsi.dem.service.ContactService;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 
@@ -27,9 +28,9 @@ public class ContactServiceImpl implements ContactService {
     public void saveEmployeeContactInfo(List<EmployeeContact> contactList, String employeeID) throws CustomException {
 
         if(Utility.isNullOrEmpty(contactList)){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Contact info list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Contact info list not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0009);
             throw new CustomException(errorMessage);
         }
 
@@ -51,9 +52,9 @@ public class ContactServiceImpl implements ContactService {
         contact.setEmployee(employee);
         boolean res = employeeDao.saveEmployeeContactInfo(contact);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Employees contact info create failed.");
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Employees contact info create failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0009);
             throw new CustomException(errorMessage);
         }
         logger.info("Save employees contact info success.");
@@ -61,16 +62,16 @@ public class ContactServiceImpl implements ContactService {
 
     private void validateInputForCreation(EmployeeContact contact) throws CustomException {
         if(contact.getPhone() == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Contact number not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Contact number not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0014);
             throw new CustomException(errorMessage);
         }
 
         if(contact.getType().getContactTypeId() == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Contact info type not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Contact info type not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0015);
             throw new CustomException(errorMessage);
         }
     }
@@ -79,13 +80,17 @@ public class ContactServiceImpl implements ContactService {
     public void updateEmployeeContactInfo(EmployeeContact employeeContact, String employeeID) throws CustomException {
         validateInputForUpdate(employeeContact, employeeID);
 
-        employeeContact.setEmployee(employeeDao.getEmployeeByID(employeeID));
-        boolean res = employeeDao.updateEmployeeContactInfo(employeeContact);
+        EmployeeContact existContact = employeeDao.getEmployeeContactByIDAndEmployeeID(
+                employeeContact.getContactNumberId(), employeeID);
+
+        existContact.setPhone(employeeContact.getPhone());
+        existContact.setType(employeeContact.getType());
+        existContact.setVersion(employeeContact.getVersion());
+        boolean res = employeeDao.updateEmployeeContactInfo(existContact);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(employeeContact.getContactNumberId(), "EmployeeContact",
-                    "Employees contact info update failed.");
+            //ErrorContext errorContext = new ErrorContext(employeeContact.getContactNumberId(), "EmployeeContact","Employees contact info update failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
-                    Constants.DEM_SERVICE_0003_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0009);
             throw new CustomException(errorMessage);
         }
         logger.info("Update employees contact info success");
@@ -93,17 +98,16 @@ public class ContactServiceImpl implements ContactService {
 
     private void validateInputForUpdate(EmployeeContact employeeContact, String employeeID) throws CustomException {
         if(employeeContact.getVersion() == 0){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Version not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Version not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
             throw new CustomException(errorMessage);
         }
 
-        if(employeeDao.getEmployeeContactByEmailIDAndEmployeeID(employeeContact.getContactNumberId(), employeeID) == null){
-            ErrorContext errorContext = new ErrorContext(employeeContact.getContactNumberId(), "EmployeeContact",
-                    "Employees contact info not found.");
+        if(employeeDao.getEmployeeContactByIDAndEmployeeID(employeeContact.getContactNumberId(), employeeID) == null){
+            //ErrorContext errorContext = new ErrorContext(employeeContact.getContactNumberId(), "EmployeeContact", "Employees contact info not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0009);
             throw new CustomException(errorMessage);
         }
     }
@@ -112,9 +116,9 @@ public class ContactServiceImpl implements ContactService {
     public void deleteEmployeeContactInfo(String contactInfoID) throws CustomException {
         boolean res = employeeDao.deleteEmployeeContactInfo(null, contactInfoID);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(contactInfoID, "EmployeeContact", "Employees contact info delete failed.");
+            //ErrorContext errorContext = new ErrorContext(contactInfoID, "EmployeeContact", "Employees contact info delete failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0009);
             throw new CustomException(errorMessage);
         }
         logger.info("Delete employees contact info success");
@@ -124,9 +128,9 @@ public class ContactServiceImpl implements ContactService {
     public List<EmployeeContact> getEmployeesContactInfoByEmployeeID(String employeeID) throws CustomException {
         List<EmployeeContact> contactList = employeeDao.getEmployeeContactsByEmployeeID(employeeID);
         if(contactList == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Employees contact info list not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Employees contact info list not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
         return contactList;
@@ -134,11 +138,11 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public EmployeeContact getEmployeeContactInfo(String contactInfoID, String employeeID) throws CustomException {
-        EmployeeContact contact = employeeDao.getEmployeeContactByEmailIDAndEmployeeID(contactInfoID, employeeID);
+        EmployeeContact contact = employeeDao.getEmployeeContactByIDAndEmployeeID(contactInfoID, employeeID);
         if(contact == null){
-            ErrorContext errorContext = new ErrorContext(contactInfoID, "EmployeeContact", "Employees contact info not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(contactInfoID, "EmployeeContact", "Employees contact info not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
         return contact;

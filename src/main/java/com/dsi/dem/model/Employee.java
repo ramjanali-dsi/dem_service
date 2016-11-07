@@ -3,6 +3,7 @@ package com.dsi.dem.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -60,18 +61,23 @@ public class Employee {
     private String etinId;
 
     @Column(name = "joining_date")
+    @Type(type = "date")
     private Date joiningDate;
 
     @Column(name = "date_of_confirmation")
+    @Type(type = "date")
     private Date dateOfConfirmation;
 
     @Column(name = "resign_date")
+    @Type(type = "date")
     private Date resignDate;
 
     @Column(name = "created_date")
+    @Type(type = "date")
     private Date createdDate;
 
     @Column(name = "last_modified_date")
+    @Type(type = "date")
     private Date lastModifiedDate;
 
     @Column(name = "is_active")

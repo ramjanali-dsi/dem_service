@@ -9,6 +9,7 @@ import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.EmployeeEmail;
 import com.dsi.dem.service.EmailService;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 
@@ -27,9 +28,9 @@ public class EmailServiceImpl implements EmailService {
     public void saveEmployeeEmail(List<EmployeeEmail> employeeEmailList, String employeeID) throws CustomException {
 
         if(Utility.isNullOrEmpty(employeeEmailList)){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email list not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0010);
             throw new CustomException(errorMessage);
         }
 
@@ -52,9 +53,9 @@ public class EmailServiceImpl implements EmailService {
         employeeEmail.setEmployee(employee);
         boolean res = employeeDao.saveEmployeeEmail(employeeEmail);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Employees email create failed.");
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Employees email create failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0010);
             throw new CustomException(errorMessage);
         }
         logger.info("Save employees email success.");
@@ -62,46 +63,42 @@ public class EmailServiceImpl implements EmailService {
 
     private void validateInputForCreation(EmployeeEmail employeeEmail) throws CustomException {
         if(employeeEmail.getEmail() == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0011);
             throw new CustomException(errorMessage);
         }
 
         if(employeeEmail.getType().getEmailTypeId() == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email type not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Email type not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0012);
             throw new CustomException(errorMessage);
         }
 
         if(employeeDao.getEmployeeEmailByEmailName(employeeEmail.getEmail()) != null){
-            ErrorContext errorContext = new ErrorContext(employeeEmail.getEmail(), "EmployeeEmail",
-                    "Email already exist.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(employeeEmail.getEmail(), "EmployeeEmail", "Email already exist.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0013);
             throw new CustomException(errorMessage);
         }
-
-        /*if(employeeDao.getEmployeeEmailByEmployeeIDAndTypeID(employeeID, employeeEmail.getType().getEmailTypeId()) != null){
-            ErrorContext errorContext = new ErrorContext(employeeEmail.getType().getEmailTypeName(), "EmployeeEmail",
-                    "Email type already exist.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
-            throw new CustomException(errorMessage);
-        }*/
     }
 
     @Override
     public void updateEmployeeEmail(EmployeeEmail employeeEmail, String employeeID) throws CustomException {
         validateInputForUpdate(employeeEmail, employeeID);
 
-        employeeEmail.setEmployee(employeeDao.getEmployeeByID(employeeID));
-        boolean res = employeeDao.updateEmployeeEmail(employeeEmail);
+        EmployeeEmail existEmail = employeeDao.getEmployeeEmailByEmailIDAndEmployeeID(
+                employeeEmail.getEmailId(), employeeID);
+
+        existEmail.setEmail(employeeEmail.getEmail());
+        existEmail.setType(employeeEmail.getType());
+        existEmail.setVersion(employeeEmail.getVersion());
+        boolean res = employeeDao.updateEmployeeEmail(existEmail);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(employeeEmail.getEmailId(), "EmployeeEmail", "Employees email update failed.");
+            //ErrorContext errorContext = new ErrorContext(employeeEmail.getEmailId(), "EmployeeEmail", "Employees email update failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
-                    Constants.DEM_SERVICE_0003_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0010);
             throw new CustomException(errorMessage);
         }
         logger.info("Update employees email success");
@@ -109,16 +106,16 @@ public class EmailServiceImpl implements EmailService {
 
     private void validateInputForUpdate(EmployeeEmail employeeEmail, String employeeID) throws CustomException {
         if(employeeEmail.getVersion() == 0){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Version not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Version not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
             throw new CustomException(errorMessage);
         }
 
         if(employeeDao.getEmployeeEmailByEmailIDAndEmployeeID(employeeEmail.getEmailId(), employeeID) == null){
-            ErrorContext errorContext = new ErrorContext(employeeEmail.getEmailId(), "EmployeeEmail", "Employees email not found.");
+            //ErrorContext errorContext = new ErrorContext(employeeEmail.getEmailId(), "EmployeeEmail", "Employees email not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0010);
             throw new CustomException(errorMessage);
         }
     }
@@ -127,9 +124,9 @@ public class EmailServiceImpl implements EmailService {
     public void deleteEmployeeEmail(String emailID) throws CustomException {
         boolean res = employeeDao.deleteEmployeeEmail(null, emailID);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(emailID, "EmployeeEmail", "Employees email delete failed.");
+            //ErrorContext errorContext = new ErrorContext(emailID, "EmployeeEmail", "Employees email delete failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0010);
             throw new CustomException(errorMessage);
         }
         logger.info("Delete employees email success");
@@ -139,9 +136,9 @@ public class EmailServiceImpl implements EmailService {
     public List<EmployeeEmail> getEmployeesEmailByEmployeeID(String employeeID) throws CustomException {
         List<EmployeeEmail> employeeEmails = employeeDao.getEmployeeEmailsByEmployeeID(employeeID);
         if(employeeEmails == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Employees email list not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Employees email list not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
         return employeeEmails;
@@ -151,9 +148,9 @@ public class EmailServiceImpl implements EmailService {
     public EmployeeEmail getEmployeeEmail(String emailID, String employeeID) throws CustomException {
         EmployeeEmail employeeEmail = employeeDao.getEmployeeEmailByEmailIDAndEmployeeID(emailID, employeeID);
         if(employeeEmail == null){
-            ErrorContext errorContext = new ErrorContext(emailID, "EmployeeEmail", "Employees email not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(emailID, "EmployeeEmail", "Employees email not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
         return employeeEmail;

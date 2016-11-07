@@ -5,44 +5,42 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 
 /**
- * Created by sabbir on 7/15/16.
+ * Created by sabbir on 9/30/16.
  */
 
 @Entity
-@Table(name = "ref_leave_status")
-public class LeaveStatus {
+@Table(name = "ref_leave_request_type")
+public class LeaveRequestType {
 
     @Id
     @GeneratedValue(generator = "system-uuid")
     @GenericGenerator(name = "system-uuid", strategy = "uuid2")
-    @Column(name = "leave_status_id", length = 40)
-    private String leaveStatusId;
+    @Column(name = "leave_request_type_id", length = 40)
+    private String leaveRequestTypeId;
 
     @Column(name = "name", length = 50)
-    private String leaveStatusName;
+    private String leaveRequestTypeName;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private int priority;
-
     @Column(name = "is_active")
     private boolean isActive;
 
-    public String getLeaveStatusId() {
-        return leaveStatusId;
+    public String getLeaveRequestTypeId() {
+        return leaveRequestTypeId;
     }
 
-    public void setLeaveStatusId(String leaveStatusId) {
-        this.leaveStatusId = leaveStatusId;
+    public void setLeaveRequestTypeId(String leaveRequestTypeId) {
+        this.leaveRequestTypeId = leaveRequestTypeId;
     }
 
-    public String getLeaveStatusName() {
-        return leaveStatusName;
+    public String getLeaveRequestTypeName() {
+        return leaveRequestTypeName;
     }
 
-    public void setLeaveStatusName(String leaveStatusName) {
-        this.leaveStatusName = leaveStatusName;
+    public void setLeaveRequestTypeName(String leaveRequestTypeName) {
+        this.leaveRequestTypeName = leaveRequestTypeName;
     }
 
     public String getDescription() {
@@ -51,14 +49,6 @@ public class LeaveStatus {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
     }
 
     public boolean isActive() {

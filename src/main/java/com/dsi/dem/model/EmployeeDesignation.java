@@ -2,6 +2,7 @@ package com.dsi.dem.model;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.ManyToAny;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -28,6 +29,7 @@ public class EmployeeDesignation {
     private String name;
 
     @Column(name = "designation_date")
+    @Type(type = "date")
     private Date designationDate;
 
     @Column(name = "is_current")

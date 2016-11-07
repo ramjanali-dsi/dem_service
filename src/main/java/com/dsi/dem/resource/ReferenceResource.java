@@ -68,4 +68,11 @@ public class ReferenceResource {
         logger.info("Read all leave types");
         return Response.ok().entity(referenceService.getAllLeaveTypes()).build();
     }
+
+    @GET
+    @Path("/leave_request")
+    public Response getAllLeaveRequestTypes() throws CustomException {
+        logger.info("Read all leave request types");
+        return Response.ok().entity(referenceService.getAllLeaveRequestTypes()).build();
+    }
 }

@@ -36,4 +36,5 @@ public class APIProvider {
     //public static final String API_USER_ROLE = BASE_AUTHORIZE_URL + apiProp.getProperty("authorization.role");
 
     public static final String PHOTO_DIRECTORY = apiProp.getProperty("dem.photoDirectory");
+    public static final String ATTENDANCE_DIRECTORY = apiProp.getProperty("dem.attendanceDirectory");
 }

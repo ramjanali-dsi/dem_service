@@ -256,13 +256,21 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
     }
 
     @Override
-    public List<ProjectTeam> getProjectTeams(String projectID) {
+    public List<ProjectTeam> getProjectTeams(String projectID, String employeeID) {
         Session session = null;
         List<ProjectTeam> projectTeams = null;
+        Query query;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM ProjectTeam pt WHERE pt.project.projectId =:projectID");
-            query.setParameter("projectID", projectID);
+            if(employeeID == null) {
+                query = session.createQuery("FROM ProjectTeam pt WHERE pt.project.projectId =:projectID");
+                query.setParameter("projectID", projectID);
+
+            } else {
+                query = session.createQuery("FROM ProjectTeam  pt WHERE pt.team.teamId in " +
+                        "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.employeeId =:employeeID)");
+                query.setParameter("employeeID", employeeID);
+            }
 
             projectTeams = query.list();
 

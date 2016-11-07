@@ -16,6 +16,8 @@ import org.apache.log4j.Logger;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by sabbir on 7/21/16.
@@ -48,9 +50,28 @@ public class LeaveResource {
     }
 
     @GET
-    @Path("/leave_details")
+    @Path("/leave_details/{leave_request_id}")
     @ApiOperation(value = "Read Employees Leave Details",
             notes = "Read Employees Leave Details", position = 2)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Read employees leave details success"),
+            @ApiResponse(code = 500, message = "Read employees leave details failed, unauthorized.")
+    })
+    public Response readEmployeesLeaveDetails(@PathParam("employee_id") String employeeID,
+                                              @PathParam("leave_request_id") String leaveRequestId) throws CustomException {
+
+        logger.info("Read employees leave details");
+        List<LeaveRequest> requestList = new ArrayList<>();
+        requestList.add(leaveService.getLeaveRequestById(leaveRequestId, employeeID));
+
+        return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getEmployeesLeaveDetails(
+                leaveService.getEmployeeLeaveSummary(employeeID), requestList)).build();
+    }
+
+    @GET
+    @Path("/leave_details")
+    @ApiOperation(value = "Read Employees Leave Details",
+            notes = "Read Employees Leave Details", position = 3)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Read employees leave details success"),
             @ApiResponse(code = 500, message = "Read employees leave details failed, unauthorized.")

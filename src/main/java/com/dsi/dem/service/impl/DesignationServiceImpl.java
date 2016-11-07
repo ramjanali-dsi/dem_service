@@ -9,6 +9,7 @@ import com.dsi.dem.model.Employee;
 import com.dsi.dem.model.EmployeeDesignation;
 import com.dsi.dem.service.DesignationService;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 
@@ -27,9 +28,9 @@ public class DesignationServiceImpl implements DesignationService {
     public void saveEmployeeDesignation(List<EmployeeDesignation> designationList, String employeeID) throws CustomException {
 
         if(Utility.isNullOrEmpty(designationList)){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Designation list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Designation list not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
         }
 
@@ -57,9 +58,9 @@ public class DesignationServiceImpl implements DesignationService {
         designation.setEmployee(employee);
         boolean res = employeeDao.saveEmployeeDesignation(designation);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Employees designation create failed.");
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Employees designation create failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
         }
         logger.info("Save employees designation success.");
@@ -67,9 +68,9 @@ public class DesignationServiceImpl implements DesignationService {
 
     private void validateInputForCreation(EmployeeDesignation designation) throws CustomException {
         if(designation.getName() == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Designation name not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Designation name not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0016);
             throw new CustomException(errorMessage);
         }
     }
@@ -81,10 +82,9 @@ public class DesignationServiceImpl implements DesignationService {
         designation.setEmployee(employeeDao.getEmployeeByID(employeeID));
         boolean res = employeeDao.updateEmployeeDesignation(designation);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(designation.getDesignationId(), "EmployeeDesignation",
-                    "Employees designation update failed.");
+            //ErrorContext errorContext = new ErrorContext(designation.getDesignationId(), "EmployeeDesignation","Employees designation update failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
-                    Constants.DEM_SERVICE_0003_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
         }
         logger.info("Update employees designation success");
@@ -92,17 +92,16 @@ public class DesignationServiceImpl implements DesignationService {
 
     private void validateInputForUpdate(EmployeeDesignation designation, String employeeID) throws CustomException {
         if(designation.getVersion() == 0){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Version not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Version not defined.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
             throw new CustomException(errorMessage);
         }
 
         if(employeeDao.getEmployeeDesignationByDesignationIDAndEmployeeID(designation.getDesignationId(), employeeID) == null){
-            ErrorContext errorContext = new ErrorContext(designation.getDesignationId(), "EmployeeDesignation",
-                    "Employees designation not found.");
+            //ErrorContext errorContext = new ErrorContext(designation.getDesignationId(), "EmployeeDesignation", "Employees designation not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
         }
     }
@@ -111,9 +110,9 @@ public class DesignationServiceImpl implements DesignationService {
     public void deleteEmployeeDesignation(String designationID) throws CustomException {
         boolean res = employeeDao.deleteEmployeeDesignation(null, designationID);
         if(!res){
-            ErrorContext errorContext = new ErrorContext(designationID, "EmployeeDesignation", "Employees designation delete failed.");
+            //ErrorContext errorContext = new ErrorContext(designationID, "EmployeeDesignation", "Employees designation delete failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
         }
         logger.info("Delete employees designation success");
@@ -123,9 +122,9 @@ public class DesignationServiceImpl implements DesignationService {
     public List<EmployeeDesignation> getEmployeesDesignationByEmployeeID(String employeeID) throws CustomException {
         List<EmployeeDesignation> designationList = employeeDao.getEmployeeDesignationsByEmployeeID(employeeID);
         if(designationList == null){
-            ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Employees designation list not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Employees designation list not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
         return designationList;
@@ -135,9 +134,9 @@ public class DesignationServiceImpl implements DesignationService {
     public EmployeeDesignation getEmployeeDesignation(String designationID, String employeeID) throws CustomException {
         EmployeeDesignation designation = employeeDao.getEmployeeDesignationByDesignationIDAndEmployeeID(designationID, employeeID);
         if(designation == null){
-            ErrorContext errorContext = new ErrorContext(designationID, "EmployeeDesignation", "Employees designation not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, errorContext);
+            //ErrorContext errorContext = new ErrorContext(designationID, "EmployeeDesignation", "Employees designation not found.");
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
         return designation;

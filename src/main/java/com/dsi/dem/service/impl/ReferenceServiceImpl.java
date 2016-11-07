@@ -43,4 +43,9 @@ public class ReferenceServiceImpl implements ReferenceService {
     public List<LeaveType> getAllLeaveTypes() {
         return referenceDao.getAllLeaveTypes();
     }
+
+    @Override
+    public List<LeaveRequestType> getAllLeaveRequestTypes() {
+        return referenceDao.getAllLeaveRequestTypes();
+    }
 }

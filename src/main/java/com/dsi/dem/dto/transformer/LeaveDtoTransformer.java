@@ -7,9 +7,17 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
+import com.dsi.dem.service.EmployeeService;
 import com.dsi.dem.service.LeaveService;
+import com.dsi.dem.service.ProjectService;
+import com.dsi.dem.service.TeamService;
+import com.dsi.dem.service.impl.EmployeeServiceImpl;
 import com.dsi.dem.service.impl.LeaveServiceImpl;
+import com.dsi.dem.service.impl.ProjectServiceImpl;
+import com.dsi.dem.service.impl.TeamServiceImpl;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
+import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
 
 import java.util.*;
@@ -20,7 +28,10 @@ import java.util.stream.Collectors;
  */
 public class LeaveDtoTransformer {
 
+    private static final ProjectService projectService = new ProjectServiceImpl();
+    private static final TeamService teamService = new TeamServiceImpl();
     private static final LeaveService leaveService = new LeaveServiceImpl();
+    private static final EmployeeService employeeService = new EmployeeServiceImpl();
 
     public LeaveRequest getLeaveRequest(LeaveRequestDto leaveDto) throws CustomException {
 
@@ -32,15 +43,21 @@ public class LeaveDtoTransformer {
             BeanUtils.copyProperties(leaveType, leaveDto);
             leaveRequest.setLeaveType(leaveType);
 
-            LeaveStatus leaveStatus = new LeaveStatus();
-            BeanUtils.copyProperties(leaveStatus, leaveDto);
-            leaveRequest.setLeaveStatus(leaveStatus);
+            if(leaveDto.getLeaveStatusId() != null || leaveDto.getLeaveStatusName() != null){
+                LeaveStatus leaveStatus = new LeaveStatus();
+                BeanUtils.copyProperties(leaveStatus, leaveDto);
+                leaveRequest.setLeaveStatus(leaveStatus);
+            }
+
+            LeaveRequestType leaveRequestType = new LeaveRequestType();
+            BeanUtils.copyProperties(leaveRequestType, leaveDto);
+            leaveRequest.setRequestType(leaveRequestType);
 
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return leaveRequest;
@@ -52,14 +69,26 @@ public class LeaveDtoTransformer {
         try {
             BeanUtils.copyProperties(leaveRequestDto, leaveRequest);
             BeanUtils.copyProperties(leaveRequestDto, leaveRequest.getLeaveType());
-            BeanUtils.copyProperties(leaveRequestDto, leaveRequest.getLeaveStatus());
+            BeanUtils.copyProperties(leaveRequestDto, leaveRequest.getRequestType());
             BeanUtils.copyProperties(leaveRequestDto, leaveRequest.getEmployee());
+            if(leaveRequest.getLeaveStatus() != null) {
+                BeanUtils.copyProperties(leaveRequestDto, leaveRequest.getLeaveStatus());
+            }
+
+            if(leaveRequest.getApprovalId() != null) {
+                Employee approvedBy = employeeService.getEmployeeByID(leaveRequest.getApprovalId());
+                String identity = approvedBy.getFirstName();
+                if(approvedBy.getLastName() != null){
+                    identity =  identity + " " + approvedBy.getLastName();
+                }
+                leaveRequestDto.setApprovedBy(identity);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return leaveRequestDto;
@@ -85,9 +114,9 @@ public class LeaveDtoTransformer {
             leaveDto.setTotalLeave(Constants.TOTAL_CASUAL + Constants.TOTAL_SICK);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return leaveDto;
@@ -102,12 +131,21 @@ public class LeaveDtoTransformer {
         return leaveDtoList;
     }
 
-    public LeaveDetailsDto getEmployeesLeaveDetails(EmployeeLeave employeeLeave, List<LeaveRequest> leaveRequests) throws CustomException {
+    public LeaveDetailsDto getEmployeesLeaveDetails(EmployeeLeave employeeLeave,
+                                                    List<LeaveRequest> leaveRequests) throws CustomException {
 
         LeaveDetailsDto leaveDetailsDto = new LeaveDetailsDto();
         try {
             BeanUtils.copyProperties(leaveDetailsDto, employeeLeave.getEmployee());
-            //TODO phone, email, designation, team, project
+            leaveDetailsDto.setEmail(getEmail(employeeLeave.getEmployee().getEmailInfo()));
+            leaveDetailsDto.setPhone(getPhone(employeeLeave.getEmployee().getContactInfo()));
+            leaveDetailsDto.setDesignation(getDesignation(employeeLeave.getEmployee().getDesignations()));
+
+            List<TeamMember> memberTeams = teamService.getTeamMembers(null, employeeLeave.getEmployee().getEmployeeId());
+            leaveDetailsDto.setTeam(getTeamList(memberTeams));
+
+            List<ProjectTeam> memberProjects = projectService.getProjectTeams(null, employeeLeave.getEmployee().getEmployeeId());
+            leaveDetailsDto.setProject(getProjectList(memberProjects));
 
             LeaveSummaryDto summaryDto = new LeaveSummaryDto();
             BeanUtils.copyProperties(summaryDto, employeeLeave);
@@ -122,19 +160,97 @@ public class LeaveDtoTransformer {
                 LeaveRequestDto detailsDto = new LeaveRequestDto();
                 BeanUtils.copyProperties(detailsDto, leaveRequest);
                 BeanUtils.copyProperties(detailsDto, leaveRequest.getLeaveType());
-                BeanUtils.copyProperties(detailsDto, leaveRequest.getLeaveStatus());
+                BeanUtils.copyProperties(detailsDto, leaveRequest.getRequestType());
+                if(leaveRequest.getLeaveStatus() != null){
+                    BeanUtils.copyProperties(detailsDto, leaveRequest.getLeaveStatus());
+                }
 
+                if(leaveRequest.getApprovalId() != null) {
+                    Employee approvedBy = employeeService.getEmployeeByID(leaveRequest.getApprovalId());
+                    String name = approvedBy.getFirstName();
+                    if(approvedBy.getLastName() != null){
+                        name += " " + approvedBy.getLastName();
+                    }
+                    detailsDto.setApprovedBy(name);
+                }
                 detailsDtoList.add(detailsDto);
             }
             leaveDetailsDto.setLeaveDetails(detailsDtoList);
 
         } catch (Exception e) {
-            ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            e.printStackTrace();
+            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
-                    Constants.DEM_SERVICE_0007_DESCRIPTION, errorContext);
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return leaveDetailsDto;
+    }
+
+    private String getProjectList(List<ProjectTeam> projectTeams){
+        String projects = "";
+        int i = 0;
+        for(ProjectTeam projectTeam : projectTeams){
+            projects += projectTeam.getProject().getProjectName();
+
+            if(i != projectTeams.size() - 1){
+                projects += ", ";
+            }
+        }
+        return projects;
+    }
+
+    private String getTeamList(List<TeamMember> teamMembers){
+        String teams = "";
+        int i = 0;
+        for(TeamMember teamMember : teamMembers){
+            teams += teamMember.getTeam().getName();
+
+            if(i != teamMembers.size() - 1){
+                teams += ", ";
+            }
+            i++;
+        }
+        return teams;
+    }
+
+    private String getPhone(List<EmployeeContact> contactList){
+        String phones = "";
+        int i = 0;
+        for(EmployeeContact contact : contactList){
+            phones += contact.getPhone();
+
+            if(i != contactList.size() - 1){
+                phones += ", ";
+            }
+            i++;
+        }
+        return phones;
+    }
+
+    private String getEmail(List<EmployeeEmail> emailList){
+        String emails = "";
+        int i = 0;
+        for(EmployeeEmail email : emailList){
+            emails += email.getEmail();
+
+            if(i != emailList.size() - 1){
+                emails += ", ";
+            }
+            i++;
+        }
+        return emails;
+    }
+
+    private String getDesignation(List<EmployeeDesignation> designationList){
+        String currentDesignation = "";
+        for(EmployeeDesignation designation : designationList){
+            if(designation.isCurrent()){
+                currentDesignation += designation.getName();
+                break;
+            }
+        }
+        return currentDesignation;
     }
 
     public List<LeaveDetailsDto> getAllEmployeesLeaveDetails(List<LeaveRequest> leaveDetails) throws CustomException {

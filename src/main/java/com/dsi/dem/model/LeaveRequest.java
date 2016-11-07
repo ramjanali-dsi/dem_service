@@ -1,6 +1,7 @@
 package com.dsi.dem.model;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -24,25 +25,30 @@ public class LeaveRequest {
     private Employee employee;
 
     @Column(name = "apply_date")
+    @Type(type = "date")
     private Date applyDate;
 
-    @Column(name = "request_type")
-    private String requestType;
+    @ManyToOne
+    @JoinColumn(name = "request_type_id")
+    private LeaveRequestType requestType;
 
     @ManyToOne
     @JoinColumn(name = "leave_type_id")
     private LeaveType leaveType;
 
     @Column(name = "start_date")
+    @Type(type = "date")
     private Date startDate;
 
     @Column(name = "end_date")
+    @Type(type = "date")
     private Date endDate;
 
     @Column(name = "days_count")
     private int daysCount;
 
     @Column(name = "last_modified_date")
+    @Type(type = "date")
     private Date lastModifiedDate;
 
     @ManyToOne
@@ -50,9 +56,11 @@ public class LeaveRequest {
     private LeaveStatus leaveStatus;
 
     @Column(name = "approved_start_date")
+    @Type(type = "date")
     private Date approvedStartDate;
 
     @Column(name = "approved_end_date")
+    @Type(type = "date")
     private Date approvedEndDate;
 
     @Column(name = "approved_days_count")
@@ -62,6 +70,7 @@ public class LeaveRequest {
     private String approvalId;
 
     @Column(name = "approved_date")
+    @Type(type = "date")
     private Date approvedDate;
 
     @Column(name = "leave_reason", columnDefinition = "TEXT")
@@ -211,11 +220,11 @@ public class LeaveRequest {
         isClientNotify = clientNotify;
     }
 
-    public String getRequestType() {
+    public LeaveRequestType getRequestType() {
         return requestType;
     }
 
-    public void setRequestType(String requestType) {
+    public void setRequestType(LeaveRequestType requestType) {
         this.requestType = requestType;
     }
 

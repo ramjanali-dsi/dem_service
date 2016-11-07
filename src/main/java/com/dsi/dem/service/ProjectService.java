@@ -22,7 +22,7 @@ public interface ProjectService {
 
     void saveProjectTeam(List<String> projectIds, Project project) throws CustomException;
     void deleteProjectTeam(String projectTeamID) throws CustomException;
-    List<ProjectTeam> getProjectTeams(String projectID) throws CustomException;
+    List<ProjectTeam> getProjectTeams(String projectID, String employeeID) throws CustomException;
 
     void saveProjectClient(List<String> clientIds, Project project) throws CustomException;
     void deleteProjectClient(String projectClientID) throws CustomException;

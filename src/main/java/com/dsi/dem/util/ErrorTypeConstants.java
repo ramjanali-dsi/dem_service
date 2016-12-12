@@ -14,6 +14,7 @@ public class ErrorTypeConstants {
     public static final String DEM_ERROR_TYPE_006 = "json";
     public static final String DEM_ERROR_TYPE_007 = "dto";
     public static final String DEM_ERROR_TYPE_008 = "upload";
+    public static final String DEM_ERROR_TYPE_009 = "range";
 
     //Employee
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0001 = "employee";
@@ -33,6 +34,9 @@ public class ErrorTypeConstants {
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0015 = "phoneType";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0016 = "designationName";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0017 = "employeeAttendances";
+    public static final String DEM_EMPLOYEE_ERROR_TYPE_0018 = "employeeInfo";
+    public static final String DEM_EMPLOYEE_ERROR_TYPE_0019 = "employeeLeaveSummary";
+
 
     //Project
     public static final String DEM_PROJECT_ERROR_TYPE_0001 = "project";
@@ -80,12 +84,26 @@ public class ErrorTypeConstants {
     public static final String DEM_LEAVE_ERROR_TYPE_0016 = "deniedReason";
     public static final String DEM_LEAVE_ERROR_TYPE_0017 = "insufficientCasualLeave";
     public static final String DEM_LEAVE_ERROR_TYPE_0018 = "insufficientSickLeave";
+    public static final String DEM_LEAVE_ERROR_TYPE_0019 = "hasApprovedLeave";
+    public static final String DEM_LEAVE_ERROR_TYPE_0020 = "specialPostMustBeSick";
+    public static final String DEM_LEAVE_ERROR_TYPE_0021 = "specialPreMustBeSpecial";
+
+
+    //Holiday
+    public static final String DEM_HOLIDAY_ERROR_TYPE_0001 = "holiday";
+    public static final String DEM_HOLIDAY_ERROR_TYPE_0002 = "holidayName";
+    public static final String DEM_HOLIDAY_ERROR_TYPE_0003 = "hasHoliday";
+    public static final String DEM_HOLIDAY_ERROR_TYPE_0004 = "holidayPresent";
+    public static final String DEM_HOLIDAY_ERROR_TYPE_0005 = "weekendPresent";
 
     //Attendance
     public static final String DEM_ATTENDANCE_ERROR_TYPE_0001 = "attendance";
-    public static final String DEM_ATTENDANCE_ERROR_TYPE_0002 = "employeeNo";
-    public static final String DEM_ATTENDANCE_ERROR_TYPE_0003 = "checkInTime";
-    public static final String DEM_ATTENDANCE_ERROR_TYPE_0004 = "checkOutTime";
-    public static final String DEM_ATTENDANCE_ERROR_TYPE_0005 = "attendance";
+    public static final String DEM_ATTENDANCE_ERROR_TYPE_0002 = "notAbsentCheckInOutTime";
+    public static final String DEM_ATTENDANCE_ERROR_TYPE_0003 = "absentCheckInOutTime";
+    public static final String DEM_ATTENDANCE_ERROR_TYPE_0004 = "attendanceDate";
+    public static final String DEM_ATTENDANCE_ERROR_TYPE_0005 = "attendanceStatus";
+    public static final String DEM_ATTENDANCE_ERROR_TYPE_0006 = "tempAttendance";
+    public static final String DEM_ATTENDANCE_ERROR_TYPE_0007 = "hasAttendance";
+    public static final String DEM_ATTENDANCE_ERROR_TYPE_0008 = "attendanceDraft";
 
 }

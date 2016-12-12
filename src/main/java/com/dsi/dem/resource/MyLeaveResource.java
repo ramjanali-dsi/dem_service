@@ -1,14 +1,11 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.LeaveRequestDto;
-import com.dsi.dem.dto.transformer.LeaveDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.LeaveRequest;
 import com.dsi.dem.service.LeaveService;
 import com.dsi.dem.service.impl.LeaveServiceImpl;
 import com.wordnik.swagger.annotations.*;
 import com.wordnik.swagger.jaxrs.PATCH;
-import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -26,10 +23,7 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON})
 public class MyLeaveResource {
 
-    private static final Logger logger = Logger.getLogger(MyLeaveResource.class);
-
     private static final LeaveService leaveService = new LeaveServiceImpl();
-    private static final LeaveDtoTransformer LEAVE_DTO_TRANSFORMER = new LeaveDtoTransformer();
 
     @Context
     HttpServletRequest request;
@@ -46,7 +40,6 @@ public class MyLeaveResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("User id: " + userID);
         return Response.ok().entity(leaveService.isAvailableLeaveTypes(typeID, userID)).build();
     }
 
@@ -74,10 +67,9 @@ public class MyLeaveResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("Search or read employees leave requests");
-        return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getAllLeaveRequestDto(
-                leaveService.searchOrReadLeaveRequests(userID, teamName, projectName, leaveCnt, leaveReason, leaveType, leaveStatus,
-                        requestType, appliedStartDate, appliedEndDate, deniedReason, deniedBy, leaveRequestId, from, range))).build();
+        return Response.ok().entity(leaveService.searchOrReadLeaveRequests(userID, teamName, projectName, leaveCnt,
+                leaveReason, leaveType, leaveStatus, requestType, appliedStartDate, appliedEndDate, deniedReason,
+                deniedBy, leaveRequestId, from, range)).build();
     }
 
     @PATCH
@@ -94,15 +86,7 @@ public class MyLeaveResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("Employees leave request update:: Start");
-        LeaveRequest leaveRequest = LEAVE_DTO_TRANSFORMER.getLeaveRequest(leaveRequestDto);
-
-        leaveRequest.setLeaveRequestId(leaveRequestID);
-        leaveService.updateLeaveRequest(leaveRequest, userID, leaveRequestDto.getMode());
-        logger.info("Employees leave request update:: End");
-
-        return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(
-                leaveService.getLeaveRequestById(leaveRequestID, null))).build();
+        return Response.ok().entity(leaveService.updateLeaveRequest(leaveRequestDto, userID, leaveRequestID)).build();
     }
 
     @POST
@@ -117,13 +101,7 @@ public class MyLeaveResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("Employees leave request create:: Start");
-        LeaveRequest leaveRequest = LEAVE_DTO_TRANSFORMER.getLeaveRequest(leaveRequestDto);
-        leaveService.saveLeaveRequest(leaveRequest, userID);
-        logger.info("Employees leave request create:: End");
-
-        return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(
-                leaveService.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null))).build();
+        return Response.ok().entity(leaveService.saveLeaveRequest(leaveRequestDto, userID)).build();
     }
 
     @DELETE
@@ -138,10 +116,7 @@ public class MyLeaveResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("Employees leave request delete:: Start");
         leaveService.deleteLeaveRequest(leaveRequestID, userID);
-        logger.info("Employees leave request delete:: End");
-
         return Response.ok().entity(null).build();
     }
 }

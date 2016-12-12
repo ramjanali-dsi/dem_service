@@ -9,24 +9,26 @@ public class Constants {
 
     public static final String AUTHORIZATION = "authorization";
 
-    public static final String SUCCESS = "Success";
     public static final String MESSAGE = "message";
     public static final String SYSTEM = "system";
-    public static final String SYSTEM_ID = "0759a760-b9df-4c8a-8a64-fa31f256d13b";
+    public static final String SYSTEM_HEADER_ID = "0759a760-b9df-4c8a-8a64-fa31f256d13b";
 
-    public static final int CSV_TYPE_COLUMN = 4;
-    public static final int CSV_EMPLOYEE_ID_COLUMN = 1;
-    public static final int CSV_DATE_TIME_COLUMN = 0;
-
-    public static final String INT_TIME = "1";
-    public static final String OUT_TIME = "2";
+    static final String SYSTEM_ID = "425744ba-6c10-47c0-91cf-5a4c05265b56";
+    static final Long NOTIFICATION_EMAIL_TYPE_ID = 1L;
+    public static final Long EMPLOYEE_CREATE_TEMPLATE_ID = 1L;
 
     static final String DATE_FORMAT="yyyy-MM-dd";
-    //public static final String DATE_FORMAT="MMM dd, yyyy hh:mm:ss a";
+    public static final String TIMESTAMP_DATE_FORMAT="MMM dd, yyyy hh:mm:ss a";
 
     public static final int DAYS_AGO_COUNT = 5;
     public static final int TOTAL_SICK = 10;
     public static final int TOTAL_CASUAL = 10;
+
+    public static final String FROM = "0";
+    public static final String RANGE = "10";
+
+    public static final String GENERAL_LEAVE_TYPE = "General";
+    public static final String SPECIAL_LEAVE_TYPE = "Special";
 
     public static final String PRE_REQUEST_TYPE_NAME = "Pre Request";
     public static final String POST_REQUEST_TYPE_NAME = "Post Request";
@@ -38,11 +40,12 @@ public class Constants {
 
     public static final String CASUAL_TYPE_NAME = "Casual Leave Application";
     public static final String SICK_TYPE_NAME = "Sick Leave Application";
-
-    public static final String OFFICIAL_TYPE_NAME = "Official";
+    public static final String SPECIAL_TYPE_NAME = "Special Leave Application";
 
     public static final String TEMPORARY_LEAVE_TYPE = "Temporary";
     public static final String CONFIRM_LEAVE_TYPE = "Confirm";
+
+    public static final String OFFICIAL_TYPE_NAME = "Official";
 
     //Error code
     public static final String DEM_SERVICE_0001 = "dem_service_0001";

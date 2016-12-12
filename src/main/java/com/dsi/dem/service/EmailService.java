@@ -1,5 +1,6 @@
 package com.dsi.dem.service;
 
+import com.dsi.dem.dto.EmployeeEmailDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.EmployeeEmail;
 
@@ -10,10 +11,12 @@ import java.util.List;
  */
 public interface EmailService {
 
-    void saveEmployeeEmail(List<EmployeeEmail> employeeEmailList, String employeeID) throws CustomException;
-    void saveEmployeeEmail(EmployeeEmail employeeEmail, String employeeID) throws CustomException;
-    void updateEmployeeEmail(EmployeeEmail employeeEmail, String employeeID) throws CustomException;
+    List<EmployeeEmailDto> saveEmployeeEmail(List<EmployeeEmailDto> emailDtoList, String employeeID) throws CustomException;
+    void saveEmployeeEmail(EmployeeEmail employeeEmail, String employeeId) throws CustomException;
+    EmployeeEmailDto updateEmployeeEmail(EmployeeEmailDto employeeEmailDto, String employeeID,
+                                         String emailId) throws CustomException;
+    void updateEmployeeEmail(EmployeeEmail employeeEmail, String employeeId) throws CustomException;
     void deleteEmployeeEmail(String emailID) throws CustomException;
-    List<EmployeeEmail> getEmployeesEmailByEmployeeID(String employeeID) throws CustomException;
-    EmployeeEmail getEmployeeEmail(String emailID, String employeeID) throws CustomException;
+    List<EmployeeEmailDto> getEmployeesEmailByEmployeeID(String employeeID) throws CustomException;
+    EmployeeEmailDto getEmployeeEmail(String emailID, String employeeID) throws CustomException;
 }

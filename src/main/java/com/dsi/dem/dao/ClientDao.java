@@ -1,7 +1,9 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.Client;
 import com.dsi.dem.model.ProjectClient;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -10,16 +12,17 @@ import java.util.List;
  */
 public interface ClientDao {
 
-    boolean saveClient(Client client);
-    boolean updateClient(Client client);
-    boolean deleteClient(String clientID);
+    void setSession(Session session);
+    void saveClient(Client client) throws CustomException;
+    void updateClient(Client client) throws CustomException;
+    void deleteClient(String clientID) throws CustomException;
     Client getClientByID(String clientID);
     Client getClientByName(String name);
     List<Client> getAllClients();
     List<Client> searchClients(String clientName, String organization, String clientEmail,
                                String from, String range);
 
-    boolean saveClientProject(ProjectClient projectClient);
-    boolean deleteClientProject(String clientID, String projectClientID);
+    void saveClientProject(ProjectClient projectClient) throws CustomException;
+    void deleteClientProject(String clientID, String projectClientID) throws CustomException;
     List<ProjectClient> getClientProjects(String clientID);
 }

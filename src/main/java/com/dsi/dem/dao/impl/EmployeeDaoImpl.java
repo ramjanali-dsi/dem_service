@@ -18,6 +18,13 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
 
     private static final Logger logger = Logger.getLogger(EmployeeDaoImpl.class);
 
+    private Session session;
+
+    @Override
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
     @Override
     public boolean saveEmployee(Employee employee) {
         return save(employee);
@@ -353,7 +360,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     @Override
     public boolean deleteEmployeeInfo(String employeeID) {
         Session session = null;
-        boolean success = true;
+        boolean success;
         try {
             session = getSession();
             Query query = session.createQuery("DELETE FROM EmployeeInfo ei WHERE ei.employee.employeeId =:employeeID");

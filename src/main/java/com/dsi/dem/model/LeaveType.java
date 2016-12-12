@@ -24,6 +24,9 @@ public class LeaveType {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(length = 20)
+    private String type;
+
     @Column(name = "is_active")
     private boolean isActive;
 
@@ -57,5 +60,13 @@ public class LeaveType {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

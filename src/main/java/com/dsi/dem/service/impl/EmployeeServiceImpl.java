@@ -1,22 +1,15 @@
 package com.dsi.dem.service.impl;
 
 import com.dsi.dem.dao.EmployeeDao;
-import com.dsi.dem.dao.TeamDao;
-import com.dsi.dem.dao.impl.BaseDao;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
-import com.dsi.dem.dao.impl.TeamDaoImpl;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.EmployeeService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.SessionUtil;
 import com.dsi.dem.util.Utility;
-import com.google.gson.Gson;
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,15 +17,14 @@ import java.util.List;
 /**
  * Created by sabbir on 7/14/16.
  */
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl extends CommonService implements EmployeeService {
 
     private static final Logger logger = Logger.getLogger(EmployeeServiceImpl.class);
 
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
-    private static final TeamDao teamDao = new TeamDaoImpl();
 
     @Override
-    public void saveEmployee(Employee employee) throws CustomException {
+    public Employee saveEmployee(Employee employee) throws CustomException {
 
         List<EmployeeDesignation> employeeDesignationList = employee.getDesignations();
         List<EmployeeEmail> employeeEmailList = employee.getEmailInfo();
@@ -44,7 +36,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         boolean res = employeeDao.saveEmployee(employee);
         if(!res){
-            //ErrorContext errorContext = new ErrorContext(null, "Employee", "Employee create failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
                     Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
             throw new CustomException(errorMessage);
@@ -66,13 +57,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         logger.info("Save employee leave summary success");
 
         saveEmployeesDesignation(employeeDesignationList, employee);
-
         saveEmployeesEmails(employeeEmailList, employee);
-
         saveEmployeesContacts(employeeContactList, employee);
+
+        return setEmployeesAllProperty(employee.getEmployeeId(), employee);
     }
 
-    private void saveEmployeesDesignation(List<EmployeeDesignation> employeeDesignationList, Employee employee) {
+    private void saveEmployeesDesignation(List<EmployeeDesignation> employeeDesignationList, Employee employee) throws CustomException {
         for(EmployeeDesignation employeeDesignation : employeeDesignationList){
             employeeDesignation.setEmployee(employee);
             employeeDesignation.setVersion(1);
@@ -82,7 +73,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         logger.info("Save employee designation success");
     }
 
-    private void saveEmployeesContacts(List<EmployeeContact> employeeContactList, Employee employee) {
+    private void saveEmployeesContacts(List<EmployeeContact> employeeContactList, Employee employee) throws CustomException {
         for(EmployeeContact employeeContact : employeeContactList){
             employeeContact.setEmployee(employee);
             employeeContact.setVersion(1);
@@ -92,7 +83,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         logger.info("Save employee contact info success");
     }
 
-    private void saveEmployeesEmails(List<EmployeeEmail> employeeEmailList, Employee employee) {
+    private void saveEmployeesEmails(List<EmployeeEmail> employeeEmailList, Employee employee) throws CustomException {
         for(EmployeeEmail employeeEmail : employeeEmailList){
             employeeEmail.setEmployee(employee);
             employeeEmail.setVersion(1);
@@ -104,64 +95,56 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     public void validateInputForCreation(Employee employee) throws CustomException {
+
         if(employee.getFirstName() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Employee", "First Name not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0004);
             throw new CustomException(errorMessage);
         }
 
         if(employee.getLastName() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Employee", "Last Name not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0005);
             throw new CustomException(errorMessage);
         }
 
         if(employee.getRoleId() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Employee", "RoleID not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0008);
             throw new CustomException(errorMessage);
         }
 
         if(employee.getInfo().getPresentAddress() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "EmployeeInfo", "Address not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0006);
             throw new CustomException(errorMessage);
         }
 
         if(Utility.isNullOrEmpty(employee.getDesignations())){
-            //ErrorContext errorContext = new ErrorContext(null, "EmployeeDesignation", "Employee designation not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
         }
 
         if(Utility.isNullOrEmpty(employee.getEmailInfo())){
-            //ErrorContext errorContext = new ErrorContext(null, "EmployeeEmail", "Employee email not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0010);
             throw new CustomException(errorMessage);
         }
 
         if(Utility.isNullOrEmpty(employee.getContactInfo())){
-            //ErrorContext errorContext = new ErrorContext(null, "EmployeeContact", "Employee contact not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0009);
             throw new CustomException(errorMessage);
         }
 
         if(employeeDao.getEmployeeEmailByEmailName(employee.getEmailInfo().get(0).getEmail()) != null){
-            //ErrorContext errorContext = new ErrorContext(employee.getEmailInfo().get(0).getEmail(), "Employee", "Employee already exist by this email.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
                     Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
         }
 
         if(employeeDao.getEmployeeByEmployeeNO(employee.getEmployeeNo()) != null){
-            //ErrorContext errorContext = new ErrorContext(employee.getEmployeeNo(), "Employee", "Employee already exist by this employee No.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
                     Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
@@ -169,10 +152,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void updateEmployee(Employee employee) throws CustomException {
+    public Employee updateEmployee(Employee employee) throws CustomException {
         validateInputForUpdate(employee);
 
         Employee existEmployee = employeeDao.getEmployeeByID(employee.getEmployeeId());
+        if(existEmployee == null){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
 
         employee.setUserId(existEmployee.getUserId());
         employee.setCreatedDate(existEmployee.getCreatedDate());
@@ -181,7 +169,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         boolean res = employeeDao.updateEmployee(employee);
         if(!res){
-            //ErrorContext errorContext = new ErrorContext(employee.getEmployeeId(), "Employee", "Employee update failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
                     Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
             throw new CustomException(errorMessage);
@@ -192,20 +179,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeInfo.setEmployee(employee);
         employeeDao.updateEmployeeInfo(employeeInfo);
         logger.info("Employee info update success");
+
+        return setEmployeesAllProperty(employee.getEmployeeId(), employee);
     }
 
     private void validateInputForUpdate(Employee employee) throws CustomException {
         if(employee.getVersion() == 0){
-            //ErrorContext errorContext = new ErrorContext(null, "Employee", "Version not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
-            throw new CustomException(errorMessage);
-        }
-
-        if(employeeDao.getEmployeeByID(employee.getEmployeeId()) == null){
-            //ErrorContext errorContext = new ErrorContext(employee.getEmployeeId(), "Employee", "Employee not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
             throw new CustomException(errorMessage);
         }
     }
@@ -221,7 +202,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         boolean res = employeeDao.deleteEmployee(employeeID);
         if(!res){
-            //ErrorContext errorContext = new ErrorContext(employeeID, "Employee", "Employee delete failed.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
                     Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
             throw new CustomException(errorMessage);
@@ -231,9 +211,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee getEmployeeByID(String employeeID) throws CustomException {
+
         Employee employee = employeeDao.getEmployeeByID(employeeID);
         if(employee == null){
-            //ErrorContext errorContext = new ErrorContext(employeeID, "Employee", "Employee not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
@@ -243,9 +223,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee getEmployeeByUserID(String userID) throws CustomException {
+
         Employee employee = employeeDao.getEmployeeByUserID(userID);
         if(employee == null){
-            //ErrorContext errorContext = new ErrorContext(userID, "Employee", "Employee not found.");
+
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
@@ -255,9 +236,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public Employee getEmployeeByEmployeeNO(String employeeNO) throws CustomException {
+
         Employee employee = employeeDao.getEmployeeByEmployeeNO(employeeNO);
         if(employee == null){
-            //ErrorContext errorContext = new ErrorContext(employeeNO, "Employee", "Employee not found.");
+
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
@@ -267,9 +249,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<Employee> getAllEmployees() throws CustomException {
+
         List<Employee> employeeList = employeeDao.getAllEmployees();
         if(employeeList == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Employee", "Employee list not found.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
@@ -286,18 +268,26 @@ public class EmployeeServiceImpl implements EmployeeService {
     public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                           String accountID, String ipAddress, String nationalID, String tinID, String phone,
                                           String email, String active, String joiningDate, String teamName, String projectName,
-                                          String userID, String from, String range)
-            throws CustomException {
+                                          String userID, String from, String range) throws CustomException {
+
+        if(!Utility.isNullOrEmpty(joiningDate)){
+            if(Utility.getDateFromString(joiningDate) == null){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                        Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_004);
+                throw new CustomException(errorMessage);
+            }
+        }
 
         List<Employee> employeeList = employeeDao.searchEmployees(employeeNo, firstName, lastName, nickName, accountID,
                 ipAddress, nationalID, tinID, phone, email, active, joiningDate, teamName, projectName, userID, from, range);
         if(employeeList == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Employee", "Employee list not found.");
+
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
 
+        logger.info("Employee list size:: " + employeeList.size());
         List<Employee> employees = new ArrayList<>();
         for(Employee employee : employeeList){
             employees.add(setEmployeesAllProperty(employee.getEmployeeId(), employee));
@@ -330,7 +320,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         if(!Utility.isNullOrEmpty(contacts)){
             employee.setContactInfo(contacts);
         }
-
         return employee;
     }
 }

@@ -1,8 +1,13 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.ClientDao;
+import com.dsi.dem.exception.CustomException;
+import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Client;
 import com.dsi.dem.model.ProjectClient;
+import com.dsi.dem.service.impl.CommonService;
+import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -15,185 +20,167 @@ import java.util.Map;
 /**
  * Created by sabbir on 8/1/16.
  */
-public class ClientDaoImpl extends BaseDao implements ClientDao {
+public class ClientDaoImpl extends CommonService implements ClientDao {
 
     private static final Logger logger = Logger.getLogger(ClientDaoImpl.class);
 
+    private Session session;
+
     @Override
-    public boolean saveClient(Client client) {
-        return save(client);
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     @Override
-    public boolean updateClient(Client client) {
-        return update(client);
+    public void saveClient(Client client) throws CustomException {
+        try{
+            session.save(client);
+
+        } catch (Exception e){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
     }
 
     @Override
-    public boolean deleteClient(String clientID) {
-        Session session = null;
-        boolean success = true;
+    public void updateClient(Client client) throws CustomException {
+        try{
+            session.update(client);
+
+        } catch (Exception e){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
+                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
+    }
+
+    @Override
+    public void deleteClient(String clientID) throws CustomException {
         try {
-            session = getSession();
             Query query = session.createQuery("DELETE FROM Client c WHERE c.clientId =:clientID");
             query.setParameter("clientID", clientID);
 
-            if(query.executeUpdate() > 0){
-                success = true;
-
-            } else {
-                success = false;
-            }
+            query.executeUpdate();
 
         } catch (Exception e) {
-            logger.error("Database error occurs when delete: " + e.getMessage());
-            success = false;
-
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
         }
-        return success;
     }
 
     @Override
     public Client getClientByID(String clientID) {
-        Session session = null;
-        Client client = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM Client c WHERE c.clientId =:clientID");
-            query.setParameter("clientID", clientID);
+        Query query = session.createQuery("FROM Client c WHERE c.clientId =:clientID");
+        query.setParameter("clientID", clientID);
 
-            client = (Client) query.uniqueResult();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        Client client = (Client) query.uniqueResult();
+        if(client != null){
+            return client;
         }
-        return client;
+        return null;
     }
 
     @Override
     public Client getClientByName(String name) {
-        Session session = null;
-        Client client = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM Client c WHERE c.memberName =:name");
-            query.setParameter("name", name);
+        Query query = session.createQuery("FROM Client c WHERE c.memberName =:name");
+        query.setParameter("name", name);
 
-            client = (Client) query.uniqueResult();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        Client client = (Client) query.uniqueResult();
+        if(client != null){
+            return client;
         }
-        return client;
+        return null;
     }
 
     @Override
     public List<Client> getAllClients() {
-        Session session = null;
-        List<Client> clientList = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM Client");
+        Query query = session.createQuery("FROM Client");
 
-            clientList = query.list();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        List<Client> clientList = query.list();
+        if(clientList != null){
+            return clientList;
         }
-        return clientList;
+        return null;
     }
 
     @Override
     public List<Client> searchClients(String clientName, String organization, String clientEmail, String from, String range) {
-        Session session = null;
-        List<Client> clientList = null;
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;
         Map<String, String> paramValue = new HashMap<>();
-        try{
-            session = getSession();
-            queryBuilder.append("FROM Client c");
 
-            if(!Utility.isNullOrEmpty(clientName)){
-                queryBuilder.append(" WHERE c.memberName like :clientName");
-                paramValue.put("clientName", clientName);
+        queryBuilder.append("FROM Client c");
+
+        if(!Utility.isNullOrEmpty(clientName)){
+            queryBuilder.append(" WHERE c.memberName like :clientName");
+            paramValue.put("clientName", clientName);
+            hasClause = true;
+        }
+
+        if(!Utility.isNullOrEmpty(organization)){
+            if(hasClause){
+                queryBuilder.append(" AND c.organization =:organization");
+
+            } else {
+                queryBuilder.append(" WHERE c.organization =:organization");
                 hasClause = true;
             }
+            paramValue.put("organization", organization);
+        }
 
-            if(!Utility.isNullOrEmpty(organization)){
-                if(hasClause){
-                    queryBuilder.append(" AND c.organization =:organization");
+        if(!Utility.isNullOrEmpty(clientEmail)){
+            if(hasClause){
+                queryBuilder.append(" AND c.memberEmail =:clientEmail");
 
-                } else {
-                    queryBuilder.append(" WHERE c.organization =:organization");
-                    hasClause = true;
-                }
-                paramValue.put("organization", organization);
+            } else {
+                queryBuilder.append(" WHERE c.memberEmail =:clientEmail");
+                //hasClause = true;
             }
+            paramValue.put("clientEmail", clientEmail);
+        }
 
-            if(!Utility.isNullOrEmpty(clientEmail)){
-                if(hasClause){
-                    queryBuilder.append(" AND c.memberEmail =:clientEmail");
+        queryBuilder.append(" ORDER BY c.memberName ASC");
 
-                } else {
-                    queryBuilder.append(" WHERE c.memberEmail =:clientEmail");
-                    //hasClause = true;
-                }
-                paramValue.put("clientEmail", clientEmail);
-            }
+        logger.info("Query builder: " + queryBuilder.toString());
+        Query query = session.createQuery(queryBuilder.toString());
 
-            queryBuilder.append(" ORDER BY c.memberName ASC");
+        for(Map.Entry<String, String> entry : paramValue.entrySet()){
+            query.setParameter(entry.getKey(), entry.getValue());
+        }
 
-            logger.info("Query builder: " + queryBuilder.toString());
-            Query query = session.createQuery(queryBuilder.toString());
+        if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+            query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
 
-            for(Map.Entry<String, String> entry : paramValue.entrySet()){
-                query.setParameter(entry.getKey(), entry.getValue());
-            }
+        List<Client> clientList = query.list();
+        if(clientList != null){
+            return clientList;
+        }
+        return null;
+    }
 
-            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
-                query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
-
-            clientList = query.list();
+    @Override
+    public void saveClientProject(ProjectClient projectClient) throws CustomException {
+        try{
+            session.save(projectClient);
 
         } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
         }
-        return clientList;
+
     }
 
     @Override
-    public boolean saveClientProject(ProjectClient projectClient) {
-        return save(projectClient);
-    }
-
-    @Override
-    public boolean deleteClientProject(String clientID, String projectClientID) {
-        Session session = null;
-        boolean success = true;
+    public void deleteClientProject(String clientID, String projectClientID) throws CustomException {
         Query query;
         try {
-            session = getSession();
             if(clientID != null){
                 query = session.createQuery("DELETE FROM ProjectClient pc WHERE pc.client.clientId =:clientID");
                 query.setParameter("clientID", clientID);
@@ -203,43 +190,25 @@ public class ClientDaoImpl extends BaseDao implements ClientDao {
                 query.setParameter("projectClientID", projectClientID);
             }
 
-            if(query.executeUpdate() > 0){
-                success = true;
-
-            } else {
-                success = false;
-            }
+            query.executeUpdate();
 
         } catch (Exception e) {
-            logger.error("Database error occurs when delete: " + e.getMessage());
-            success = false;
-
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
         }
-        return success;
     }
 
     @Override
     public List<ProjectClient> getClientProjects(String clientID) {
-        Session session = null;
-        List<ProjectClient> projectClientList = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM ProjectClient pc WHERE pc.client.clientId =:clientID");
-            query.setParameter("clientID", clientID);
+        Query query = session.createQuery("FROM ProjectClient pc WHERE pc.client.clientId =:clientID");
+        query.setParameter("clientID", clientID);
 
-            projectClientList = query.list();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        List<ProjectClient>projectClientList = query.list();
+        if(projectClientList != null){
+            return projectClientList;
         }
-        return projectClientList;
+        return null;
     }
 }

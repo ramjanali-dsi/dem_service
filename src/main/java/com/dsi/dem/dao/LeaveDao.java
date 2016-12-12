@@ -1,7 +1,10 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.*;
+import org.hibernate.Session;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -9,14 +12,16 @@ import java.util.List;
  */
 public interface LeaveDao {
 
+    void setSession(Session session);
     boolean isAvailableLeaveTypes(String leaveType, String userId);
     EmployeeLeave getEmployeeLeaveSummary(String employeeID);
-    boolean updateEmployeeLeaveSummary(EmployeeLeave leaveSummary);
+    void updateEmployeeLeaveSummary(EmployeeLeave leaveSummary) throws CustomException;
     List<EmployeeLeave> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
                                                           String email, String phone, String teamName, String projectName,
                                                           String employeeId, String from, String range, String userId);
 
     LeaveRequest getEmployeesLeaveDetails(String employeeID);
+    boolean alreadyApprovedLeaveExist(String employeeID, Date leaveStartDate);
     int getLeaveCountByStatus(String employeeID, String statusName);
     List<LeaveRequest> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName, String email,
                                                 String phone, String teamName, String projectName, String employeeId, String leaveType,
@@ -27,9 +32,9 @@ public interface LeaveDao {
     LeaveType getLeaveTypeByID(String leaveTypeId);
     LeaveRequestType getLeaveRequestTypeByID(String leaveRequestTypeId);
 
-    boolean saveLeaveRequest(LeaveRequest leaveRequest);
-    boolean updateLeaveRequest(LeaveRequest leaveRequest);
-    boolean deleteLeaveRequest(String leaveRequestID);
+    void saveLeaveRequest(LeaveRequest leaveRequest) throws CustomException;
+    void updateLeaveRequest(LeaveRequest leaveRequest) throws CustomException;
+    void deleteLeaveRequest(String leaveRequestID) throws CustomException;
     LeaveRequest getLeaveRequestById(String leaveRequestID, String employeeId);
     LeaveRequest getLeaveRequestByIdAndEmployeeId(String leaveRequestId, String userId);
     List<LeaveRequest> getLeaveRequestByEmployeeID(String employeeID);
@@ -38,8 +43,11 @@ public interface LeaveDao {
                                                  String leaveType, String leaveStatus, String requestType, String appliedStartDate,
                                                  String appliedEndDate, String deniedReason, String deniedBy, String leaveRequestId,
                                                  String from, String range);
+    List<LeaveRequest> searchOrReadSpecialLeaveRequests(String employeeNo, String firstName, String lastName,
+                                                        String nickName, String leaveStatus, String leaveType,
+                                                        String requestType, String leaveRequestId, String from, String range);
 
     LeaveStatus getLeaveStatusByName(String typeName);
-    boolean getLeaveRequestByRequestTypeAndEmployeeNo(String employeeNo, String date);
-    LeaveRequest getLeaveRequestByStatusAndEmployee(String employeeNo, String date);
+    boolean getLeaveRequestByRequestTypeAndEmployeeNo(String employeeNo, Date date);
+    LeaveRequest getLeaveRequestByStatusAndEmployee(String employeeNo, Date date);
 }

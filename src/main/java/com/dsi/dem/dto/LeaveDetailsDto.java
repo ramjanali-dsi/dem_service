@@ -18,6 +18,8 @@ public class LeaveDetailsDto {
 
     private String nickName;
 
+    private boolean isActive;
+
     private String designation;
 
     private String phone;
@@ -136,5 +138,13 @@ public class LeaveDetailsDto {
 
     public void setLeaveDetails(List<LeaveRequestDto> leaveDetails) {
         this.leaveDetails = leaveDetails;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

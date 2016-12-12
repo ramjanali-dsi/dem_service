@@ -1,14 +1,11 @@
 package com.dsi.dem.resource;
 
-import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.dto.EmployeeEmailDto;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.EmployeeEmail;
 import com.dsi.dem.service.EmailService;
 import com.dsi.dem.service.impl.EmailServiceImpl;
 import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -25,10 +22,7 @@ import java.util.List;
 @Consumes({MediaType.APPLICATION_JSON})
 public class EmailResource {
 
-    private static final Logger logger = Logger.getLogger(EmailResource.class);
-
     private static final EmailService emailService = new EmailServiceImpl();
-    private static final EmployeeDtoTransformer EMPLOYEE_DTO_TRANSFORMER = new EmployeeDtoTransformer();
 
     @POST
     @ApiOperation(value = "Create Employees Email", notes = "Create Employees Email", position = 1)
@@ -40,16 +34,7 @@ public class EmailResource {
                                          @ApiParam(value = "EmployeeEmail Dto", required = true)
                                                  List<EmployeeEmailDto> employeeEmailDtoList) throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        List<EmployeeEmail> employeeEmailList = EMPLOYEE_DTO_TRANSFORMER.getEmailList(employeeEmailDtoList);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Employee Emails Create:: Start");
-        emailService.saveEmployeeEmail(employeeEmailList, employeeID);
-        logger.info("Employee Emails Create:: End");
-
-        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmailDtoList(
-                emailService.getEmployeesEmailByEmployeeID(employeeID))).build();
+        return Response.ok().entity(emailService.saveEmployeeEmail(employeeEmailDtoList, employeeID)).build();
     }
 
     @PUT
@@ -64,17 +49,7 @@ public class EmailResource {
                                          @ApiParam(value = "EmployeeEmail Dto", required = true)
                                                      EmployeeEmailDto emailDto) throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        EmployeeEmail employeeEmail = EMPLOYEE_DTO_TRANSFORMER.getEmployeeEmail(emailDto);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Employees email update:: Start");
-        employeeEmail.setEmailId(emailID);
-        emailService.updateEmployeeEmail(employeeEmail, employeeID);
-        logger.info("Employees email update:: End");
-
-        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeEmailDto(
-                emailService.getEmployeeEmail(emailID, employeeID))).build();
+        return Response.ok().entity(emailService.updateEmployeeEmail(emailDto, employeeID, emailID)).build();
     }
 
     @DELETE
@@ -87,11 +62,8 @@ public class EmailResource {
     public Response deleteEmployeesEmail(@PathParam("employee_id") String employeeID,
                                          @PathParam("email_id") String emailID) throws CustomException {
 
-        logger.info("Employees email delete:: Start");
         emailService.deleteEmployeeEmail(emailID);
-        logger.info("Employees email delete:: End");
-
-        return Response.ok().entity("Success").build();
+        return Response.ok().entity(null).build();
     }
 
     @GET
@@ -104,9 +76,7 @@ public class EmailResource {
     public Response readEmployeesEmail(@PathParam("employee_id") String employeeID,
                                        @PathParam("email_id") String emailID) throws CustomException {
 
-        logger.info("Read an employees email info");
-        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeEmailDto(
-                emailService.getEmployeeEmail(emailID, employeeID))).build();
+        return Response.ok().entity(emailService.getEmployeeEmail(emailID, employeeID)).build();
     }
 
     @GET
@@ -122,10 +92,9 @@ public class EmailResource {
             //TODO search employees email info
 
         } else {
-            logger.info("Read employees all email info");
-            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmailDtoList(
-                    emailService.getEmployeesEmailByEmployeeID(employeeID))).build();
+            return Response.ok().entity(emailService.getEmployeesEmailByEmployeeID(employeeID)).build();
         }
-        return null;
+
+        return Response.ok().entity(null).build();
     }
 }

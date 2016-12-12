@@ -1,24 +1,24 @@
 package com.dsi.dem.dto.transformer;
 
+import com.dsi.dem.dao.EmployeeDao;
+import com.dsi.dem.dao.LeaveDao;
+import com.dsi.dem.dao.ProjectDao;
+import com.dsi.dem.dao.TeamDao;
+import com.dsi.dem.dao.impl.EmployeeDaoImpl;
+import com.dsi.dem.dao.impl.LeaveDaoImpl;
+import com.dsi.dem.dao.impl.ProjectDaoImpl;
+import com.dsi.dem.dao.impl.TeamDaoImpl;
 import com.dsi.dem.dto.LeaveDetailsDto;
 import com.dsi.dem.dto.LeaveSummaryDto;
 import com.dsi.dem.dto.LeaveRequestDto;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
-import com.dsi.dem.service.EmployeeService;
-import com.dsi.dem.service.LeaveService;
-import com.dsi.dem.service.ProjectService;
-import com.dsi.dem.service.TeamService;
-import com.dsi.dem.service.impl.EmployeeServiceImpl;
-import com.dsi.dem.service.impl.LeaveServiceImpl;
-import com.dsi.dem.service.impl.ProjectServiceImpl;
-import com.dsi.dem.service.impl.TeamServiceImpl;
+import com.dsi.dem.service.impl.CommonService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
-import com.google.gson.Gson;
 import org.apache.commons.beanutils.BeanUtils;
+import org.hibernate.Session;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,12 +26,18 @@ import java.util.stream.Collectors;
 /**
  * Created by sabbir on 8/25/16.
  */
-public class LeaveDtoTransformer {
+public class LeaveDtoTransformer extends CommonService {
 
-    private static final ProjectService projectService = new ProjectServiceImpl();
-    private static final TeamService teamService = new TeamServiceImpl();
-    private static final LeaveService leaveService = new LeaveServiceImpl();
-    private static final EmployeeService employeeService = new EmployeeServiceImpl();
+    private static final ProjectDao projectDao = new ProjectDaoImpl();
+    private static final TeamDao teamDao = new TeamDaoImpl();
+    private static final LeaveDao leaveDao = new LeaveDaoImpl();
+    private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
+
+    private Session session;
+
+    public void setSession(Session session){
+        this.session = session;
+    }
 
     public LeaveRequest getLeaveRequest(LeaveRequestDto leaveDto) throws CustomException {
 
@@ -55,7 +61,6 @@ public class LeaveDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -65,6 +70,7 @@ public class LeaveDtoTransformer {
 
     public LeaveRequestDto getLeaveRequestDto(LeaveRequest leaveRequest) throws CustomException {
 
+        //employeeDao.setSession(session);
         LeaveRequestDto leaveRequestDto = new LeaveRequestDto();
         try {
             BeanUtils.copyProperties(leaveRequestDto, leaveRequest);
@@ -76,7 +82,7 @@ public class LeaveDtoTransformer {
             }
 
             if(leaveRequest.getApprovalId() != null) {
-                Employee approvedBy = employeeService.getEmployeeByID(leaveRequest.getApprovalId());
+                Employee approvedBy = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
                 String identity = approvedBy.getFirstName();
                 if(approvedBy.getLastName() != null){
                     identity =  identity + " " + approvedBy.getLastName();
@@ -86,7 +92,7 @@ public class LeaveDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            //close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -114,7 +120,6 @@ public class LeaveDtoTransformer {
             leaveDto.setTotalLeave(Constants.TOTAL_CASUAL + Constants.TOTAL_SICK);
 
         } catch (Exception e) {
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -134,17 +139,24 @@ public class LeaveDtoTransformer {
     public LeaveDetailsDto getEmployeesLeaveDetails(EmployeeLeave employeeLeave,
                                                     List<LeaveRequest> leaveRequests) throws CustomException {
 
+        //employeeDao.setSession(session);
+        teamDao.setSession(session);
+        projectDao.setSession(session);
+
         LeaveDetailsDto leaveDetailsDto = new LeaveDetailsDto();
         try {
             BeanUtils.copyProperties(leaveDetailsDto, employeeLeave.getEmployee());
-            leaveDetailsDto.setEmail(getEmail(employeeLeave.getEmployee().getEmailInfo()));
-            leaveDetailsDto.setPhone(getPhone(employeeLeave.getEmployee().getContactInfo()));
-            leaveDetailsDto.setDesignation(getDesignation(employeeLeave.getEmployee().getDesignations()));
+            leaveDetailsDto.setEmail(getEmail(employeeDao.getEmployeeEmailsByEmployeeID
+                    (employeeLeave.getEmployee().getEmployeeId())));
+            leaveDetailsDto.setPhone(getPhone(employeeDao.getEmployeeContactsByEmployeeID
+                    (employeeLeave.getEmployee().getEmployeeId())));
+            leaveDetailsDto.setDesignation(getDesignation(employeeDao.getEmployeeDesignationsByEmployeeID
+                    (employeeLeave.getEmployee().getEmployeeId())));
 
-            List<TeamMember> memberTeams = teamService.getTeamMembers(null, employeeLeave.getEmployee().getEmployeeId());
+            List<TeamMember> memberTeams = teamDao.getTeamMembers(null, employeeLeave.getEmployee().getEmployeeId());
             leaveDetailsDto.setTeam(getTeamList(memberTeams));
 
-            List<ProjectTeam> memberProjects = projectService.getProjectTeams(null, employeeLeave.getEmployee().getEmployeeId());
+            List<ProjectTeam> memberProjects = projectDao.getProjectTeams(null, employeeLeave.getEmployee().getEmployeeId());
             leaveDetailsDto.setProject(getProjectList(memberProjects));
 
             LeaveSummaryDto summaryDto = new LeaveSummaryDto();
@@ -166,7 +178,7 @@ public class LeaveDtoTransformer {
                 }
 
                 if(leaveRequest.getApprovalId() != null) {
-                    Employee approvedBy = employeeService.getEmployeeByID(leaveRequest.getApprovalId());
+                    Employee approvedBy = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
                     String name = approvedBy.getFirstName();
                     if(approvedBy.getLastName() != null){
                         name += " " + approvedBy.getLastName();
@@ -179,7 +191,7 @@ public class LeaveDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -255,6 +267,7 @@ public class LeaveDtoTransformer {
 
     public List<LeaveDetailsDto> getAllEmployeesLeaveDetails(List<LeaveRequest> leaveDetails) throws CustomException {
 
+        leaveDao.setSession(session);
         List<String> employees = leaveDetails
                 .stream()
                 .map(leaveDetail
@@ -276,7 +289,7 @@ public class LeaveDtoTransformer {
                             .getEmployeeId().equals(employeeId))
                     .collect(Collectors.toList());
 
-            leaveDetailsDtoList.add(getEmployeesLeaveDetails(leaveService.
+            leaveDetailsDtoList.add(getEmployeesLeaveDetails(leaveDao.
                     getEmployeeLeaveSummary(employeeId), employeesLeaveDetail));
         }
         return leaveDetailsDtoList;

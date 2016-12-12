@@ -3,6 +3,7 @@ package com.dsi.dem.service;
 import com.dsi.dem.dto.AttendanceDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.AttendanceStatus;
+import com.dsi.dem.model.DraftAttendance;
 import com.dsi.dem.model.EmployeeAttendance;
 import com.dsi.dem.model.TemporaryAttendance;
 
@@ -14,9 +15,9 @@ import java.util.List;
  */
 public interface AttendanceService {
 
-    boolean saveAttendance(String attendanceDate) throws CustomException;
+    void saveAttendance(List<AttendanceDto> attendanceDtoList, String userID, String attendanceDate) throws CustomException;
     void updateAttendance(EmployeeAttendance attendance) throws CustomException;
-    void deleteAttendance(String attendanceId, String employeeId) throws CustomException;
+    void deleteAttendance(String attendanceDate) throws CustomException;
     EmployeeAttendance getAttendanceByID(String attendanceId, String employeeId) throws CustomException;
     List<EmployeeAttendance> getEmployeesAllAttendances(String employeeId) throws CustomException;
     List<EmployeeAttendance> getAllAttendancesByDate(String attendanceDate) throws CustomException;
@@ -27,9 +28,11 @@ public interface AttendanceService {
     boolean isAvailableEmployeeOrTempAttendanceSheet(String attendanceDate) throws CustomException;
     boolean getAttendanceStatus(String attendanceDate, String mode) throws CustomException;
 
-    boolean saveTempAttendance(InputStream inputStream, String userID) throws CustomException;
-    void updateTempAttendance(AttendanceDto attendanceDto, String userID, String tempAttendanceID) throws CustomException;
+    List<DraftAttendance> saveTempAttendance(InputStream inputStream, String userID) throws CustomException;
+    void updateTempAttendance(List<AttendanceDto> attendanceDtoList, String userID, String attendanceDate) throws CustomException;
     void deleteTempAttendance() throws CustomException;
     List<TemporaryAttendance> getAllTempAttendances(String attendanceDate) throws CustomException;
     TemporaryAttendance getTemporaryAttendance(String tempAttendanceId) throws CustomException;
+
+    List<DraftAttendance> getDraftAttendanceFileDetails(String from, String range) throws CustomException;
 }

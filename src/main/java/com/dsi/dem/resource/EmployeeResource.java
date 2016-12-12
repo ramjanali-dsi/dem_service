@@ -3,12 +3,12 @@ package com.dsi.dem.resource;
 import com.dsi.dem.dto.*;
 import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.*;
 import com.dsi.dem.service.impl.*;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.EmailBodyTemplate;
 import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import com.dsi.httpclient.HttpClient;
@@ -84,7 +84,7 @@ public class EmployeeResource {
             logger.info("Employee Create:: Start");
             logger.info("Request body for login create: " + Utility.getLoginObject(employee, currentUserID));
             String result = httpClient.sendPost(APIProvider.API_LOGIN_SESSION_CREATE,
-                    Utility.getLoginObject(employee, currentUserID), Constants.SYSTEM, Constants.SYSTEM_ID);
+                    Utility.getLoginObject(employee, currentUserID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
             logger.info("v1/login_session/create api call result: " + result);
 
             JSONObject resultObj = new JSONObject(result);
@@ -97,26 +97,28 @@ public class EmployeeResource {
             }
 
             employee.setUserId(resultObj.getString("user_id"));
-            employeeService.saveEmployee(employee);
+
+            employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto(employeeService.saveEmployee(employee));
             logger.info("Employee Create:: End");
 
-            /*result = httpClient.getRequest(APIProvider.API_USER_ROLE + employee.getUserId(),
-                    Constants.SYSTEM, Constants.SYSTEM_ID);
-            logger.info("v1/user_role api call result: " + result);
+            /*String email = employeeDto.getEmailList().get(0).getEmail();
+            String body = EmailBodyTemplate.getEmployeeCreateBody(resultObj.getString("password"),
+                    employee.getFirstName(), email);
+
+            logger.info("Request body for notification create: " + Utility.getNotificationObject(
+                    email, body, Constants.EMPLOYEE_CREATE_TEMPLATE_ID));
+
+            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(
+                    email, body, Constants.EMPLOYEE_CREATE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
 
             resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
+            if(!resultObj.has(Constants.MESSAGE)){
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
             }*/
-
-            employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
-                    (employeeService.getEmployeeByID(employee.getEmployeeId()));
-            //employeeDto.setRoleId(resultObj.getString("role_id"));
 
             return Response.ok().entity(employeeDto).build();
 
         } catch (JSONException | IOException je) {
-            //ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
@@ -153,11 +155,12 @@ public class EmployeeResource {
 
             logger.info("Employee update:: Start");
             employee.setEmployeeId(employeeID);
-            employeeService.updateEmployee(employee);
+            employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto(employeeService.updateEmployee(employee));
+            //employeeService.updateEmployee(employee);
             logger.info("Employee update:: End");
 
-            employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
-                    (employeeService.getEmployeeByID(employeeID));
+            /*employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
+                    (employeeService.getEmployeeByID(employeeID));*/
 
             return Response.ok().entity(employeeDto).build();
 
@@ -206,7 +209,7 @@ public class EmployeeResource {
 
             logger.info("User info delete:: start");
             String result = httpClient.sendDelete(APIProvider.API_USER + userID,
-                    "", Constants.SYSTEM, Constants.SYSTEM_ID);
+                    "", Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
             logger.info("v1/user/" + userID + "api call result: " + result);
 
             JSONObject resultObj = new JSONObject(result);
@@ -217,7 +220,7 @@ public class EmployeeResource {
 
             logger.info("Login info delete:: start");
             result = httpClient.sendDelete(APIProvider.API_LOGIN_SESSION_DELETE + userID,
-                    "", Constants.SYSTEM, Constants.SYSTEM_ID);
+                    "", Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
             logger.info("v1/login_session/delete/" + userID + "api call result: " + result);
 
             resultObj = new JSONObject(result);
@@ -343,8 +346,7 @@ public class EmployeeResource {
                     }
                 }
                 logger.info("Read employees all email info");
-                return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmailDtoList(
-                        emailService.getEmployeesEmailByEmployeeID(employeeID))).build();
+                return Response.ok().entity(emailService.getEmployeesEmailByEmployeeID(employeeID)).build();
 
             case "Contact":
                 for(EmployeeContactDto contactDto : additionalInfo.getContactList()){
@@ -381,8 +383,7 @@ public class EmployeeResource {
                     }
                 }
                 logger.info("Read employees all contact info");
-                return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getContactInfoDtoList(
-                        contactService.getEmployeesContactInfoByEmployeeID(employeeID))).build();
+                return Response.ok().entity(contactService.getEmployeesContactInfoByEmployeeID(employeeID)).build();
 
             case "Designation":
                 for(EmployeeDesignationDto designationDto : additionalInfo.getDesignationList()){
@@ -419,11 +420,9 @@ public class EmployeeResource {
                     }
                 }
                 logger.info("Read employees all designation info");
-                return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getDesignationDtoList(
-                        designationService.getEmployeesDesignationByEmployeeID(employeeID))).build();
+                return Response.ok().entity(designationService.getEmployeesDesignationByEmployeeID(employeeID)).build();
         }
 
-        //ErrorContext errorContext = new ErrorContext(null, null, "Additional info not found.");
         ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                 Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
         throw new CustomException(errorMessage);

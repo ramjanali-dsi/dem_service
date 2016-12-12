@@ -1,9 +1,15 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.ProjectDao;
+import com.dsi.dem.exception.CustomException;
+import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
+import com.dsi.dem.model.ProjectStatus;
 import com.dsi.dem.model.ProjectTeam;
+import com.dsi.dem.service.impl.CommonService;
+import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -16,217 +22,211 @@ import java.util.Map;
 /**
  * Created by sabbir on 8/1/16.
  */
-public class ProjectDaoImpl extends BaseDao implements ProjectDao {
+public class ProjectDaoImpl extends CommonService implements ProjectDao {
 
     private static final Logger logger = Logger.getLogger(ProjectDaoImpl.class);
 
+    private Session session;
+
     @Override
-    public boolean saveProject(Project project) {
-        return save(project);
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     @Override
-    public boolean updateProject(Project project) {
-        return update(project);
+    public void saveProject(Project project) throws CustomException {
+        try{
+            session.save(project);
+
+        } catch (Exception e){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
     }
 
     @Override
-    public boolean deleteProject(String projectID) {
-        Session session = null;
-        boolean success = true;
+    public void updateProject(Project project) throws CustomException {
+        try{
+            session.update(project);
+
+        } catch (Exception e){
+            close(session);
+            e.printStackTrace();
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
+                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
+    }
+
+    @Override
+    public void deleteProject(String projectID) throws CustomException {
         try {
-            session = getSession();
             Query query = session.createQuery("DELETE FROM Project p WHERE p.projectId =:projectID");
             query.setParameter("projectID", projectID);
 
-            if(query.executeUpdate() > 0){
-                success = true;
+            query.executeUpdate();
 
-            } else {
-                success = false;
-            }
-
-        } catch (Exception e) {
-            logger.error("Database error occurs when delete: " + e.getMessage());
-            success = false;
-
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        } catch (Exception e){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
         }
-        return success;
     }
 
     @Override
     public Project getProjectByID(String projectID) {
-        Session session = null;
-        Project project = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM Project p WHERE p.projectId =:projectID");
-            query.setParameter("projectID", projectID);
+        Query query = session.createQuery("FROM Project p WHERE p.projectId =:projectID");
+        query.setParameter("projectID", projectID);
 
-            project = (Project) query.uniqueResult();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        Project project = (Project) query.uniqueResult();
+        if(project != null){
+            return project;
         }
-        return project;
+        return null;
     }
 
     @Override
     public Project getProjectByName(String name) {
-        Session session = null;
-        Project project = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM Project p WHERE p.projectName =:name");
-            query.setParameter("name", name);
+        Query query = session.createQuery("FROM Project p WHERE p.projectName =:name");
+        query.setParameter("name", name);
 
-            project = (Project) query.uniqueResult();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        Project project = (Project) query.uniqueResult();
+        if(project != null){
+            return project;
         }
-        return project;
+        return null;
     }
 
     @Override
     public List<Project> getAllProjects() {
-        Session session = null;
-        List<Project> projectList = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM Project");
+        Query query = session.createQuery("FROM Project");
 
-            projectList = query.list();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        List<Project> projectList = query.list();
+        if(projectList != null){
+            return projectList;
         }
-        return projectList;
+        return null;
     }
 
     @Override
     public List<Project> searchProjects(String projectName, String status, String clientName,
                                         String teamName, String memberName, String from, String range) {
 
-        Session session = null;
-        List<Project> projectList = null;
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;
         Map<String, String> paramValue = new HashMap<>();
-        try{
-            session = getSession();
-            queryBuilder.append("FROM Project p");
 
-            if(!Utility.isNullOrEmpty(projectName)){
-                queryBuilder.append(" WHERE p.projectName like :projectName");
-                paramValue.put("projectName", "%" + projectName + "%");
+        queryBuilder.append("FROM Project p");
+
+        if(!Utility.isNullOrEmpty(projectName)){
+            queryBuilder.append(" WHERE p.projectName like :projectName");
+            paramValue.put("projectName", "%" + projectName + "%");
+            hasClause = true;
+        }
+
+        if(!Utility.isNullOrEmpty(status)){
+            if(hasClause){
+                queryBuilder.append(" AND p.status.projectStatusName =:status");
+
+            } else {
+                queryBuilder.append(" WHERE p.status.projectStatusName =:status");
                 hasClause = true;
             }
+            paramValue.put("status", status);
+        }
 
-            if(!Utility.isNullOrEmpty(status)){
-                if(hasClause){
-                    queryBuilder.append(" AND p.status.projectStatusName =:status");
+        if(!Utility.isNullOrEmpty(clientName)){
+            if(hasClause){
+                queryBuilder.append(" AND p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
+                        "WHERE pc.client.memberName like :clientName)");
 
-                } else {
-                    queryBuilder.append(" WHERE p.status.projectStatusName =:status");
-                    hasClause = true;
-                }
-                paramValue.put("status", status);
+            } else {
+                queryBuilder.append(" WHERE p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
+                        "WHERE pc.client.memberName like :clientName)");
+                hasClause = true;
             }
+            paramValue.put("clientName", clientName);
+        }
 
-            if(!Utility.isNullOrEmpty(clientName)){
-                if(hasClause){
-                    queryBuilder.append(" AND p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
-                            "WHERE pc.client.memberName like :clientName)");
+        if(!Utility.isNullOrEmpty(teamName)){
+            if(hasClause){
+                queryBuilder.append(" AND p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                        "WHERE pt.team.name like :teamName)");
 
-                } else {
-                    queryBuilder.append(" WHERE p.projectId in (SELECT pc.project.projectId FROM ProjectClient pc " +
-                            "WHERE pc.client.memberName like :clientName)");
-                    hasClause = true;
-                }
-                paramValue.put("clientName", clientName);
+            } else {
+                queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                        "WHERE pt.team.name like :teamName)");
+                hasClause = true;
             }
+            paramValue.put("teamName", teamName);
+        }
 
-            if(!Utility.isNullOrEmpty(teamName)){
-                if(hasClause){
-                    queryBuilder.append(" AND p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
-                            "WHERE pt.team.name like :teamName)");
+        if(!Utility.isNullOrEmpty(memberName)){
+            if(hasClause){
+                queryBuilder.append(" AND p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
+                        "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.firstName like :memberName " +
+                        "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
 
-                } else {
-                    queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
-                            "WHERE pt.team.name like :teamName)");
-                    hasClause = true;
-                }
-                paramValue.put("teamName", teamName);
+            } else {
+                queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
+                        "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.firstName like :memberName " +
+                        "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
+                //hasClause = true;
             }
+            paramValue.put("memberName", memberName);
+        }
 
-            if(!Utility.isNullOrEmpty(memberName)){
-                if(hasClause){
-                    queryBuilder.append(" AND p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
-                            "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.firstName like :memberName " +
-                            "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
+        queryBuilder.append(" ORDER BY p.projectName ASC");
 
-                } else {
-                    queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
-                            "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.firstName like :memberName " +
-                            "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
-                    //hasClause = true;
-                }
-                paramValue.put("memberName", memberName);
-            }
+        logger.info("Query builder: " + queryBuilder.toString());
+        Query query = session.createQuery(queryBuilder.toString());
 
-            queryBuilder.append(" ORDER BY p.projectName ASC");
+        for(Map.Entry<String, String> entry : paramValue.entrySet()){
+            query.setParameter(entry.getKey(), entry.getValue());
+        }
 
-            logger.info("Query builder: " + queryBuilder.toString());
-            Query query = session.createQuery(queryBuilder.toString());
+        if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
+            query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
 
-            for(Map.Entry<String, String> entry : paramValue.entrySet()){
-                query.setParameter(entry.getKey(), entry.getValue());
-            }
+        List<Project> projectList = query.list();
+        if(projectList != null){
+            return projectList;
+        }
+        return null;
+    }
 
-            if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))
-                query.setFirstResult(Integer.valueOf(from)).setMaxResults(Integer.valueOf(range));
+    @Override
+    public ProjectStatus getProjectStatusById(String statusID) {
+        Query query = session.createQuery("FROM ProjectStatus ps WHERE ps.projectStatusId =:statusID");
+        query.setParameter("statusID", statusID);
 
-            projectList = query.list();
+        ProjectStatus status = (ProjectStatus) query.uniqueResult();
+        if(status != null){
+            return status;
+        }
+        return null;
+    }
+
+    @Override
+    public void saveProjectTeam(ProjectTeam projectTeam) throws CustomException {
+        try{
+            session.save(projectTeam);
 
         } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
         }
-        return projectList;
     }
 
     @Override
-    public boolean saveProjectTeam(ProjectTeam projectTeam) {
-        return save(projectTeam);
-    }
-
-    @Override
-    public boolean deleteProjectTeam(String projectID, String projectTeamID) {
-        Session session = null;
-        boolean success = true;
+    public void deleteProjectTeam(String projectID, String projectTeamID) throws CustomException {
         Query query;
         try {
-            session = getSession();
             if(projectID != null){
                 query = session.createQuery("DELETE FROM ProjectTeam pt WHERE pt.project.projectId =:projectID");
                 query.setParameter("projectID", projectID);
@@ -236,66 +236,52 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
                 query.setParameter("projectTeamID", projectTeamID);
             }
 
-            if(query.executeUpdate() > 0){
-                success = true;
-
-            } else {
-                success = false;
-            }
+            query.executeUpdate();
 
         } catch (Exception e) {
-            logger.error("Database error occurs when delete: " + e.getMessage());
-            success = false;
-
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
         }
-        return success;
     }
 
     @Override
     public List<ProjectTeam> getProjectTeams(String projectID, String employeeID) {
-        Session session = null;
-        List<ProjectTeam> projectTeams = null;
         Query query;
+        if(employeeID == null) {
+            query = session.createQuery("FROM ProjectTeam pt WHERE pt.project.projectId =:projectID");
+            query.setParameter("projectID", projectID);
+
+        } else {
+            query = session.createQuery("FROM ProjectTeam  pt WHERE pt.team.teamId in " +
+                    "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.employeeId =:employeeID)");
+            query.setParameter("employeeID", employeeID);
+        }
+
+        List<ProjectTeam> projectTeams = query.list();
+        if(projectTeams != null){
+            return projectTeams;
+        }
+        return null;
+    }
+
+    @Override
+    public void saveProjectClient(ProjectClient projectClient) throws CustomException {
         try{
-            session = getSession();
-            if(employeeID == null) {
-                query = session.createQuery("FROM ProjectTeam pt WHERE pt.project.projectId =:projectID");
-                query.setParameter("projectID", projectID);
-
-            } else {
-                query = session.createQuery("FROM ProjectTeam  pt WHERE pt.team.teamId in " +
-                        "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.employeeId =:employeeID)");
-                query.setParameter("employeeID", employeeID);
-            }
-
-            projectTeams = query.list();
+            session.save(projectClient);
 
         } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
-        }
-        return projectTeams;
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0003);
+            throw new CustomException(errorMessage);        }
     }
 
     @Override
-    public boolean saveProjectClient(ProjectClient projectClient) {
-        return save(projectClient);
-    }
-
-    @Override
-    public boolean deleteProjectClient(String projectID, String projectClientID) {
-        Session session = null;
-        boolean success = true;
+    public void deleteProjectClient(String projectID, String projectClientID) throws CustomException {
         Query query;
         try {
-            session = getSession();
             if(projectID != null){
                 query = session.createQuery("DELETE FROM ProjectClient pc WHERE pc.project.projectId =:projectID");
                 query.setParameter("projectID", projectID);
@@ -305,43 +291,25 @@ public class ProjectDaoImpl extends BaseDao implements ProjectDao {
                 query.setParameter("projectClientID", projectClientID);
             }
 
-            if(query.executeUpdate() > 0){
-                success = true;
-
-            } else {
-                success = false;
-            }
+            query.executeUpdate();
 
         } catch (Exception e) {
-            logger.error("Database error occurs when delete: " + e.getMessage());
-            success = false;
-
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0003);
+            throw new CustomException(errorMessage);
         }
-        return success;
     }
 
     @Override
     public List<ProjectClient> getProjectClients(String projectID) {
-        Session session = null;
-        List<ProjectClient> projectClients = null;
-        try{
-            session = getSession();
-            Query query = session.createQuery("FROM ProjectClient pc WHERE pc.project.projectId =:projectID");
-            query.setParameter("projectID", projectID);
+        Query query = session.createQuery("FROM ProjectClient pc WHERE pc.project.projectId =:projectID");
+        query.setParameter("projectID", projectID);
 
-            projectClients = query.list();
-
-        } catch (Exception e){
-            logger.error("Database error occurs when get: " + e.getMessage());
-        } finally {
-            if(session != null) {
-                close(session);
-            }
+        List<ProjectClient> projectClients = query.list();
+        if(projectClients != null){
+            return projectClients;
         }
-        return projectClients;
+        return null;
     }
 }

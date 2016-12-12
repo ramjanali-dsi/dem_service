@@ -1,15 +1,10 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.ClientDto;
-import com.dsi.dem.dto.transformer.ClientDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.Client;
 import com.dsi.dem.service.ClientService;
 import com.dsi.dem.service.impl.ClientServiceImpl;
-import com.dsi.dem.util.Utility;
-import com.google.gson.Gson;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -25,9 +20,6 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON})
 public class ClientResource {
 
-    private static final Logger logger = Logger.getLogger(ClientResource.class);
-
-    private static final ClientDtoTransformer TRANSFORMER = new ClientDtoTransformer();
     private static final ClientService clientService = new ClientServiceImpl();
 
     @POST
@@ -39,19 +31,7 @@ public class ClientResource {
     public Response createClient(@ApiParam(value = "Client Dto", required = true) ClientDto clientDto)
             throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        Client client = TRANSFORMER.getClient(clientDto);
-        logger.info("Convert Dto to Object:: End");
-
-        if(!Utility.isNullOrEmpty(clientDto.getProjectIds())) {
-            logger.info("Create client:: start");
-            clientService.saveClient(client);
-            clientService.saveClientProject(clientDto.getProjectIds(), client);
-        }
-        logger.info("Create client:: end");
-
-        return Response.ok().entity(TRANSFORMER.getClientDto(
-                clientService.getClientByID(client.getClientId()))).build();
+        return Response.ok().entity(clientService.saveClient(clientDto)).build();
     }
     
     @PUT
@@ -65,17 +45,7 @@ public class ClientResource {
                                  @ApiParam(value = "Client Dto", required = true) ClientDto clientDto)
             throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        Client client = TRANSFORMER.getClient(clientDto);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Client Update:: Start");
-        client.setClientId(clientID);
-        clientService.updateClient(client);
-        logger.info("Client Update:: End");
-
-        return Response.ok().entity(TRANSFORMER.getClientDto(
-                clientService.getClientByID(clientID))).build();
+        return Response.ok().entity(clientService.updateClient(clientDto, clientID)).build();
     }
     
     @DELETE
@@ -87,10 +57,7 @@ public class ClientResource {
     })
     public Response deleteClient(@PathParam("client_id") String clientID) throws CustomException {
 
-        logger.info("Client delete:: Start");
         clientService.deleteClient(clientID);
-        logger.info("Client delete:: End");
-
         return Response.ok().entity(null).build();
     }
     
@@ -102,10 +69,8 @@ public class ClientResource {
             @ApiResponse(code = 500, message = "Read client failed, unauthorized.")
     })
     public Response readClientOrAllClients(@PathParam("client_id") String clientID) throws CustomException {
-        
-        logger.info("Read a client");
-        return Response.ok().entity(TRANSFORMER.getClientDto(
-                clientService.getClientByID(clientID))).build();
+
+        return Response.ok().entity(clientService.getClientByID(clientID)).build();
     }
 
     @GET
@@ -120,8 +85,7 @@ public class ClientResource {
                                              @QueryParam("from") String from,
                                              @QueryParam("range") String range) throws CustomException {
 
-        logger.info("Read all client");
-        return Response.ok().entity(TRANSFORMER.getClientsDto(clientService.
-                searchClients(clientName, organization, clientEmail, from, range))).build();
+        return Response.ok().entity(clientService.searchClients(clientName, organization,
+                clientEmail, from, range)).build();
     }
 }

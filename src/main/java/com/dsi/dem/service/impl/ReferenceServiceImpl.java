@@ -4,6 +4,7 @@ import com.dsi.dem.dao.ReferenceDao;
 import com.dsi.dem.dao.impl.ReferenceDaoImpl;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.ReferenceService;
+import com.dsi.dem.util.Constants;
 
 import java.util.List;
 
@@ -30,6 +31,11 @@ public class ReferenceServiceImpl implements ReferenceService {
     }
 
     @Override
+    public List<EmployeeStatus> getAllEmployeeStatusNames() {
+        return referenceDao.getAllEmployeeStatusNames();
+    }
+
+    @Override
     public List<ProjectStatus> getAllProjectStatusNames() {
         return referenceDao.getAllProjectStatusNames();
     }
@@ -40,12 +46,17 @@ public class ReferenceServiceImpl implements ReferenceService {
     }
 
     @Override
-    public List<LeaveType> getAllLeaveTypes() {
-        return referenceDao.getAllLeaveTypes();
+    public List<LeaveType> getAllLeaveTypes(String mode) {
+        return referenceDao.getAllLeaveTypes(mode);
     }
 
     @Override
     public List<LeaveRequestType> getAllLeaveRequestTypes() {
         return referenceDao.getAllLeaveRequestTypes();
+    }
+
+    @Override
+    public List<HolidayType> getAllHolidayTypes() {
+        return referenceDao.getAllHolidayTypes();
     }
 }

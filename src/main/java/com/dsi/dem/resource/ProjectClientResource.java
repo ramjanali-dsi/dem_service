@@ -1,16 +1,10 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.ProjectDto;
-import com.dsi.dem.dto.transformer.ProjectDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
-import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.service.impl.ProjectServiceImpl;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -26,9 +20,6 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON})
 public class ProjectClientResource {
 
-    private static final Logger logger = Logger.getLogger(ProjectClientResource.class);
-
-    private static final ProjectDtoTransformer TRANSFORMER = new ProjectDtoTransformer();
     private static final ProjectService projectService = new ProjectServiceImpl();
 
     @POST
@@ -41,11 +32,7 @@ public class ProjectClientResource {
                                         @ApiParam(value = "Project Dto", required = true) ProjectDto projectDto)
             throws CustomException {
 
-        logger.info("Project client create:: start");
-        projectService.saveProjectClient(projectDto.getClientIds(), projectService.getProjectByID(projectID));
-        logger.info("Project client create:: end");
-
-        return Response.ok().entity(TRANSFORMER.getProjectClientsDto(projectService.getProjectClients(projectID))).build();
+        return Response.ok().entity(projectService.createProjectClients(projectDto, projectID)).build();
     }
 
     @DELETE
@@ -58,10 +45,8 @@ public class ProjectClientResource {
     public Response deleteProjectClient(@PathParam("project_id") String projectID,
                                         @PathParam("client_id") String clientID) throws CustomException {
 
-        logger.info("Project client delete:: start");
-        projectService.deleteProjectClient(clientID);
-        logger.info("Project client delete:: end");
 
-        return null;
+        projectService.deleteProjectClient(clientID);
+        return Response.ok().entity(null).build();
     }
 }

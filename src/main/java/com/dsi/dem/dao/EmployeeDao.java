@@ -1,6 +1,7 @@
 package com.dsi.dem.dao;
 
 import com.dsi.dem.model.*;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -8,6 +9,8 @@ import java.util.List;
  * Created by sabbir on 7/14/16.
  */
 public interface EmployeeDao {
+
+    void setSession(Session session);
 
     boolean saveEmployee(Employee employee);
     boolean updateEmployee(Employee employee);

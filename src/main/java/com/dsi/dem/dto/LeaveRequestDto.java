@@ -17,6 +17,8 @@ public class LeaveRequestDto {
 
     private String employeeId;
 
+    private String employeeNo;
+
     private Date applyDate;
 
     private String leaveRequestTypeId;
@@ -75,6 +77,14 @@ public class LeaveRequestDto {
 
     public void setEmployeeId(String employeeId) {
         this.employeeId = employeeId;
+    }
+
+    public String getEmployeeNo() {
+        return employeeNo;
+    }
+
+    public void setEmployeeNo(String employeeNo) {
+        this.employeeNo = employeeNo;
     }
 
     @JsonSerialize(using = JsonDateSerializer.class)

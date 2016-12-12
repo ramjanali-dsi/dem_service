@@ -1,13 +1,10 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.LeaveRequestDto;
-import com.dsi.dem.dto.transformer.LeaveDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.LeaveRequest;
 import com.dsi.dem.service.LeaveService;
 import com.dsi.dem.service.impl.LeaveServiceImpl;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -25,10 +22,7 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON})
 public class LeaveRequestResource {
 
-    private static final Logger logger = Logger.getLogger(LeaveRequestResource.class);
-
     private static final LeaveService leaveService = new LeaveServiceImpl();
-    private static final LeaveDtoTransformer LEAVE_DTO_TRANSFORMER = new LeaveDtoTransformer();
 
     @Context
     HttpServletRequest request;
@@ -55,10 +49,8 @@ public class LeaveRequestResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("Search or read employees leave summaries");
-        return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getAllEmployeesLeaveDto(leaveService.
-                searchOrReadEmployeesLeaveSummary(employeeNo, firstName, lastName, nickName, email, phone, teamName,
-                        projectName, employeeId, from, range, userID))).build();
+        return Response.ok().entity(leaveService.searchOrReadEmployeesLeaveSummary(employeeNo, firstName, lastName, nickName,
+                email, phone, teamName, projectName, employeeId, from, range, userID)).build();
     }
 
     @GET
@@ -93,11 +85,10 @@ public class LeaveRequestResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("Search or read employees leave details");
-        return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getAllEmployeesLeaveDetails(
-                leaveService.searchOrReadLeaveDetails(employeeNo, firstName, lastName, nickName, email, phone, teamName,
-                        projectName, employeeId, leaveType, requestType, approvedStartDate, approvedEndDate, approvedFirstName,
-                        approvedLastName, approvedNickName, appliedStartDate, appliedEndDate, leaveStatus, from, range, userID))).build();
+        return Response.ok().entity(leaveService.searchOrReadLeaveDetails(employeeNo, firstName, lastName, nickName, email,
+                phone, teamName, projectName, employeeId, leaveType, requestType, approvedStartDate, approvedEndDate,
+                approvedFirstName, approvedLastName, approvedNickName, appliedStartDate, appliedEndDate, leaveStatus,
+                from, range, userID)).build();
     }
 
     @POST
@@ -114,14 +105,6 @@ public class LeaveRequestResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        logger.info("Employees leave request approval:: Start");
-        LeaveRequest leaveRequest = LEAVE_DTO_TRANSFORMER.getLeaveRequest(leaveRequestDto);
-
-        leaveRequest.setLeaveRequestId(leaveRequestId);
-        leaveService.approveLeaveRequest(leaveRequest, userID);
-        logger.info("Employees leave request approval:: End");
-
-        return Response.ok().entity(LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(
-                leaveService.getLeaveRequestById(leaveRequestId, null))).build();
+        return Response.ok().entity(leaveService.approveLeaveRequest(leaveRequestDto, userID, leaveRequestId)).build();
     }
 }

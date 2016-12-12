@@ -1,8 +1,11 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
+import com.dsi.dem.model.ProjectStatus;
 import com.dsi.dem.model.ProjectTeam;
+import org.hibernate.Session;
 
 import java.util.List;
 
@@ -11,20 +14,23 @@ import java.util.List;
  */
 public interface ProjectDao {
 
-    boolean saveProject(Project project);
-    boolean updateProject(Project project);
-    boolean deleteProject(String projectID);
+    void setSession(Session session);
+    void saveProject(Project project) throws CustomException;
+    void updateProject(Project project) throws CustomException;
+    void deleteProject(String projectID) throws CustomException;
     Project getProjectByID(String projectID);
     Project getProjectByName(String name);
     List<Project> getAllProjects();
     List<Project> searchProjects(String projectName, String status, String clientName, String teamName,
                                  String memberName, String from, String range);
 
-    boolean saveProjectTeam(ProjectTeam projectTeam);
-    boolean deleteProjectTeam(String projectID, String projectTeamID);
+    ProjectStatus getProjectStatusById(String statusID);
+
+    void saveProjectTeam(ProjectTeam projectTeam) throws CustomException;
+    void deleteProjectTeam(String projectID, String projectTeamID) throws CustomException;
     List<ProjectTeam> getProjectTeams(String projectID, String employeeID);
 
-    boolean saveProjectClient(ProjectClient projectClient);
-    boolean deleteProjectClient(String projectID, String projectClientID);
+    void saveProjectClient(ProjectClient projectClient) throws CustomException;
+    void deleteProjectClient(String projectID, String projectClientID) throws CustomException;
     List<ProjectClient> getProjectClients(String projectID);
 }

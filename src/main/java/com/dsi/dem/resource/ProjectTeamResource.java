@@ -1,18 +1,10 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.ProjectDto;
-import com.dsi.dem.dto.TeamDto;
-import com.dsi.dem.dto.transformer.ProjectDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
-import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.service.impl.ProjectServiceImpl;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -28,9 +20,6 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON})
 public class ProjectTeamResource {
 
-    private static final Logger logger = Logger.getLogger(ProjectTeamResource.class);
-
-    private static final ProjectDtoTransformer TRANSFORMER = new ProjectDtoTransformer();
     private static final ProjectService projectService = new ProjectServiceImpl();
 
     @POST
@@ -43,18 +32,7 @@ public class ProjectTeamResource {
                                       @ApiParam(value = "Project Dto", required = true) ProjectDto projectDto)
             throws CustomException {
 
-        logger.info("Project team create:: start");
-        if(Utility.isNullOrEmpty(projectDto.getTeamIds())){
-            //ErrorContext errorContext = new ErrorContext(null, "ProjectTeam", "Project team list not defined.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
-                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0002);
-            throw new CustomException(errorMessage);
-        }
-
-        projectService.saveProjectTeam(projectDto.getTeamIds(), projectService.getProjectByID(projectID));
-        logger.info("Project team create:: end");
-
-        return Response.ok().entity(TRANSFORMER.getProjectTeamsDto(projectService.getProjectTeams(projectID, null))).build();
+        return Response.ok().entity(projectService.createProjectTeams(projectDto, projectID)).build();
     }
 
     @DELETE
@@ -67,10 +45,7 @@ public class ProjectTeamResource {
     public Response deleteProjectTeam(@PathParam("project_id") String projectID,
                                       @PathParam("team_id") String teamID) throws CustomException {
 
-        logger.info("Project team delete:: start");
         projectService.deleteProjectTeam(teamID);
-        logger.info("Project team delete:: end");
-
-        return null;
+        return Response.ok().entity(null).build();
     }
 }

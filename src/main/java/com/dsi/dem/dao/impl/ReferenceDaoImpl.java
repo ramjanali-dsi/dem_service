@@ -2,6 +2,7 @@ package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.ReferenceDao;
 import com.dsi.dem.model.*;
+import com.dsi.dem.util.Constants;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -76,6 +77,26 @@ public class ReferenceDaoImpl extends BaseDao implements ReferenceDao {
     }
 
     @Override
+    public List<EmployeeStatus> getAllEmployeeStatusNames() {
+        Session session = null;
+        List<EmployeeStatus> employeeStatusList = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeStatus ");
+
+            employeeStatusList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeStatusList;
+    }
+
+    @Override
     public List<ProjectStatus> getAllProjectStatusNames() {
         Session session = null;
         List<ProjectStatus> projectStatusList = null;
@@ -116,12 +137,13 @@ public class ReferenceDaoImpl extends BaseDao implements ReferenceDao {
     }
 
     @Override
-    public List<LeaveType> getAllLeaveTypes() {
+    public List<LeaveType> getAllLeaveTypes(String mode) {
         Session session = null;
         List<LeaveType> leaveTypes = null;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM LeaveType");
+            Query query = session.createQuery("FROM LeaveType l WHERE l.type =:mode");
+            query.setParameter("mode", mode);
 
             leaveTypes = query.list();
 
@@ -153,5 +175,25 @@ public class ReferenceDaoImpl extends BaseDao implements ReferenceDao {
             }
         }
         return leaveRequestTypes;
+    }
+
+    @Override
+    public List<HolidayType> getAllHolidayTypes() {
+        Session session = null;
+        List<HolidayType> holidayTypes = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM HolidayType");
+
+            holidayTypes = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return holidayTypes;
     }
 }

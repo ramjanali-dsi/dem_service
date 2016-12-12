@@ -1,14 +1,10 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.ProjectDto;
-import com.dsi.dem.dto.transformer.ProjectDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.Project;
 import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.service.impl.ProjectServiceImpl;
-import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -24,9 +20,6 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON})
 public class ProjectResource {
 
-    private static final Logger logger = Logger.getLogger(ProjectResource.class);
-
-    private static final ProjectDtoTransformer TRANSFORMER = new ProjectDtoTransformer();
     private static final ProjectService projectService = new ProjectServiceImpl();
 
     @POST
@@ -38,23 +31,7 @@ public class ProjectResource {
     public Response createProject(@ApiParam(value = "Project Dto", required = true)ProjectDto  projectDto)
             throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        Project project = TRANSFORMER.getProject(projectDto);
-        logger.info("Convert Dto to Object:: End");
-
-        if(!Utility.isNullOrEmpty(projectDto.getTeamIds())){
-            logger.info("Project Create:: Start");
-            projectService.saveProject(project);
-            projectService.saveProjectTeam(projectDto.getTeamIds(), project);
-
-            if(!Utility.isNullOrEmpty(projectDto.getClientIds())){
-                projectService.saveProjectClient(projectDto.getClientIds(), project);
-            }
-        }
-        logger.info("Project Create:: End");
-
-        return Response.ok().entity(TRANSFORMER.getProjectDto(
-                projectService.getProjectByID(project.getProjectId()))).build();
+        return Response.ok().entity(projectService.saveProject(projectDto)).build();
     }
 
     @PUT
@@ -68,17 +45,7 @@ public class ProjectResource {
                                   @ApiParam(value = "Project Dto", required = true) ProjectDto projectDto)
             throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        Project project = TRANSFORMER.getProject(projectDto);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Project Update:: Start");
-        project.setProjectId(projectID);
-        projectService.updateProject(project);
-        logger.info("Project Update:: End");
-
-        return Response.ok().entity(TRANSFORMER.getProjectDto(
-                projectService.getProjectByID(projectID))).build();
+        return Response.ok().entity(projectService.updateProject(projectID, projectDto)).build();
     }
 
     @DELETE
@@ -90,10 +57,7 @@ public class ProjectResource {
     })
     public Response deleteProject(@PathParam("project_id") String projectID) throws CustomException {
 
-        logger.info("Project delete:: Start");
         projectService.deleteProject(projectID);
-        logger.info("Project delete:: End");
-
         return Response.ok().entity(null).build();
     }
 
@@ -106,9 +70,7 @@ public class ProjectResource {
     })
     public Response readProjectOrAllProjects(@PathParam("project_id") String projectID) throws CustomException {
 
-        logger.info("Read a project");
-        return Response.ok().entity(TRANSFORMER.getProjectDto(
-                projectService.getProjectByID(projectID))).build();
+        return Response.ok().entity(projectService.getProjectByID(projectID)).build();
     }
 
     @GET
@@ -125,8 +87,8 @@ public class ProjectResource {
                                                @QueryParam("from") String from,
                                                @QueryParam("range") String range) throws CustomException {
 
-        logger.info("Read all projects");
-        return Response.ok().entity(TRANSFORMER.getProjectsDto(projectService.
-                searchProjects(projectName, status, clientName, teamName, memberName, from, range))).build();
+
+        return Response.ok().entity(projectService.searchProjects(projectName, status, clientName,
+                teamName, memberName, from, range)).build();
     }
 }

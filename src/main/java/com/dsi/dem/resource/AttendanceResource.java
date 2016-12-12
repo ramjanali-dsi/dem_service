@@ -1,26 +1,14 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.AttendanceDto;
-import com.dsi.dem.dto.TempAttendanceDto;
 import com.dsi.dem.dto.transformer.AttendanceDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
-import com.dsi.dem.exception.ErrorMessage;
-import com.dsi.dem.model.TemporaryAttendance;
 import com.dsi.dem.service.AttendanceService;
-import com.dsi.dem.service.EmployeeService;
-import com.dsi.dem.service.impl.APIProvider;
 import com.dsi.dem.service.impl.AttendanceServiceImpl;
-import com.dsi.dem.service.impl.EmployeeServiceImpl;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
 import com.wordnik.swagger.jaxrs.PATCH;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -29,14 +17,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created by sabbir on 10/19/16.
@@ -65,7 +47,6 @@ public class AttendanceResource {
     })
     public Response checkAvailableAttendanceSchedule(@QueryParam("date") String date) throws CustomException {
 
-        logger.info("Check attendance date schedule exist or not!");
         return Response.ok().entity(attendanceService.
                 isAvailableEmployeeOrTempAttendanceSheet(date)).build();
     }
@@ -79,20 +60,36 @@ public class AttendanceResource {
             @ApiResponse(code = 500, message = "Employees temporary attendance create failed, unauthorized.")
     })
     public Response createEmployeesTemporaryAttendance(@FormDataParam("file") InputStream fileInputStream,
-                                              @FormDataParam("file") FormDataContentDisposition fileDetails) throws CustomException {
+                                                       @FormDataParam("file") FormDataContentDisposition fileDetails) throws CustomException {
+
+        String userID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+
+        return Response.ok().entity(attendanceService.saveTempAttendance(fileInputStream, userID)).build();
+    }
+
+    @PATCH
+    @Path("/temporary")
+    @ApiOperation(value = "Update Employees Temporary Attendances", notes = "Create Employees Temporary Attendances", position = 3)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Employees temporary attendances update success"),
+            @ApiResponse(code = 500, message = "Employees temporary attendances update failed, unauthorized.")
+    })
+    public Response updateTemporaryAttendance(@QueryParam("attendanceDate") String attendanceDate,
+                                              @ApiParam(value = "Employees Attendance Info", required = true)
+                                                      List<AttendanceDto> attendanceDtoList) throws CustomException {
 
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
         logger.info("User id: " + userID);
 
-        logger.info("Attendance sheet upload:: start");
-        attendanceService.saveTempAttendance(fileInputStream, userID);
-        logger.info("Attendance sheet upload:: end");
+        attendanceService.updateTempAttendance(attendanceDtoList, userID, attendanceDate);
 
-        return commonResponse();
+        return Response.ok().entity(DTO_TRANSFORMER.getTempAttendancesDto(
+                attendanceService.getAllTempAttendances(attendanceDate))).build();
     }
 
-    @PATCH
+    /*@PATCH
     @Path("/temporary/{temp_attendance_id}")
     @ApiOperation(value = "Update Employees Temporary Attendance", notes = "Create Employees Temporary Attendance", position = 3)
     @ApiResponses(value = {
@@ -113,7 +110,7 @@ public class AttendanceResource {
 
         return Response.ok().entity(DTO_TRANSFORMER.getTempAttendanceDto(attendanceService.
                 getTemporaryAttendance(tempAttendanceId))).build();
-    }
+    }*/
 
     @GET
     @Path("/temporary")
@@ -124,7 +121,6 @@ public class AttendanceResource {
     })
     public Response searchOrReadAttendanceSchedule(@QueryParam("attendanceDate") String attendanceDate) throws CustomException {
 
-        logger.info("Read all temporary attendances for this date: " + attendanceDate);
         return Response.ok().entity(DTO_TRANSFORMER.getTempAttendancesDto(attendanceService.
                 getAllTempAttendances(attendanceDate))).build();
     }
@@ -140,7 +136,6 @@ public class AttendanceResource {
                                           @QueryParam("mode") String mode) throws CustomException {
 
         logger.info("Check attendance status for this date: " + attendanceDate + " & mode: " + mode);
-
         return Response.ok().entity(attendanceService.getAttendanceStatus(attendanceDate, mode)).build();
     }
 
@@ -150,31 +145,22 @@ public class AttendanceResource {
             @ApiResponse(code = 200, message = "Employees attendance create success"),
             @ApiResponse(code = 500, message = "Employees attendance create failed, unauthorized.")
     })
-    public Response createEmployeesAttendance(@QueryParam("attendanceDate") String attendanceDate) throws CustomException {
+    public Response createEmployeesAttendance(@QueryParam("attendanceDate") String attendanceDate,
+                                              @ApiParam(value = "Employees Attendance Info", required = true)
+                                                      List<AttendanceDto> attendanceDtoList) throws CustomException {
 
-        logger.info("Employees attendance schedule create: start");
-        attendanceService.saveAttendance(attendanceDate);
-        logger.info("Employees attendance schedule create: end");
+        String userID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+        logger.info("User id: " + userID);
 
-        return commonResponse();
-    }
+        attendanceService.saveAttendance(attendanceDtoList, userID, attendanceDate);
 
-    private Response commonResponse() throws CustomException {
-        try{
-            JSONObject resultObj = new JSONObject();
-            resultObj.put(Constants.MESSAGE, Constants.SUCCESS);
-
-            return Response.ok().entity(resultObj.toString()).build();
-
-        } catch (JSONException je) {
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
-                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
-            throw new CustomException(errorMessage);
-        }
+        return Response.ok().entity(DTO_TRANSFORMER.getEmployeesAttendanceList(
+                attendanceService.getAllAttendancesByDate(attendanceDate))).build();
     }
 
     @GET
-    @ApiOperation(value = "Search or Read All Attendance Schedule", notes = "Search or Read All Attendance Schedule", position = 5)
+    @ApiOperation(value = "Search or Read All Attendance Schedule", notes = "Search or Read All Attendance Schedule", position = 7)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Search or read all attendance schedule success"),
             @ApiResponse(code = 500, message = "Search or read all attendance schedule failed, unauthorized.")
@@ -192,7 +178,33 @@ public class AttendanceResource {
                                                    @QueryParam("attendanceId") String attendanceID) throws CustomException {
 
         logger.info("Read or search all attendance schedule.");
-        return Response.ok().entity(DTO_TRANSFORMER.getEmployeesAttendanceList(attendanceService.searchOrReadAttendances(null, employeeNo, isAbsent, firstName,
-                lastName, nickName, attendanceDate, teamName, projectName, from, range))).build();
+        return Response.ok().entity(DTO_TRANSFORMER.getEmployeesAttendanceList(attendanceService.
+                searchOrReadAttendances(null, employeeNo, isAbsent, firstName, lastName,
+                        nickName, attendanceDate, teamName, projectName, from, range))).build();
+    }
+
+    @GET
+    @Path("/draft")
+    @ApiOperation(value = "Read Attendance Draft File", notes = "Read Attendance Draft File", position = 8)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Read attendance draft files success"),
+            @ApiResponse(code = 500, message = "Read attendance draft files failed, unauthorized.")
+    })
+    public Response readAttendanceDraftFile(@QueryParam("from") String from,
+                                            @QueryParam("range") String range) throws CustomException {
+
+        return Response.ok().entity(attendanceService.getDraftAttendanceFileDetails(from, range)).build();
+    }
+
+    @DELETE
+    @ApiOperation(value = "Delete Attendances", notes = "Delete Attendances", position = 9)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Delete attendances success"),
+            @ApiResponse(code = 500, message = "Delete attendances failed, unauthorized.")
+    })
+    public Response deleteAllAttendances(@QueryParam("attendanceDate") String attendanceDate) throws CustomException {
+
+        attendanceService.deleteAttendance(attendanceDate);
+        return Response.ok().entity(null).build();
     }
 }

@@ -3,6 +3,7 @@ package com.dsi.dem.resource;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.service.ReferenceService;
 import com.dsi.dem.service.impl.ReferenceServiceImpl;
+import com.dsi.dem.util.Constants;
 import com.wordnik.swagger.annotations.Api;
 import org.apache.log4j.Logger;
 
@@ -49,6 +50,13 @@ public class ReferenceResource {
     }
 
     @GET
+    @Path("/employee_status")
+    public Response getAllEmployeeStatus() throws CustomException {
+        logger.info("Read all employee status names");
+        return Response.ok().entity(referenceService.getAllEmployeeStatusNames()).build();
+    }
+
+    @GET
     @Path("/project_status")
     public Response getAllProjectStatusNames() throws CustomException {
         logger.info("Read all project status names");
@@ -65,8 +73,17 @@ public class ReferenceResource {
     @GET
     @Path("/leave_type")
     public Response getAllLeaveTypes() throws CustomException {
-        logger.info("Read all leave types");
-        return Response.ok().entity(referenceService.getAllLeaveTypes()).build();
+        logger.info("Read all general leave types");
+        return Response.ok().entity(referenceService.getAllLeaveTypes(
+                Constants.GENERAL_LEAVE_TYPE)).build();
+    }
+
+    @GET
+    @Path("/special_leave_type")
+    public Response getAllSpecialLeaveTypes() throws CustomException {
+        logger.info("Read all special leave types");
+        return Response.ok().entity(referenceService.getAllLeaveTypes(
+                Constants.SPECIAL_LEAVE_TYPE)).build();
     }
 
     @GET
@@ -74,5 +91,12 @@ public class ReferenceResource {
     public Response getAllLeaveRequestTypes() throws CustomException {
         logger.info("Read all leave request types");
         return Response.ok().entity(referenceService.getAllLeaveRequestTypes()).build();
+    }
+
+    @GET
+    @Path("/holiday_type")
+    public Response getAllHolidayTypes() throws CustomException {
+        logger.info("Read all holiday types");
+        return Response.ok().entity(referenceService.getAllHolidayTypes()).build();
     }
 }

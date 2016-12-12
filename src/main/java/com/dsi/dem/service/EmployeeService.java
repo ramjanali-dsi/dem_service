@@ -1,8 +1,10 @@
 package com.dsi.dem.service;
 
+import com.dsi.dem.dto.EmployeeDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.Employee;
 
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -10,9 +12,9 @@ import java.util.List;
  */
 public interface EmployeeService {
 
-    void saveEmployee(Employee employee) throws CustomException;
+    Employee saveEmployee(Employee employee) throws CustomException;
     void validateInputForCreation(Employee employee) throws CustomException;
-    void updateEmployee(Employee employee) throws CustomException;
+    Employee updateEmployee(Employee employee) throws CustomException;
     void deleteEmployee(String employeeID) throws CustomException;
     Employee getEmployeeByID(String employeeID) throws CustomException;
     Employee getEmployeeByUserID(String userID) throws CustomException;

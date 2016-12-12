@@ -1,14 +1,10 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.TeamDto;
-import com.dsi.dem.dto.transformer.TeamDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.Team;
 import com.dsi.dem.service.TeamService;
 import com.dsi.dem.service.impl.TeamServiceImpl;
-import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -24,9 +20,6 @@ import javax.ws.rs.core.Response;
 @Consumes({MediaType.APPLICATION_JSON})
 public class TeamResource {
 
-    private static final Logger logger = Logger.getLogger(TeamResource.class);
-
-    private static final TeamDtoTransformer TRANSFORMER = new TeamDtoTransformer();
     private static final TeamService teamService = new TeamServiceImpl();
 
     @POST
@@ -37,19 +30,7 @@ public class TeamResource {
     })
     public Response createTeam(@ApiParam(value = "Team Dto", required = true) TeamDto teamDto) throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        Team team = TRANSFORMER.getTeam(teamDto);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Team Create:: Start");
-        teamService.saveTeam(team);
-
-        if(!Utility.isNullOrEmpty(teamDto.getProjectIds())) {
-            teamService.saveTeamProjects(teamDto.getProjectIds(), team);
-        }
-        logger.info("Team Create:: End");
-
-        return Response.ok().entity(TRANSFORMER.getTeamDto(teamService.getTeamByID(team.getTeamId()))).build();
+        return Response.ok().entity(teamService.saveTeam(teamDto)).build();
     }
 
     @PUT
@@ -62,16 +43,7 @@ public class TeamResource {
     public Response updateTeam(@PathParam("team_id") String teamID,
                                @ApiParam(value = "Team Dto", required = true) TeamDto teamDto) throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        Team team = TRANSFORMER.getTeam(teamDto);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Team Update:: Start");
-        team.setTeamId(teamID);
-        teamService.updateTeam(team);
-        logger.info("Team Update:: End");
-
-        return Response.ok().entity(TRANSFORMER.getTeamDto(teamService.getTeamByID(teamID))).build();
+        return Response.ok().entity(teamService.updateTeam(teamDto, teamID)).build();
     }
 
     @DELETE
@@ -83,10 +55,7 @@ public class TeamResource {
     })
     public Response deleteTeam(@PathParam("team_id") String teamID) throws CustomException {
 
-        logger.info("Team delete:: Start");
         teamService.deleteTeam(teamID);
-        logger.info("Team delete:: End");
-
         return Response.ok().entity(null).build();
     }
 
@@ -99,8 +68,7 @@ public class TeamResource {
     })
     public Response readTeamOrAllTeams(@PathParam("team_id") String teamID) throws CustomException {
 
-        logger.info("Read a team info");
-        return Response.ok().entity(TRANSFORMER.getTeamDto(teamService.getTeamByID(teamID))).build();
+        return Response.ok().entity(teamService.getTeamByID(teamID)).build();
     }
 
     @GET
@@ -119,8 +87,7 @@ public class TeamResource {
                                          @QueryParam("from") String from,
                                          @QueryParam("range") String range) throws CustomException {
 
-        logger.info("Read all team info");
-        return Response.ok().entity(TRANSFORMER.getTeamsDto(teamService.searchTeams(teamName, status, floor, room,
-                memberName, projectName, clientName, from, range))).build();
+        return Response.ok().entity(teamService.searchTeams(teamName, status, floor, room, memberName,
+                projectName, clientName, from, range)).build();
     }
 }

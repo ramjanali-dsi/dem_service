@@ -59,7 +59,6 @@ public class ClientDtoTransformer {
 
         } catch (Exception e){
             e.printStackTrace();
-            //ErrorContext ErrorTypeConstans = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -77,7 +76,6 @@ public class ClientDtoTransformer {
 
         } catch (Exception e){
             e.printStackTrace();
-            //ErrorContext ErrorTypeConstans = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);

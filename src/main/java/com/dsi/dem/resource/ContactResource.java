@@ -1,14 +1,11 @@
 package com.dsi.dem.resource;
 
-import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.dto.EmployeeContactDto;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.model.EmployeeContact;
 import com.dsi.dem.service.ContactService;
 import com.dsi.dem.service.impl.ContactServiceImpl;
 import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -25,9 +22,6 @@ import java.util.List;
 @Consumes({MediaType.APPLICATION_JSON})
 public class ContactResource {
 
-    private static final Logger logger = Logger.getLogger(ContactResource.class);
-
-    private static final EmployeeDtoTransformer EMPLOYEE_DTO_TRANSFORMER = new EmployeeDtoTransformer();
     private static final ContactService contactService = new ContactServiceImpl();
 
     @POST
@@ -40,16 +34,7 @@ public class ContactResource {
                                            @ApiParam(value = "EmployeeContact Dto", required = true)
                                                    List<EmployeeContactDto> employeeContactDtoList) throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        List<EmployeeContact> employeeContactList = EMPLOYEE_DTO_TRANSFORMER.getContactInfoList(employeeContactDtoList);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Employees Contacts info Create:: Start");
-        contactService.saveEmployeeContactInfo(employeeContactList, employeeID);
-        logger.info("Employee Contacts info Create:: End");
-
-        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getContactInfoDtoList(
-                contactService.getEmployeesContactInfoByEmployeeID(employeeID))).build();
+        return Response.ok().entity(contactService.saveEmployeeContactInfo(employeeContactDtoList, employeeID)).build();
     }
 
     @PUT
@@ -64,17 +49,7 @@ public class ContactResource {
                                            @ApiParam(value = "EmployeeContact Dto", required = true)
                                                        EmployeeContactDto employeeContactDto) throws CustomException {
 
-        logger.info("Convert Dto to Object:: Start");
-        EmployeeContact employeeContact = EMPLOYEE_DTO_TRANSFORMER.getEmployeeContactInfo(employeeContactDto);
-        logger.info("Convert Dto to Object:: End");
-
-        logger.info("Employees contact info update:: Start");
-        employeeContact.setContactNumberId(contactID);
-        contactService.updateEmployeeContactInfo(employeeContact, employeeID);
-        logger.info("Employees contact info update:: End");
-
-        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeContactInfoDto(
-                contactService.getEmployeeContactInfo(contactID, employeeID))).build();
+        return Response.ok().entity(contactService.updateEmployeeContactInfo(employeeContactDto, employeeID, contactID)).build();
     }
 
     @DELETE
@@ -87,11 +62,8 @@ public class ContactResource {
     public Response deleteEmployeesContact(@PathParam("employee_id") String employeeID,
                                            @PathParam("contact_id") String contactID) throws CustomException {
 
-        logger.info("Employees contact info delete:: Start");
         contactService.deleteEmployeeContactInfo(contactID);
-        logger.info("Employees contact info delete:: End");
-
-        return null;
+        return Response.ok().entity(null).build();
     }
 
     @GET
@@ -104,9 +76,7 @@ public class ContactResource {
     public Response readEmployeesContactOrAllContacts(@PathParam("employee_id") String employeeID,
                                                       @PathParam("contact_id") String contactID) throws CustomException {
 
-        logger.info("Read an employees contact info");
-        return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeContactInfoDto(
-                contactService.getEmployeeContactInfo(contactID, employeeID))).build();
+        return Response.ok().entity(contactService.getEmployeeContactInfo(contactID, employeeID)).build();
     }
 
     @GET
@@ -122,10 +92,9 @@ public class ContactResource {
             //TODO search employees contact info
 
         } else {
-            logger.info("Read employees all contact info");
-            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getContactInfoDtoList(
-                    contactService.getEmployeesContactInfoByEmployeeID(employeeID))).build();
+            return Response.ok().entity(contactService.getEmployeesContactInfoByEmployeeID(employeeID)).build();
         }
-        return null;
+
+        return Response.ok().entity(null).build();
     }
 }

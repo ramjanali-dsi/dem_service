@@ -6,7 +6,9 @@ import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Employee;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.DateTime;
@@ -15,6 +17,7 @@ import org.joda.time.Interval;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -31,29 +34,27 @@ public class Utility {
 
     public static boolean isNullOrEmpty(String s){
 
-        if(s==null ||s.isEmpty() ){
-            return true;
-        }
-        return false;
+        return s == null || s.isEmpty();
     }
 
     public static boolean isNullOrEmpty(List list){
 
-        if(list==null || list.size() == 0 ){
-            return true;
-        }
-        return false;
+        return list == null || list.size() == 0;
     }
 
-    public static final String generateRandomString(){
+    public static String generateRandomString(){
         return UUID.randomUUID().toString();
     }
 
-    public static final Date today() {
+    public static Date today() {
         return new Date();
     }
 
-    public static final int getDaysBetween(Date d1, Date d2){
+    public static Timestamp todayTimeStamp(){
+        return new Timestamp(System.currentTimeMillis());
+    }
+
+    public static int getDaysBetween(Date d1, Date d2){
         return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24) );
     }
 
@@ -61,6 +62,26 @@ public class Utility {
         Interval interval = new Interval(new DateTime(startDate),
                 new DateTime(endDate));
         return interval.contains(new DateTime(checkDate));
+    }
+
+    public static Boolean getWeekendBetweenDate(Date startDate, Date endDate){
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(startDate);
+
+        Calendar calendar2 = Calendar.getInstance();
+        calendar2.setTime(endDate);
+
+        boolean flag = false;
+        while(calendar1.compareTo(calendar2) <= 0){
+            if(calendar1.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY
+                    || calendar1.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+
+                flag = true;
+                break;
+            }
+            calendar1.add(Calendar.DATE, 1);
+        }
+        return flag;
     }
 
     public static boolean isGreater02PM(Date date) {
@@ -75,7 +96,7 @@ public class Utility {
         return false;
     }
 
-    public static final String getTimeCalculation(String dateTime1, String dateTime2){
+    public static String getTimeCalculation(String dateTime1, String dateTime2){
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         Date date1;
         Date date2;
@@ -94,10 +115,25 @@ public class Utility {
         } catch (ParseException e) {
             logger.error("Date parse error occurs: " + e.getMessage());
         }
+        logger.info("Time: " + time);
         return time;
     }
 
-    public static final Date getDateFormatFromDate(Date date) {
+    public static int getYearFromDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        return calendar.get(Calendar.YEAR);
+    }
+
+    public static Date getDateFromAddYear(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.YEAR, 1);
+        return calendar.getTime();
+    }
+
+    public static Date getDateFormatFromDate(Date date) {
         Date formatDate = null;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -109,7 +145,7 @@ public class Utility {
         return formatDate;
     }
 
-    public static final Date getDateFromString(String date) {
+    public static Date getDateFromString(String date) {
 
         Date formatDate = null;
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -122,10 +158,12 @@ public class Utility {
         return formatDate;
     }
 
-    public static final String getDateFromStringForAttendance(String date){
+    public static String getDateFromStringForAttendance(String date){
+        logger.info("Date: " + date);
+
         Date formatDate = null;
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
-        DateFormat finalFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        SimpleDateFormat finalFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
             formatDate = dateFormat.parse(date);
 
@@ -135,7 +173,7 @@ public class Utility {
         return finalFormat.format(formatDate);
     }
 
-    public static final Timestamp getTimeStampFromString(String date){
+    public static Timestamp getTimeStampFromString(String date){
         Timestamp timestamp = null;
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         try {
@@ -147,7 +185,7 @@ public class Utility {
         return timestamp;
     }
 
-    public static final String getTime(String date){
+    public static String getTime(String date){
         Timestamp timestamp = null;
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
@@ -160,7 +198,7 @@ public class Utility {
         return timeFormat.format(timestamp);
     }
 
-    public static final String getLoginObject(Employee employee, String currentUserId) throws JSONException {
+    public static String getLoginObject(Employee employee, String currentUserId) throws JSONException {
         JSONObject loginObject = new JSONObject();
         loginObject.put("firstName", employee.getFirstName());
         loginObject.put("lastName", employee.getLastName());
@@ -175,7 +213,24 @@ public class Utility {
         return loginObject.toString();
     }
 
-    public static final void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {
+    public static String getNotificationObject(String email, String body, Long templateId) throws JSONException {
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("recipient", new JSONArray().put(email));
+        contentObj.put("body", body);
+
+        JSONObject notificationObj = new JSONObject();
+        notificationObj.put("notificationTypeId", Constants.NOTIFICATION_EMAIL_TYPE_ID);
+        notificationObj.put("notificationTemplateId", templateId);
+        notificationObj.put("systemId", Constants.SYSTEM_ID);
+        notificationObj.put("contentJson", contentObj.toString());
+        notificationObj.put("maxRetryCount", 5);
+        notificationObj.put("isProcessed", true);
+        notificationObj.put("retryInterval", "1");
+
+        return notificationObj.toString();
+    }
+
+    public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {
         logger.debug("Uploaded File Location: " + uploadedFileLocation);
 
         OutputStream out = null;

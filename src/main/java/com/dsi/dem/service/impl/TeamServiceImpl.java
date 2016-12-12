@@ -1,19 +1,24 @@
 package com.dsi.dem.service.impl;
 
+import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.ProjectDao;
 import com.dsi.dem.dao.TeamDao;
+import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.ProjectDaoImpl;
 import com.dsi.dem.dao.impl.TeamDaoImpl;
+import com.dsi.dem.dto.TeamDto;
+import com.dsi.dem.dto.TeamMemberDto;
+import com.dsi.dem.dto.TeamProjectDto;
+import com.dsi.dem.dto.transformer.TeamDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
-import com.dsi.dem.service.EmployeeService;
 import com.dsi.dem.service.TeamService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,70 +26,96 @@ import java.util.List;
 /**
  * Created by sabbir on 8/1/16.
  */
-public class TeamServiceImpl implements TeamService {
+public class TeamServiceImpl extends CommonService implements TeamService {
 
     private static final Logger logger = Logger.getLogger(TeamServiceImpl.class);
 
-    private static final EmployeeService employeeService = new EmployeeServiceImpl();
-
+    private static final TeamDtoTransformer TRANSFORMER = new TeamDtoTransformer();
+    private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final TeamDao teamDao = new TeamDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
 
     @Override
-    public void saveTeam(Team team) throws CustomException {
-        validateInputForCreation(team);
+    public TeamDto saveTeam(TeamDto teamDto) throws CustomException {
+        logger.info("Team Create:: Start");
+        logger.info("Convert Team Dto to Team Object");
+        Team team = TRANSFORMER.getTeam(teamDto);
 
-        team.setVersion(1);
-        boolean res = teamDao.saveTeam(team);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(null, "Team", "Team create failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0001);
+        if(Utility.isNullOrEmpty(team.getMembers())){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
         }
+
+        validateInputForCreation(team);
+
+        Session session = getSession();
+        teamDao.setSession(session);
+        //employeeDao.setSession(session);
+
+        if(teamDao.getTeamByName(team.getName()) != null){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0004);
+            throw new CustomException(errorMessage);
+        }
+
+        team.setVersion(1);
+        teamDao.saveTeam(team);
         logger.info("Save team success");
 
         for(TeamMember member : team.getMembers()){
-
             member.setVersion(1);
             member.setTeam(team);
-            res = teamDao.saveTeamMember(member);
-            if(!res){
-                //ErrorContext errorContext = new ErrorContext(null, "Team", "Team member create failed.");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
-                throw new CustomException(errorMessage);
-            }
-            logger.info("Save team member success");
+            teamDao.saveTeamMember(member);
         }
+        logger.info("Save team members success");
+
+        if(!Utility.isNullOrEmpty(teamDto.getProjectIds())) {
+            projectDao.setSession(session);
+            saveTeamProjects(teamDto.getProjectIds(), team);
+        }
+
+        setTeamAllProperty(team.getTeamId(), team);
+        logger.info("Team Create:: End");
+
+        close(session);
+        return TRANSFORMER.getTeamDto(team);
     }
 
     private void validateInputForCreation(Team team) throws CustomException {
         if(team.getName() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Team", "Team Name not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0005);
             throw new CustomException(errorMessage);
         }
 
         if(Utility.isNullOrEmpty(team.getMembers())){
-            //ErrorContext errorContext = new ErrorContext(null, "Team", "Team members not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
-            throw new CustomException(errorMessage);
-        }
-
-        if(teamDao.getTeamByName(team.getName()) != null){
-            //ErrorContext errorContext = new ErrorContext(team.getName(), "Team", "Team already exist by this name.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
-                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0004);
             throw new CustomException(errorMessage);
         }
     }
 
     @Override
-    public void updateTeam(Team team) throws CustomException {
+    public TeamDto updateTeam(TeamDto teamDto, String teamId) throws CustomException {
+        logger.info("Team Update:: Start");
+        logger.info("Convert Team Dto to Team Object");
+        Team team = TRANSFORMER.getTeam(teamDto);
+
         validateInputForUpdate(team);
+
+        Session session = getSession();
+        teamDao.setSession(session);
+        //employeeDao.setSession(session);
+
+        team.setTeamId(teamId);
+        if(teamDao.getTeamByID(team.getTeamId()) == null){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
 
         Team existTeam = teamDao.getTeamByID(team.getTeamId());
 
@@ -93,64 +124,70 @@ public class TeamServiceImpl implements TeamService {
         existTeam.setRoom(team.getRoom());
         existTeam.setActive(team.isActive());
         existTeam.setVersion(team.getVersion());
-        boolean res = teamDao.updateTeam(existTeam);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(team.getTeamId(), "Team", "Team update failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
-                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0001);
-            throw new CustomException(errorMessage);
-        }
+        teamDao.updateTeam(existTeam);
         logger.info("Update team success");
+
+        setTeamAllProperty(teamId, existTeam);
+        logger.info("Team Update:: End");
+
+        close(session);
+        return TRANSFORMER.getTeamDto(existTeam);
     }
 
     private void validateInputForUpdate(Team team) throws CustomException {
         if(team.getVersion() == 0){
-            //ErrorContext errorContext = new ErrorContext(null, "Team", "Version not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
-            throw new CustomException(errorMessage);
-        }
-
-        if(teamDao.getTeamByID(team.getTeamId()) == null){
-            //ErrorContext errorContext = new ErrorContext(team.getTeamId(), "Team", "Team not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0001);
             throw new CustomException(errorMessage);
         }
     }
 
     @Override
     public void deleteTeam(String teamID) throws CustomException {
+        logger.info("Team delete:: Start");
+        Session session = getSession();
+        teamDao.setSession(session);
+
         teamDao.deleteTeamMember(teamID, null);
         teamDao.deleteProjectTeam(teamID, null);
 
-        boolean res = teamDao.deleteTeam(teamID);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(teamID, "Team", "Team delete failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0001);
-            throw new CustomException(errorMessage);
-        }
+        teamDao.deleteTeam(teamID);
         logger.info("Delete team success");
+        logger.info("Team delete:: End");
+
+        close(session);
     }
 
     @Override
-    public Team getTeamByID(String teamID) throws CustomException {
+    public TeamDto getTeamByID(String teamID) throws CustomException {
+        logger.info("Read team:: Start");
+        Session session = getSession();
+        teamDao.setSession(session);
+        //employeeDao.setSession(session);
+
         Team team = teamDao.getTeamByID(teamID);
         if(team == null){
-            //ErrorContext errorContext = new ErrorContext(teamID, "Team", "Team not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
-        return setTeamAllProperty(teamID, team);
+        setTeamAllProperty(teamID, team);
+        logger.info("Read team:: End");
+
+        close(session);
+        return TRANSFORMER.getTeamDto(team);
     }
 
     @Override
     public List<Team> getAllTeams() throws CustomException {
+        Session session = getSession();
+        teamDao.setSession(session);
+        //employeeDao.setSession(session);
+
         List<Team> teamList = teamDao.getAllTeams();
         if(teamList == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Team", "Team list not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
@@ -160,40 +197,67 @@ public class TeamServiceImpl implements TeamService {
         for(Team team : teamList){
             teams.add(setTeamAllProperty(team.getTeamId(), team));
         }
+
+        close(session);
         return teams;
     }
 
     @Override
-    public List<Team> searchTeams(String teamName, String status, String floor, String room, String memberName,
+    public List<TeamDto> searchTeams(String teamName, String status, String floor, String room, String memberName,
                                   String projectName, String clientName, String from, String range) throws CustomException {
+
+        logger.info("Read all teams:: Start");
+        Session session = getSession();
+        teamDao.setSession(session);
+        //employeeDao.setSession(session);
 
         List<Team> teamList = teamDao.searchTeams(teamName, status, floor, room, memberName, projectName, clientName, from, range);
         if(teamList == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Team", "Team list not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
+        logger.info("Team list size: " + teamList.size());
 
         List<Team> teams = new ArrayList<>();
         for(Team team : teamList){
             teams.add(setTeamAllProperty(team.getTeamId(), team));
         }
-        return teams;
+        logger.info("Read all teams:: End");
+
+        close(session);
+        return TRANSFORMER.getTeamsDto(teams);
     }
 
     @Override
-    public void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException {
+    public List<TeamMemberDto> createTeamMembers(String teamId, List<TeamMemberDto> teamMembers) throws CustomException {
+        logger.info("Team members create:: Start");
+        logger.info("Convert TeamMember Dto to TeamMember Object");
+        List<TeamMember> teamMemberList = TRANSFORMER.getTeamMembers(teamMembers);
 
-        if(Utility.isNullOrEmpty(teamMembers)){
-            //ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member list not defined.");
+        if(Utility.isNullOrEmpty(teamMemberList)){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
         }
 
-        if(teamDao.deleteTeamMember(teamID, null))
-            logger.info("Delete all team members.");
+        Session session = getSession();
+        teamDao.setSession(session);
+
+        saveTeamMembers(teamMemberList, teamId);
+        List<TeamMember> teamMembersList = teamDao.getTeamMembers(teamId, null);
+        logger.info("Team members create:: End");
+
+        close(session);
+        return TRANSFORMER.getTeamMembersDto(teamMembersList);
+    }
+
+    @Override
+    public void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException {
+
+        teamDao.deleteTeamMember(teamID, null);
+        logger.info("Delete all team members.");
 
         for(TeamMember member : teamMembers){
             validateInputForMemberCreation(member);
@@ -201,15 +265,9 @@ public class TeamServiceImpl implements TeamService {
             Team team = teamDao.getTeamByID(teamID);
             member.setVersion(team.getVersion());
             member.setTeam(team);
-            boolean res = teamDao.saveTeamMember(member);
-            if(!res){
-                //ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member create failed.");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
-                throw new CustomException(errorMessage);
-            }
-            logger.info("Save team member success.");
+            teamDao.saveTeamMember(member);
         }
+        logger.info("Save team members success.");
 
         Team existTeam = teamDao.getTeamByID(teamID);
         existTeam.setMemberCount(teamMembers.size());
@@ -219,38 +277,63 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public void deleteTeamMember(String teamMemberID) throws CustomException {
-        boolean res = teamDao.deleteTeamMember(null, teamMemberID);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(teamMemberID, "TeamMember", "Team member delete failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
-            throw new CustomException(errorMessage);
-        }
+        logger.info("Team member delete:: Start");
+        Session session = getSession();
+        teamDao.setSession(session);
+
+        teamDao.deleteTeamMember(null, teamMemberID);
         logger.info("Delete team member success");
+        logger.info("Team member delete:: end");
+
+        close(session);
     }
 
     @Override
     public List<TeamMember> getTeamMembers(String teamID, String employeeID) throws CustomException {
+        Session session = getSession();
+        teamDao.setSession(session);
+
         List<TeamMember> memberList = teamDao.getTeamMembers(teamID, employeeID);
         if(memberList == null){
-            //ErrorContext errorContext = new ErrorContext(teamID, "TeamMember", "Team members not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
+
+        close(session);
         return memberList;
+    }
+
+    @Override
+    public List<TeamProjectDto> createTeamProjects(TeamDto teamDto, String teamId) throws CustomException {
+        logger.info("Team project create:: Start");
+        if(Utility.isNullOrEmpty(teamDto.getProjectIds())){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0003);
+            throw new CustomException(errorMessage);
+        }
+
+        Session session = getSession();
+        teamDao.setSession(session);
+        projectDao.setSession(session);
+
+        saveTeamProjects(teamDto.getProjectIds(), teamDao.getTeamByID(teamId));
+        List<ProjectTeam> teamProjects = teamDao.getProjectTeams(teamId);
+        logger.info("Team project create:: End");
+
+        close(session);
+        return TRANSFORMER.getProjectTeamsDto(teamProjects);
     }
 
     private void validateInputForMemberCreation(TeamMember member) throws CustomException {
         if(member.getEmployee().getEmployeeId() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member info not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0006);
             throw new CustomException(errorMessage);
         }
 
         if(member.getRole().getRoleId() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "TeamMember", "Team member role not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
@@ -260,50 +343,48 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void saveTeamProjects(List<String> projectIdList, Team team) throws CustomException {
 
-        if(teamDao.deleteProjectTeam(team.getTeamId(), null))
-            logger.info("Delete all team projects");
+        teamDao.deleteProjectTeam(team.getTeamId(), null);
+        logger.info("Delete all team projects");
 
-        if(!Utility.isNullOrEmpty(projectIdList)) {
-            for (String projectId : projectIdList) {
-                Project project = projectDao.getProjectByID(projectId);
-                ProjectTeam projectTeam = new ProjectTeam();
-                projectTeam.setTeam(team);
-                projectTeam.setVersion(project.getVersion());
-                projectTeam.setProject(project);
+        for (String projectId : projectIdList) {
+            Project project = projectDao.getProjectByID(projectId);
+            ProjectTeam projectTeam = new ProjectTeam();
+            projectTeam.setTeam(team);
+            projectTeam.setVersion(project.getVersion());
+            projectTeam.setProject(project);
 
-                boolean res = teamDao.saveTeamProject(projectTeam);
-                if (!res) {
-                    //ErrorContext errorContext = new ErrorContext(null, "TeamProject", "Team project create failed.");
-                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                            Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0003);
-                    throw new CustomException(errorMessage);
-                }
-                logger.info("Save team project success");
-            }
+            teamDao.saveTeamProject(projectTeam);
         }
+        logger.info("Save team projects success");
     }
 
     @Override
     public void deleteTeamProject(String teamProjectID) throws CustomException {
-        boolean res = teamDao.deleteProjectTeam(null, teamProjectID);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(teamProjectID, "TeamProject", "Team project delete failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0003);
-            throw new CustomException(errorMessage);
-        }
+        logger.info("Team project delete:: Start");
+        Session session = getSession();
+        teamDao.setSession(session);
+
+        teamDao.deleteProjectTeam(null, teamProjectID);
         logger.info("Delete team project success");
+        logger.info("Team project delete:: End");
+
+        close(session);
     }
 
     @Override
     public List<ProjectTeam> getTeamProjects(String teamID) throws CustomException {
+        Session session = getSession();
+        teamDao.setSession(session);
+
         List<ProjectTeam> projectTeamList = teamDao.getProjectTeams(teamID);
         if(projectTeamList == null){
-            //ErrorContext errorContext = new ErrorContext(teamID, "TeamProject", "Team projects not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
+
+        close(session);
         return projectTeamList;
     }
 
@@ -312,7 +393,7 @@ public class TeamServiceImpl implements TeamService {
         List<TeamMember> memberList = teamDao.getTeamMembers(teamID, null);
         if(!Utility.isNullOrEmpty(memberList)){
             for(TeamMember member : memberList){
-                Employee employee = employeeService.getEmployeeByID(member.getEmployee().getEmployeeId());
+                Employee employee = employeeDao.getEmployeeByID(member.getEmployee().getEmployeeId());
                 member.setEmployee(employee);
             }
             team.setMembers(memberList);

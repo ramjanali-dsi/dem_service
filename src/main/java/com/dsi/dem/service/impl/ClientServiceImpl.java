@@ -4,8 +4,10 @@ import com.dsi.dem.dao.ClientDao;
 import com.dsi.dem.dao.ProjectDao;
 import com.dsi.dem.dao.impl.ClientDaoImpl;
 import com.dsi.dem.dao.impl.ProjectDaoImpl;
+import com.dsi.dem.dto.ClientDto;
+import com.dsi.dem.dto.ClientProjectDto;
+import com.dsi.dem.dto.transformer.ClientDtoTransformer;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Client;
 import com.dsi.dem.model.Project;
@@ -15,6 +17,7 @@ import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,44 +25,64 @@ import java.util.List;
 /**
  * Created by sabbir on 8/1/16.
  */
-public class ClientServiceImpl implements ClientService {
+public class ClientServiceImpl extends CommonService implements ClientService {
 
     private static final Logger logger = Logger.getLogger(ClientServiceImpl.class);
 
+    private static final ClientDtoTransformer TRANSFORMER = new ClientDtoTransformer();
     private static final ClientDao clientDao = new ClientDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
 
     @Override
-    public void saveClient(Client client) throws CustomException {
-        validateInputForCreation(client);
-
-        boolean res = clientDao.saveClient(client);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(null, "Client", "Client create failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
+    public ClientDto saveClient(ClientDto clientDto) throws CustomException {
+        logger.info("Client create:: Start");
+        if(Utility.isNullOrEmpty(clientDto.getProjectIds())){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
         }
+
+        logger.info("Convert Client Dto to Client Object");
+        Client client = TRANSFORMER.getClient(clientDto);
+
+        validateInputForCreation(client);
+
+        Session session = getSession();
+        clientDao.setSession(session);
+        projectDao.setSession(session);
+
+        if(clientDao.getClientByName(client.getMemberName()) != null){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0003);
+            throw new CustomException(errorMessage);
+        }
+
+        clientDao.saveClient(client);
         logger.info("Save client success");
+
+        saveClientProject(clientDto.getProjectIds(), client);
+        setAllClientProperty(client);
+        logger.info("Client create:: End");
+
+        close(session);
+        return TRANSFORMER.getClientDto(client);
     }
 
     private void validateInputForCreation(Client client) throws CustomException {
         if(client.getMemberName() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Client", "Client member name not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0004);
             throw new CustomException(errorMessage);
         }
 
         if(client.getMemberEmail() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Client", "Client member email not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0005);
             throw new CustomException(errorMessage);
         }
 
         if(client.getOrganization() == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Client", "Client organization not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0006);
             throw new CustomException(errorMessage);
@@ -70,18 +93,26 @@ public class ClientServiceImpl implements ClientService {
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
         }
-
-        if(clientDao.getClientByName(client.getMemberName()) != null){
-            //ErrorContext errorContext = new ErrorContext(client.getMemberName(), "Client", "Client already exist by this name.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
-                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0003);
-            throw new CustomException(errorMessage);
-        }
     }
 
     @Override
-    public void updateClient(Client client) throws CustomException {
+    public ClientDto updateClient(ClientDto clientDto, String clientId) throws CustomException {
+        logger.info("Client Update:: Start");
+        logger.info("Convert Client Dto to Client Object");
+        Client client = TRANSFORMER.getClient(clientDto);
+
         validateInputForUpdate(client);
+
+        Session session = getSession();
+        clientDao.setSession(session);
+
+        client.setClientId(clientId);
+        if(clientDao.getClientByID(client.getClientId()) == null){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
 
         Client existClient = clientDao.getClientByID(client.getClientId());
 
@@ -89,64 +120,68 @@ public class ClientServiceImpl implements ClientService {
         existClient.setMemberEmail(client.getMemberEmail());
         existClient.setMemberPosition(client.getMemberPosition());
         existClient.setOrganization(client.getOrganization());
+        existClient.setNotify(client.isNotify());
         existClient.setVersion(client.getVersion());
-        boolean res = clientDao.updateClient(existClient);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(client.getClientId(), "Client", "Client update failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
-                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
-            throw new CustomException(errorMessage);
-        }
+        clientDao.updateClient(existClient);
         logger.info("Update client success");
+
+        setAllClientProperty(existClient);
+        logger.info("Client Update:: End");
+
+        close(session);
+        return TRANSFORMER.getClientDto(existClient);
     }
 
     private void validateInputForUpdate(Client client) throws CustomException {
         if(client.getVersion() == 0){
-            //ErrorContext errorContext = new ErrorContext(null, "Client", "Version not defined.");
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
-            throw new CustomException(errorMessage);
-        }
-
-        if(clientDao.getClientByID(client.getClientId()) == null){
-            //ErrorContext errorContext = new ErrorContext(client.getClientId(), "Client", "Client not found.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
             throw new CustomException(errorMessage);
         }
     }
 
     @Override
     public void deleteClient(String clientID) throws CustomException {
-        clientDao.deleteClientProject(clientID, null);
+        logger.info("Client delete:: Start");
+        Session session = getSession();
+        clientDao.setSession(session);
 
-        boolean res = clientDao.deleteClient(clientID);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(clientID, "Client", "Client delete failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0001);
-            throw new CustomException(errorMessage);
-        }
+        clientDao.deleteClientProject(clientID, null);
+        clientDao.deleteClient(clientID);
         logger.info("Delete client success");
+        logger.info("Client delete:: End");
+
+        close(session);
     }
 
     @Override
-    public Client getClientByID(String clientID) throws CustomException {
+    public ClientDto getClientByID(String clientID) throws CustomException {
+        logger.info("Read client:: Start");
+        Session session = getSession();
+        clientDao.setSession(session);
+
         Client client = clientDao.getClientByID(clientID);
         if(client == null){
-            //ErrorContext errorContext = new ErrorContext(clientID, "Client", "Client not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
-        return setAllClientProperty(client);
+        setAllClientProperty(client);
+        logger.info("Read client:: End");
+
+        close(session);
+        return TRANSFORMER.getClientDto(client);
     }
 
     @Override
     public List<Client> getAllClients() throws CustomException {
+        Session session = getSession();
+        clientDao.setSession(session);
+
         List<Client> clients = clientDao.getAllClients();
         if(clients == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Client", "Client list not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
@@ -156,32 +191,64 @@ public class ClientServiceImpl implements ClientService {
         for(Client client : clients){
             clientList.add(setAllClientProperty(client));
         }
+
+        close(session);
         return clientList;
     }
 
     @Override
-    public List<Client> searchClients(String clientName, String organization, String clientEmail,
+    public List<ClientDto> searchClients(String clientName, String organization, String clientEmail,
                                       String from, String range) throws CustomException {
+
+        logger.info("Read all client:: Start");
+        Session session = getSession();
+        clientDao.setSession(session);
+
         List<Client> clients = clientDao.searchClients(clientName, organization, clientEmail, from, range);
         if(clients == null){
-            //ErrorContext errorContext = new ErrorContext(null, "Client", "Client list not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
+        logger.info("Client list size: " + clients.size());
 
         List<Client> clientList = new ArrayList<>();
         for(Client client : clients){
             clientList.add(setAllClientProperty(client));
         }
-        return clientList;
+        logger.info("Read all client:: End");
+
+        close(session);
+        return TRANSFORMER.getClientsDto(clientList);
+    }
+
+    @Override
+    public List<ClientProjectDto> createClientProjects(String clientId, ClientDto clientDto) throws CustomException {
+        logger.info("Client project create:: Start");
+        if(Utility.isNullOrEmpty(clientDto.getProjectIds())){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
+        }
+
+        Session session = getSession();
+        clientDao.setSession(session);
+        projectDao.setSession(session);
+
+        saveClientProject(clientDto.getProjectIds(), clientDao.getClientByID(clientId));
+        List<ProjectClient> clientProjects = clientDao.getClientProjects(clientId);
+        logger.info("Client project create:: End");
+
+        close(session);
+        return TRANSFORMER.getClientProjectsDto(clientProjects);
     }
 
     @Override
     public void saveClientProject(List<String> projectIds, Client client) throws CustomException {
 
-        if(clientDao.deleteClientProject(client.getClientId(), null))
-            logger.info("Delete all client projects.");
+        clientDao.deleteClientProject(client.getClientId(), null);
+        logger.info("Delete all client projects.");
 
         for(String projectID : projectIds){
             Project project = projectDao.getProjectByID(projectID);
@@ -190,38 +257,38 @@ public class ClientServiceImpl implements ClientService {
             projectClient.setProject(project);
             projectClient.setVersion(1);
 
-            boolean res = clientDao.saveClientProject(projectClient);
-            if(!res){
-                //ErrorContext errorContext = new ErrorContext(null, "ClientProject", "Client project create failed.");
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
-                throw new CustomException(errorMessage);
-            }
-            logger.info("Save client project success");
+            clientDao.saveClientProject(projectClient);
         }
+        logger.info("Save client projects success");
     }
 
     @Override
     public void deleteClientProject(String clientProjectID) throws CustomException {
-        boolean res = clientDao.deleteClientProject(null, clientProjectID);
-        if(!res){
-            //ErrorContext errorContext = new ErrorContext(clientProjectID, "ClientProject", "Client project delete failed.");
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
-                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
-            throw new CustomException(errorMessage);
-        }
+        logger.info("Client project delete:: Start");
+        Session session = getSession();
+        clientDao.setSession(session);
+
+        clientDao.deleteClientProject(null, clientProjectID);
         logger.info("Delete client project success");
+        logger.info("Project client delete:: End");
+
+        close(session);
     }
 
     @Override
     public List<ProjectClient> getClientProjects(String clientID) throws CustomException {
+        Session session = getSession();
+        clientDao.setSession(session);
+
         List<ProjectClient> projectClientList = clientDao.getClientProjects(clientID);
         if(projectClientList == null){
-            //ErrorContext errorContext = new ErrorContext(null, "ClientProject", "Client project list not found.");
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                     Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
             throw new CustomException(errorMessage);
         }
+
+        close(session);
         return projectClientList;
     }
 

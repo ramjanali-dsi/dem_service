@@ -2,6 +2,7 @@ package com.dsi.dem.util;
 
 import com.dsi.checkauthorization.filter.CheckAuthorizationFilter;
 import com.dsi.dem.filter.ResponseCORSFilter;
+import com.dsi.dem.resource.EmployeeResource;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
@@ -16,6 +17,6 @@ public class DemService extends ResourceConfig {
         register(MultiPartFeature.class);
         register(CheckAuthorizationFilter.class);
 
-        //SessionUtil.getSession();
+        SessionUtil.getSession();
     }
 }

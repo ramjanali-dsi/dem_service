@@ -348,6 +348,27 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
+    public EmployeeStatus getEmployeeStatusById(String statusId) {
+        Session session = null;
+        EmployeeStatus employeeStatus = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeStatus es WHERE es.employeeStatusId =:statusId");
+            query.setParameter("statusId", statusId);
+
+            employeeStatus = (EmployeeStatus) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeStatus;
+    }
+
+    @Override
     public boolean saveEmployeeInfo(EmployeeInfo employeeInfo) {
         return save(employeeInfo);
     }

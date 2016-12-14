@@ -44,6 +44,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
         EmployeeInfo employeeInfo = employee.getInfo();
         employeeInfo.setEmployee(employee);
+        employeeInfo.setStatus(employeeDao.getEmployeeStatusById(employee.getInfo().getStatus().getEmployeeStatusId()));
         employeeInfo.setVersion(1);
 
         employeeDao.saveEmployeeInfo(employeeInfo);

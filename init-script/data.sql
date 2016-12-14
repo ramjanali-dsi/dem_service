@@ -7,6 +7,9 @@ INSERT INTO `dem_service`.`ref_employee_contact_number_type` (`employee_contact_
 INSERT INTO `dem_service`.`ref_employee_email_type` (`employee_email_type_id`, `description`, `is_active`, `name`) VALUES ('78b5c3c5-5470-49f7-aafe-b016a33b3883', NULL, b'1', 'Official');
 INSERT INTO `dem_service`.`ref_employee_email_type` (`employee_email_type_id`, `description`, `is_active`, `name`) VALUES ('b6540691-773c-4ee8-9e24-07c292887e73', NULL, b'1', 'Personal');
 
+INSERT INTO `dem_service`.`ref_employee_status` (`employee_status_id`, `description`, `is_active`, `name`) VALUES ('10021760-5ace-46b9-8b2b-b05cb2a65d43', NULL, b'1', 'Full-Time');
+INSERT INTO `dem_service`.`ref_employee_status` (`employee_status_id`, `description`, `is_active`, `name`) VALUES ('4797c659-b2e6-42e7-ac93-28c9e781b0b1', NULL, b'1', 'Part-Time');
+
 INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`) VALUES ('19bad1c8-5e6c-41c1-bccb-5d4c360baf25', NULL, b'1', 'Applied');
 INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`) VALUES ('0a30ce24-edbf-41b9-86cd-b6f9954bbf92', NULL, b'1', 'Approved');
 INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`) VALUES ('4c3b5ba4-f9ae-48d2-8320-a4d6e6d17583', NULL, b'1', 'Denied');

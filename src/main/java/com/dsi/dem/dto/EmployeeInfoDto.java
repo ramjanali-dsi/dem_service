@@ -31,6 +31,10 @@ public class EmployeeInfoDto {
 
     private String permanentAddress;
 
+    private String employeeStatusId;
+
+    private String employeeStatusName;
+
     @ApiModelProperty(required = true)
     private Date dateOfBirth;
 
@@ -102,6 +106,22 @@ public class EmployeeInfoDto {
 
     public void setPermanentAddress(String permanentAddress) {
         this.permanentAddress = permanentAddress;
+    }
+
+    public String getEmployeeStatusId() {
+        return employeeStatusId;
+    }
+
+    public void setEmployeeStatusId(String employeeStatusId) {
+        this.employeeStatusId = employeeStatusId;
+    }
+
+    public String getEmployeeStatusName() {
+        return employeeStatusName;
+    }
+
+    public void setEmployeeStatusName(String employeeStatusName) {
+        this.employeeStatusName = employeeStatusName;
     }
 
     @JsonSerialize(using = JsonDateSerializer.class)

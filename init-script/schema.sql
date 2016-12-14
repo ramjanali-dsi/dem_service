@@ -34,6 +34,8 @@ create table ref_employee_contact_number_type (employee_contact_type_id varchar(
 
 create table ref_employee_email_type (employee_email_type_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (employee_email_type_id));
 
+create table ref_employee_status (employee_status_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (employee_status_id));
+
 create table ref_leave_status (leave_status_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (leave_status_id));
 
 create table ref_leave_type (leave_type_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (leave_type_id));

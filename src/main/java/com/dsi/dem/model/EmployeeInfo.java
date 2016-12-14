@@ -24,6 +24,10 @@ public class EmployeeInfo {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
+    @ManyToOne
+    @JoinColumn(name = "employee_status_id")
+    private EmployeeStatus status;
+
     @Column(length = 10)
     private String gender;
 
@@ -68,6 +72,14 @@ public class EmployeeInfo {
 
     public void setEmployee(Employee employee) {
         this.employee = employee;
+    }
+
+    public EmployeeStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EmployeeStatus status) {
+        this.status = status;
     }
 
     public String getGender() {

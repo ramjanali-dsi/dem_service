@@ -24,6 +24,8 @@ public interface EmployeeDao {
                                    String phone, String email, String active, String joiningDate, String teamName,
                                    String projectName, String userID, String from, String range);
 
+    EmployeeStatus getEmployeeStatusById(String statusId);
+
     boolean saveEmployeeInfo(EmployeeInfo employeeInfo);
     boolean updateEmployeeInfo(EmployeeInfo employeeInfo);
     boolean deleteEmployeeInfo(String employeeID);

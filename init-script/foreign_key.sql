@@ -45,3 +45,8 @@ alter table dsi_team_member add constraint FK_team_id_team foreign key (team_id)
 ALTER TABLE `dsi_employee_email` CHANGE `is_preferred` `is_preferred` BIT(1) NULL DEFAULT NULL;
 
 ALTER TABLE  `ref_leave_status` ADD  `priority` INT NOT NULL AFTER  `name` ;
+
+ALTER TABLE  `dsi_employee_info` ADD  `employee_status_id` VARCHAR( 40 ) NOT NULL AFTER  `employee_id` ;
+
+ALTER TABLE `dsi_employee_info` ADD CONSTRAINT  FK_employee_status_id FOREIGN KEY (employee_status_id) REFERENCES ref_employee_status (employee_status_id);
+

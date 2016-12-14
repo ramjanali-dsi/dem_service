@@ -26,6 +26,10 @@ public class EmployeeDtoTransformer {
 
             EmployeeInfo employeeInfo = new EmployeeInfo();
             BeanUtils.copyProperties(employeeInfo, employeeDto.getEmployeeInfo());
+
+            EmployeeStatus employeeStatus = new EmployeeStatus();
+            BeanUtils.copyProperties(employeeStatus, employeeDto.getEmployeeInfo());
+            employeeInfo.setStatus(employeeStatus);
             employee.setInfo(employeeInfo);
 
             List<EmployeeDesignation> designationList = new ArrayList<>();
@@ -63,6 +67,10 @@ public class EmployeeDtoTransformer {
 
             EmployeeInfo employeeInfo = new EmployeeInfo();
             BeanUtils.copyProperties(employeeInfo, employeeDto.getEmployeeInfo());
+
+            EmployeeStatus employeeStatus = new EmployeeStatus();
+            BeanUtils.copyProperties(employeeStatus, employeeDto.getEmployeeInfo());
+            employeeInfo.setStatus(employeeStatus);
             employee.setInfo(employeeInfo);
 
         } catch (Exception e) {
@@ -172,6 +180,7 @@ public class EmployeeDtoTransformer {
 
             EmployeeInfoDto infoDto = new EmployeeInfoDto();
             BeanUtils.copyProperties(infoDto, employee.getInfo());
+            BeanUtils.copyProperties(infoDto, employee.getInfo().getStatus());
             employeeDto.setEmployeeInfo(infoDto);
 
             LeaveSummaryDto leaveDto = new LeaveSummaryDto();

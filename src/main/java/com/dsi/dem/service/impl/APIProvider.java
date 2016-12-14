@@ -33,6 +33,7 @@ public class APIProvider {
 
     public static final String API_USER = BASE_AUTHORIZE_URL + apiProp.getProperty("authorization.user");
     public static final String API_LOGIN_SESSION_CREATE = BASE_AUTHENTICATE_URL + apiProp.getProperty("authentication.login");
+    public static final String API_LOGIN_SESSION_UPDATE = BASE_AUTHENTICATE_URL + apiProp.getProperty("authentication.login.update");
     public static final String API_LOGIN_SESSION_DELETE = BASE_AUTHENTICATE_URL + apiProp.getProperty("authentication.login.delete");
     public static final String API_NOTIFICATION_CREATE = BASE_NOTIFICATION_URL + apiProp.getProperty("notification.create");
 

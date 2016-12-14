@@ -82,9 +82,9 @@ public class EmployeeResource {
             employeeService.validateInputForCreation(employee);
 
             logger.info("Employee Create:: Start");
-            logger.info("Request body for login create: " + Utility.getLoginObject(employee, currentUserID));
+            logger.info("Request body for login create: " + Utility.getLoginObject(employee, currentUserID, 1));
             String result = httpClient.sendPost(APIProvider.API_LOGIN_SESSION_CREATE,
-                    Utility.getLoginObject(employee, currentUserID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+                    Utility.getLoginObject(employee, currentUserID, 1), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
             logger.info("v1/login_session/create api call result: " + result);
 
             JSONObject resultObj = new JSONObject(result);
@@ -138,6 +138,9 @@ public class EmployeeResource {
                                    @FormDataParam("file") FormDataContentDisposition fileDetails,
                                    @FormDataParam("employee") String employeeDtoData) throws CustomException {
 
+        String currentUserID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+
         ObjectMapper mapper = new ObjectMapper();
         EmployeeDto employeeDto;
 
@@ -157,6 +160,16 @@ public class EmployeeResource {
             employee.setEmployeeId(employeeID);
             employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto(employeeService.updateEmployee(employee));
             //employeeService.updateEmployee(employee);
+
+            logger.info("Request body for login update: " + Utility.getLoginObject(employee, currentUserID, 2));
+            String result = httpClient.sendPut(APIProvider.API_LOGIN_SESSION_UPDATE + employee.getUserId(),
+                    Utility.getLoginObject(employee, currentUserID, 2), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+            logger.info("v1/login_session/update api call result: " + result);
+
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+            }
             logger.info("Employee update:: End");
 
             /*employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto

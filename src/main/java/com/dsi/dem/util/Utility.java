@@ -191,18 +191,24 @@ public class Utility {
         return timeFormat.format(timestamp);
     }
 
-    public static String getLoginObject(Employee employee, String currentUserId) throws JSONException {
+    public static String getLoginObject(Employee employee, String currentUserId, int mode) throws JSONException {
         JSONObject loginObject = new JSONObject();
-        loginObject.put("firstName", employee.getFirstName());
-        loginObject.put("lastName", employee.getLastName());
-        loginObject.put("gender", employee.getInfo().getGender());
-        loginObject.put("email", employee.getEmailInfo().get(0).getEmail());
-        loginObject.put("phone", employee.getContactInfo().get(0).getPhone());
-        loginObject.put("roleId", employee.getRoleId());
-        loginObject.put("createBy", currentUserId);
-        loginObject.put("modifiedBy", currentUserId);
-        loginObject.put("version", 1);
+        if(mode == 1) {
+            loginObject.put("firstName", employee.getFirstName());
+            loginObject.put("lastName", employee.getLastName());
+            loginObject.put("gender", employee.getInfo().getGender());
+            loginObject.put("email", employee.getEmailInfo().get(0).getEmail());
+            loginObject.put("phone", employee.getContactInfo().get(0).getPhone());
+            loginObject.put("roleId", employee.getRoleId());
+            loginObject.put("createBy", currentUserId);
+            loginObject.put("modifiedBy", currentUserId);
+            loginObject.put("active", employee.isActive());
+            loginObject.put("version", 1);
 
+        } else if (mode == 2) {
+            loginObject.put("modifiedBy", currentUserId);
+            loginObject.put("active", employee.isActive());
+        }
         return loginObject.toString();
     }
 

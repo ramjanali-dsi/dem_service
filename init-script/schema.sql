@@ -12,7 +12,7 @@ create table dsi_employee_contact_number (employee_contact_number_id varchar(40)
 
 create table dsi_employee_designation (employee_designation_id varchar(40) not null, designation_date date, name varchar(50), employee_id varchar(40), is_current bit, version integer, primary key (employee_designation_id));
 
-create table dsi_employee_email (employee_email_id varchar(40) not null, email varchar(50), employee_id varchar(40), type_id varchar(40), version integer, primary key (employee_email_id));
+create table dsi_employee_email (employee_email_id varchar(40) not null, email varchar(50), employee_id varchar(40), type_id varchar(40), is_preferred bit, version integer, primary key (employee_email_id));
 
 create table dsi_employee_info (employee_info_id varchar(40) not null, blood_group varchar(15), date_of_birth date, father_name varchar(40), gender varchar(10), mother_name varchar(40), permanent_address TEXT, photo_url TEXT, present_address TEXT, spouse_name varchar(40), employee_id varchar(40), version integer, primary key (employee_info_id));
 
@@ -28,7 +28,13 @@ create table dsi_project_team (project_team_id varchar(40) not null, project_id 
 
 create table dsi_team (team_id varchar(40) not null, floor varchar(20), is_active bit, member_count integer, name varchar(50), room varchar(20), version integer, primary key (team_id));
 
+create table dsi_holiday (holiday_id varchar(40) not null, created_date date, description TEXT, end_date date, name varchar(40), is_active boolean, last_modified_date date, start_date date, version integer not null, year integer not null, publish integer not null type_id varchar(40), primary key (holiday_id));
+
 create table dsi_team_member (team_member_id varchar(40) not null, employee_id varchar(40), role_id varchar(40), team_id varchar(40), version integer, primary key (team_member_id));
+
+create table ref_attendance_status (attendance_status_id varchar(40) not null, attendance_date date, status bit, type varchar(40), primary key (attendance_status_id));
+
+create table ref_draft_attendance_file (draft_attendance_id varchar(40) not null, attendance_date date, created_date timestamp, last_modified_date timestamp, primary key (draft_attendance_id));
 
 create table ref_employee_contact_number_type (employee_contact_type_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (employee_contact_type_id));
 
@@ -36,9 +42,9 @@ create table ref_employee_email_type (employee_email_type_id varchar(40) not nul
 
 create table ref_employee_status (employee_status_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (employee_status_id));
 
-create table ref_leave_status (leave_status_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (leave_status_id));
+create table ref_leave_status (leave_status_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), priority integer, primary key (leave_status_id));
 
-create table ref_leave_type (leave_type_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (leave_type_id));
+create table ref_leave_type (leave_type_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), type varchar(20) , primary key (leave_type_id));
 
 create table ref_leave_request_type(leave_request_type_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (leave_request_type_id));
 
@@ -46,3 +52,4 @@ create table ref_project_status (project_status_id varchar(40) not null, descrip
 
 create table ref_role (role_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (role_id));
 
+create table ref_holiday_type (holiday_type_id varchar(40) not null, description TEXT, name varchar(50), is_active boolean, primary key (holiday_type_id));

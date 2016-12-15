@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="csv.dateTime.column">Event Time</entry>
+    <entry key="csv.employeeId.column">User ID</entry>
+    <entry key="csv.terminalId.column">Terminal ID</entry>
+    <entry key="csv.result.column">Result</entry>
+
+    <entry key="csv.inTime">1</entry>
+    <entry key="csv.outTime">2</entry>
+    <entry key="csv.status">Success</entry>
+
+</properties>

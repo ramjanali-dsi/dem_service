@@ -22,7 +22,7 @@
                 </configuration>
             </plugin>
 
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.tomcat.maven</groupId>
                 <artifactId>tomcat7-maven-plugin</artifactId>
                 <version>2.2</version>
@@ -31,7 +31,7 @@
                     <server>dsiproductserver</server>
                     <path>/dem</path>
                 </configuration>
-            </plugin>
+            </plugin>-->
 
         </plugins>
     </build>
@@ -44,10 +44,22 @@
     <dependencies>
 
         <!--Hibernate property-->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>4.3.2.Final</version>
+        </dependency>
+
         <!--<dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
+            <artifactId>hibernate-ehcache</artifactId>
             <version>${hibernate.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>2.10.1</version>
         </dependency>-->
 
         <!--Mysql connector-->

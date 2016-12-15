@@ -59,9 +59,9 @@ VALUES ('425744ba-6c10-47c0-91cf-5a4c05265b56', b'1', 'DSI Employee Management',
 
 
 INSERT INTO `service_authorization`.`dsi_role` (`role_id`, `is_active`, `name`, `version`)
-VALUES ('fe3e0492-c80b-431a-8b6e-658af6a2c8d7', b'1', 'Super Admin', '1');
+VALUES ('fe3e0492-c80b-431a-8b6e-658af6a2c8d7', b'1', 'Manager', '1');
 INSERT INTO `service_authorization`.`dsi_role` (`role_id`, `is_active`, `name`, `version`)
-VALUES ('33394716-ab11-4e6d-8baa-dd4cb214befc', b'1', 'Admin', '1');
+VALUES ('33394716-ab11-4e6d-8baa-dd4cb214befc', b'1', 'HR', '1');
 INSERT INTO `service_authorization`.`dsi_role` (`role_id`, `is_active`, `name`, `version`)
 VALUES ('9183166d-2356-42df-a045-416748260106', b'1', 'Member', '1');
 

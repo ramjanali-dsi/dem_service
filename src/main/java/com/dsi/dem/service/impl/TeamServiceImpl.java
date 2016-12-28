@@ -18,6 +18,8 @@ import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.Session;
 
 import java.util.ArrayList;
@@ -51,7 +53,6 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
         Session session = getSession();
         teamDao.setSession(session);
-        //employeeDao.setSession(session);
 
         if(teamDao.getTeamByName(team.getName()) != null){
             close(session);
@@ -67,6 +68,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         for(TeamMember member : team.getMembers()){
             member.setVersion(1);
             member.setTeam(team);
+            member.setRole(teamDao.getRoleTypeByRoleId(member.getRole().getRoleId()));
+            member.setEmployee(employeeDao.getEmployeeByUserID(member.getEmployee().getUserId()));
             teamDao.saveTeamMember(member);
         }
         logger.info("Save team members success");
@@ -242,6 +245,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             throw new CustomException(errorMessage);
         }
 
+        validateInputForMemberCreation(teamMemberList);
+
         Session session = getSession();
         teamDao.setSession(session);
 
@@ -259,12 +264,12 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         teamDao.deleteTeamMember(teamID, null);
         logger.info("Delete all team members.");
 
-        for(TeamMember member : teamMembers){
-            validateInputForMemberCreation(member);
-
+        for (TeamMember member : teamMembers) {
             Team team = teamDao.getTeamByID(teamID);
             member.setVersion(team.getVersion());
             member.setTeam(team);
+            member.setRole(teamDao.getRoleTypeByRoleId(member.getRole().getRoleId()));
+            member.setEmployee(employeeDao.getEmployeeByUserID(member.getEmployee().getUserId()));
             teamDao.saveTeamMember(member);
         }
         logger.info("Save team members success.");
@@ -273,6 +278,70 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         existTeam.setMemberCount(teamMembers.size());
         teamDao.updateTeam(existTeam);
         logger.info("Team (member count) update success.");
+
+        /*JSONObject resultObj, contentObj;
+        String result;
+        boolean isCheck = true;
+        try {
+
+            List<TeamMember> assignedTeamMember = new ArrayList<>();
+            List<TeamMember> unassignedTeamMember = new ArrayList<>();
+
+            List<TeamMember> teamMemberList = teamDao.getTeamMembers(teamID, null);
+            for(TeamMember existMember : teamMemberList){
+
+                for(TeamMember newMember : teamMembers){
+
+                    if(existMember.getEmployee().getUserId().equals(newMember.getEmployee().getUserId())){
+                        isCheck = false;
+                    }
+                }
+
+                if(isCheck){
+                    logger.info("Unassigned team member.");
+                    unassignedTeamMember.add(existMember);
+                }
+            }
+
+            isCheck = true;
+            for(TeamMember newMember : teamMembers){
+
+                for(TeamMember existMember : teamMemberList){
+
+                    if(newMember.getEmployee().getUserId().equals(existMember.getEmployee().getUserId())){
+                        isCheck = false;
+                    }
+                }
+
+                if(isCheck){
+                    logger.info("Assigned team member.");
+                    assignedTeamMember.add(newMember);
+                }
+            }
+
+            teamDao.deleteTeamMember(teamID, null);
+            logger.info("Delete all team members.");
+
+            for (TeamMember member : teamMembers) {
+                Team team = teamDao.getTeamByID(teamID);
+                member.setVersion(team.getVersion());
+                member.setTeam(team);
+                member.setRole(teamDao.getRoleTypeByRoleId(member.getRole().getRoleId()));
+                member.setEmployee(employeeDao.getEmployeeByUserID(member.getEmployee().getUserId()));
+                teamDao.saveTeamMember(member);
+            }
+            logger.info("Save team members success.");
+
+            Team existTeam = teamDao.getTeamByID(teamID);
+            existTeam.setMemberCount(teamMembers.size());
+            teamDao.updateTeam(existTeam);
+            logger.info("Team (member count) update success.");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
     }
 
     @Override
@@ -286,6 +355,23 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         logger.info("Team member delete:: end");
 
         close(session);
+    }
+
+    @Override
+    public TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID) throws CustomException {
+        Session session = getSession();
+        teamDao.setSession(session);
+
+        TeamMember member = teamDao.getTeamMemberByTeamIDAndMemberID(teamID, memberID);
+        if(member == null){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
+            throw new CustomException(errorMessage);
+        }
+
+        close(session);
+        return member;
     }
 
     @Override
@@ -326,17 +412,20 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         return TRANSFORMER.getProjectTeamsDto(teamProjects);
     }
 
-    private void validateInputForMemberCreation(TeamMember member) throws CustomException {
-        if(member.getEmployee().getEmployeeId() == null){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
-                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0006);
-            throw new CustomException(errorMessage);
-        }
+    private void validateInputForMemberCreation(List<TeamMember> memberList) throws CustomException {
 
-        if(member.getRole().getRoleId() == null){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
-                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0007);
-            throw new CustomException(errorMessage);
+        for(TeamMember member : memberList){
+            if(member.getEmployee().getUserId() == null){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                        Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0006);
+                throw new CustomException(errorMessage);
+            }
+
+            if(member.getRole().getRoleId() == null){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                        Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0007);
+                throw new CustomException(errorMessage);
+            }
         }
     }
 

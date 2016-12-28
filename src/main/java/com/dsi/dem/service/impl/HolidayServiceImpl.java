@@ -207,8 +207,11 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
 
     private void copyHolidayFromExist(Holiday holiday, Session session) throws CustomException {
 
+        int currentYear = Utility.getYearFromDate(new Date());
+        logger.info("Current year: " + currentYear);
         logger.info("Holiday year: " + holiday.getYear());
-        Holiday nextYearHoliday = holidayDao.getHolidayByNameAndYear(holiday.getHolidayName(), holiday.getYear() + 1);
+
+        Holiday nextYearHoliday = holidayDao.getHolidayByNameAndYear(holiday.getHolidayName(), currentYear + 1);
         if(nextYearHoliday != null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
@@ -223,7 +226,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
         newHoliday.setHolidayType(holiday.getHolidayType());
         newHoliday.setStartDate(Utility.getDateFromAddYear(holiday.getStartDate()));
         newHoliday.setEndDate(Utility.getDateFromAddYear(holiday.getEndDate()));
-        newHoliday.setYear(holiday.getYear() + 1);
+        newHoliday.setYear(currentYear + 1);
         newHoliday.setCreatedDate(Utility.today());
         newHoliday.setLastModifiedDate(Utility.today());
         newHoliday.setActive(holiday.isActive());

@@ -7,15 +7,13 @@ import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.*;
 import com.dsi.dem.service.impl.*;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.EmailBodyTemplate;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.util.*;
 import com.dsi.httpclient.HttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -66,6 +64,9 @@ public class EmployeeResource {
                                    @FormDataParam("employee") String employeeDtoData)
             throws CustomException {
 
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
         String currentUserID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
@@ -79,48 +80,16 @@ public class EmployeeResource {
             Employee employee = EMPLOYEE_DTO_TRANSFORMER.getEmployee(employeeDto);
             logger.info("Convert Dto to Object:: End");
 
-            employeeService.validateInputForCreation(employee);
-
-            logger.info("Employee Create:: Start");
-            logger.info("Request body for login create: " + Utility.getLoginObject(employee, currentUserID, 1));
-            String result = httpClient.sendPost(APIProvider.API_LOGIN_SESSION_CREATE,
-                    Utility.getLoginObject(employee, currentUserID, 1), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-            logger.info("v1/login_session/create api call result: " + result);
-
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-            }
-
             if (fileInputStream != null) {
                 employee.getInfo().setPhotoUrl(savePhoto(fileInputStream, fileDetails.getFileName()));
             }
 
-            employee.setUserId(resultObj.getString("user_id"));
+            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto(
+                    employeeService.saveEmployee(employee, currentUserID, tenantName))).build();
 
-            employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto(employeeService.saveEmployee(employee));
-            logger.info("Employee Create:: End");
-
-            /*String email = employeeDto.getEmailList().get(0).getEmail();
-            String body = EmailBodyTemplate.getEmployeeCreateBody(resultObj.getString("password"),
-                    employee.getFirstName(), email);
-
-            logger.info("Request body for notification create: " + Utility.getNotificationObject(
-                    email, body, Constants.EMPLOYEE_CREATE_TEMPLATE_ID));
-
-            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(
-                    email, body, Constants.EMPLOYEE_CREATE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-            }*/
-
-            return Response.ok().entity(employeeDto).build();
-
-        } catch (JSONException | IOException je) {
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
-                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+        } catch (IOException io) {
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0008,
+                    Constants.DEM_SERVICE_0008_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_008);
             throw new CustomException(errorMessage);
         }
     }
@@ -137,6 +106,9 @@ public class EmployeeResource {
                                    @FormDataParam("file") InputStream fileInputStream,
                                    @FormDataParam("file") FormDataContentDisposition fileDetails,
                                    @FormDataParam("employee") String employeeDtoData) throws CustomException {
+
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
 
         String currentUserID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
@@ -156,31 +128,14 @@ public class EmployeeResource {
                 employee.getInfo().setPhotoUrl(savePhoto(fileInputStream, fileDetails.getFileName()));
             }
 
-            logger.info("Employee update:: Start");
             employee.setEmployeeId(employeeID);
-            employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto(employeeService.updateEmployee(employee));
-            //employeeService.updateEmployee(employee);
 
-            logger.info("Request body for login update: " + Utility.getLoginObject(employee, currentUserID, 2));
-            String result = httpClient.sendPut(APIProvider.API_LOGIN_SESSION_UPDATE + employee.getUserId(),
-                    Utility.getLoginObject(employee, currentUserID, 2), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-            logger.info("v1/login_session/update api call result: " + result);
+            return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
+                    (employeeService.updateEmployee(employee, currentUserID, tenantName))).build();
 
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-            }
-            logger.info("Employee update:: End");
-
-            /*employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
-                    (employeeService.getEmployeeByID(employeeID));*/
-
-            return Response.ok().entity(employeeDto).build();
-
-        } catch (Exception e) {
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
-                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+        } catch (IOException io) {
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0008,
+                    Constants.DEM_SERVICE_0008_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_008);
             throw new CustomException(errorMessage);
         }
     }
@@ -214,7 +169,6 @@ public class EmployeeResource {
 
             List<TeamMember> memberList = teamService.getTeamMembers(null, employeeID);
             if(!Utility.isNullOrEmpty(memberList)){
-                //ErrorContext errorContext = new ErrorContext(employeeID, "Employee", "Employee delete failed, because this employee associated with a team members");
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
                         Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0003);
                 throw new CustomException(errorMessage);
@@ -248,7 +202,6 @@ public class EmployeeResource {
             return Response.ok().entity(null).build();
 
         } catch (JSONException je) {
-            //ErrorContext errorContext = new ErrorContext(null, null, je.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);

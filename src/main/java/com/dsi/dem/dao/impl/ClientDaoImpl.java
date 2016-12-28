@@ -118,7 +118,7 @@ public class ClientDaoImpl extends CommonService implements ClientDao {
 
         if(!Utility.isNullOrEmpty(clientName)){
             queryBuilder.append(" WHERE c.memberName like :clientName");
-            paramValue.put("clientName", clientName);
+            paramValue.put("clientName", "%" + clientName + "%");
             hasClause = true;
         }
 

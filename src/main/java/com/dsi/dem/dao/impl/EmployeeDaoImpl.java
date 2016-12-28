@@ -2,11 +2,13 @@ package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.model.*;
+import com.dsi.dem.util.NotificationConstant;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +121,36 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             }
         }
         return employee;
+    }
+
+    @Override
+    public List<Employee> getTeamLeadsProfileOfAnEmployee(String employeeId) {
+        Session session = null;
+        List<Employee> employeeList = new ArrayList<>();
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM TeamMember tm WHERE tm.role.roleName =:roleName AND tm.team.teamId " +
+                    "IN (SELECT tm1.team.teamId FROM TeamMember tm1 WHERE tm1.employee.employeeId =:employeeId) " +
+                    "AND tm.employee.employeeId not in :employeeId");
+            query.setParameter("roleName", "Lead");
+            query.setParameter("employeeId", employeeId);
+
+            List<TeamMember> teamMembers = query.list();
+
+            logger.info("Team member size: " + teamMembers.size());
+
+            for(TeamMember member : teamMembers){
+                employeeList.add(member.getEmployee());
+            }
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeList;
     }
 
     @Override

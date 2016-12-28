@@ -2,11 +2,21 @@ package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.TeamMemberDto;
 import com.dsi.dem.exception.CustomException;
+import com.dsi.dem.exception.ErrorMessage;
+import com.dsi.dem.model.TeamMember;
 import com.dsi.dem.service.TeamService;
 import com.dsi.dem.service.impl.TeamServiceImpl;
+import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.ErrorTypeConstants;
+import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
+import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -21,7 +31,12 @@ import java.util.List;
 @Consumes({MediaType.APPLICATION_JSON})
 public class TeamMemberResource {
 
+    private static final Logger logger = Logger.getLogger(TeamMemberResource.class);
+
     private static final TeamService teamService = new TeamServiceImpl();
+
+    @Context
+    HttpServletRequest request;
 
     @POST
     @ApiOperation(value = "Create Team Member", notes = "Create Team Member", position = 1)
@@ -32,6 +47,9 @@ public class TeamMemberResource {
     public Response createTeamMember(@PathParam("team_id") String teamID,
                                      @ApiParam(value = "TeamMember Dto", required = true)
                                              List<TeamMemberDto> teamMemberDtoList) throws CustomException {
+
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
 
         return Response.ok().entity(teamService.createTeamMembers(teamID, teamMemberDtoList)).build();
     }

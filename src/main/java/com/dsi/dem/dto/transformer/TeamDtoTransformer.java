@@ -90,7 +90,7 @@ public class TeamDtoTransformer {
             BeanUtils.copyProperties(memberDto, teamMember.getEmployee());
             BeanUtils.copyProperties(memberDto, teamMember.getRole());
 
-            memberDto.setPhotoUrl(teamMember.getEmployee().getInfo().getPhotoUrl());
+            /*memberDto.setPhotoUrl(teamMember.getEmployee().getInfo().getPhotoUrl());
 
             if(!Utility.isNullOrEmpty(teamMember.getEmployee().getDesignations())) {
                 for (EmployeeDesignation designation : teamMember.getEmployee().getDesignations()) {
@@ -117,7 +117,7 @@ public class TeamDtoTransformer {
                         break;
                     }
                 }
-            }
+            }*/
 
         } catch (Exception e) {
             e.printStackTrace();

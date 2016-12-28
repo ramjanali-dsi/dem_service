@@ -1,7 +1,9 @@
 package com.dsi.dem.util;
 
+import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.HolidayDao;
 import com.dsi.dem.dao.LeaveDao;
+import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.HolidayDaoImpl;
 import com.dsi.dem.dao.impl.LeaveDaoImpl;
 import com.dsi.dem.dto.*;
@@ -237,10 +239,27 @@ public class Test {
 
         dao.deleteHoliday("c1d7bd06-f1f9-4d6b-9823-361b7628f5a1");*/
 
-        Date start = Utility.getDateFromString("2016-12-01");
+        /*Date start = Utility.getDateFromString("2016-12-01");
         Date end = Utility.getDateFromString("2016-12-05");
 
-        System.out.println(Utility.getWeekendBetweenDate(start, end));
+        Date approveStart = Utility.getDateFromString("2016-12-02");
+        Date approveEnd = Utility.getDateFromString("2016-12-02");
+
+
+        if((approveStart.compareTo(start) >= 0 && approveStart.compareTo(end) <= 0)
+                && (approveEnd.compareTo(start) >= 0 && approveEnd.compareTo(end) <= 0)){
+
+            System.out.println("Dates are in range.");
+        }*/
+
+        /*EmployeeDao employeeDao = new EmployeeDaoImpl();
+
+        List<Employee> employeeList = employeeDao.getTeamLeadsProfileOfAnEmployee("6aefc8a6-85be-4d14-a7ad-ba3ebf0137a7");
+
+        System.out.println(new Gson().toJson(employeeList));*/
+
+        //System.out.println(Utility.getWeekendBetweenDate(start, end));
+
     }
 
     private static void myLeaveRequestPatch() {
@@ -462,7 +481,7 @@ public class Test {
 
             System.out.println("Employee Object After Convert: " + new Gson().toJson(employee));
 
-            employeeService.saveEmployee(employee);
+            //employeeService.saveEmployee(employee);
 
             employeeDto = employeeDtoTransformer.getEmployeeDto(employeeService.getEmployeeByUserID(employee.getUserId()));
 
@@ -516,7 +535,7 @@ public class Test {
             System.out.println("Employee Object After Convert: " + new Gson().toJson(employee));
 
             employee.setEmployeeId("d0f3baa2-c3e2-4b68-91ec-160c0523d815");
-            employeeService.updateEmployee(employee);
+            //employeeService.updateEmployee(employee);
 
             employeeDto = employeeDtoTransformer.getEmployeeDto(employeeService.getEmployeeByUserID(employee.getUserId()));
 

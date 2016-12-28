@@ -4,6 +4,7 @@ import com.dsi.dem.dao.TeamDao;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.ProjectTeam;
+import com.dsi.dem.model.RoleType;
 import com.dsi.dem.model.Team;
 import com.dsi.dem.model.TeamMember;
 import com.dsi.dem.service.impl.CommonService;
@@ -217,6 +218,18 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
         List<Team> teamList = query.list();
         if(teamList != null){
             return teamList;
+        }
+        return null;
+    }
+
+    @Override
+    public RoleType getRoleTypeByRoleId(String roleId) {
+        Query query = session.createQuery("FROM RoleType rt WHERE rt.roleId =:roleId");
+        query.setParameter("roleId", roleId);
+
+        RoleType roleType = (RoleType) query.uniqueResult();
+        if(roleType != null){
+            return roleType;
         }
         return null;
     }

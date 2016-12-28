@@ -8,9 +8,15 @@ import com.dsi.dem.model.*;
 import com.dsi.dem.service.EmployeeService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
+import com.dsi.dem.util.NotificationConstant;
 import com.dsi.dem.util.Utility;
+import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,46 +28,118 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
     private static final Logger logger = Logger.getLogger(EmployeeServiceImpl.class);
 
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
+    private static final HttpClient httpClient = new HttpClient();
 
     @Override
-    public Employee saveEmployee(Employee employee) throws CustomException {
+    public Employee saveEmployee(Employee employee, String currentUserID, String tenantName) throws CustomException {
 
-        List<EmployeeDesignation> employeeDesignationList = employee.getDesignations();
-        List<EmployeeEmail> employeeEmailList = employee.getEmailInfo();
-        List<EmployeeContact> employeeContactList = employee.getContactInfo();
+        validateInputForCreation(employee);
 
-        employee.setVersion(1);
-        employee.setCreatedDate(Utility.today());
-        employee.setLastModifiedDate(Utility.today());
+        try {
+            logger.info("Employee Create:: Start");
+            logger.info("Request body for login create: " + Utility.getLoginObject(employee, currentUserID, 1));
+            String result = httpClient.sendPost(APIProvider.API_LOGIN_SESSION_CREATE,
+                    Utility.getLoginObject(employee, currentUserID, 1), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+            logger.info("v1/login_session/create api call result: " + result);
 
-        boolean res = employeeDao.saveEmployee(employee);
-        if(!res){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                    Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+
+            List<EmployeeDesignation> employeeDesignationList = employee.getDesignations();
+            List<EmployeeEmail> employeeEmailList = employee.getEmailInfo();
+            List<EmployeeContact> employeeContactList = employee.getContactInfo();
+
+            employee.setVersion(1);
+            employee.setCreatedDate(Utility.today());
+            employee.setLastModifiedDate(Utility.today());
+            employee.setUserId(resultObj.getString("user_id"));
+
+            boolean res = employeeDao.saveEmployee(employee);
+            if (!res) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                        Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Save employee success");
+
+            EmployeeInfo employeeInfo = employee.getInfo();
+            employeeInfo.setEmployee(employee);
+            employeeInfo.setStatus(employeeDao.getEmployeeStatusById(employee.getInfo().getStatus().getEmployeeStatusId()));
+            employeeInfo.setVersion(1);
+
+            employeeDao.saveEmployeeInfo(employeeInfo);
+            logger.info("Save employee info success");
+
+            EmployeeLeave employeeLeave = new EmployeeLeave();
+            employeeLeave.setEmployee(employee);
+            employeeLeave.setVersion(1);
+
+            employeeDao.saveEmployeeLeaveSummary(employeeLeave);
+            logger.info("Save employee leave summary success");
+
+            saveEmployeesDesignation(employeeDesignationList, employee);
+            saveEmployeesEmails(employeeEmailList, employee);
+            saveEmployeesContacts(employeeContactList, employee);
+
+            logger.info("Employee Create:: End");
+
+            /*logger.info("Notification create:: Start");
+            String email = employeeEmailList.get(0).getEmail();
+            JSONArray recipients = new JSONArray();
+            recipients.put(email);
+
+            logger.info("Get HR email list.");
+            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.HR_ROLE_TYPE,
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONArray resultArray = new JSONArray(result);
+            if(resultArray.length() > 0){
+                recipients.put(resultArray);
+            }
+
+            logger.info("Get Manager email list.");
+            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.MANAGER_ROLE_TYPE,
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            resultArray = new JSONArray(result);
+            if(resultArray.length() > 0){
+                recipients.put(resultArray);
+            }
+
+            JSONObject contentObj = new JSONObject();
+            contentObj.put("Recipient", recipients);
+            contentObj.put("EmployeeFirstName", employee.getFirstName());
+            contentObj.put("EmployeeLastName", employee.getLastName());
+            contentObj.put("TenantName", tenantName);
+            contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+            contentObj.put("Username", email);
+            contentObj.put("Password", resultObj.getString("password"));
+
+            logger.info("Request body for notification create: " + Utility.getNotificationObject(contentObj,
+                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID));
+
+            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
+                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");*/
+
+            return setEmployeesAllProperty(employee.getEmployeeId(), employee);
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
         }
-        logger.info("Save employee success");
-
-        EmployeeInfo employeeInfo = employee.getInfo();
-        employeeInfo.setEmployee(employee);
-        employeeInfo.setStatus(employeeDao.getEmployeeStatusById(employee.getInfo().getStatus().getEmployeeStatusId()));
-        employeeInfo.setVersion(1);
-
-        employeeDao.saveEmployeeInfo(employeeInfo);
-        logger.info("Save employee info success");
-
-        EmployeeLeave employeeLeave = new EmployeeLeave();
-        employeeLeave.setEmployee(employee);
-        employeeLeave.setVersion(1);
-
-        employeeDao.saveEmployeeLeaveSummary(employeeLeave);
-        logger.info("Save employee leave summary success");
-
-        saveEmployeesDesignation(employeeDesignationList, employee);
-        saveEmployeesEmails(employeeEmailList, employee);
-        saveEmployeesContacts(employeeContactList, employee);
-
-        return setEmployeesAllProperty(employee.getEmployeeId(), employee);
     }
 
     private void saveEmployeesDesignation(List<EmployeeDesignation> employeeDesignationList, Employee employee) throws CustomException {
@@ -121,6 +199,12 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             throw new CustomException(errorMessage);
         }
 
+        if(employee.getInfo().getStatus().getEmployeeStatusId() == null){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0018);
+            throw new CustomException(errorMessage);
+        }
+
         if(Utility.isNullOrEmpty(employee.getDesignations())){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0007);
@@ -153,35 +237,133 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
     }
 
     @Override
-    public Employee updateEmployee(Employee employee) throws CustomException {
+    public Employee updateEmployee(Employee employee, String currentUserId, String tenantName) throws CustomException {
         validateInputForUpdate(employee);
 
-        Employee existEmployee = employeeDao.getEmployeeByID(employee.getEmployeeId());
-        if(existEmployee == null){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+        try {
+            logger.info("Employee update:: Start");
+
+            Employee existEmployee = employeeDao.getEmployeeByID(employee.getEmployeeId());
+            if (existEmployee == null) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                        Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+                throw new CustomException(errorMessage);
+            }
+
+            employee.setUserId(existEmployee.getUserId());
+            employee.setCreatedDate(existEmployee.getCreatedDate());
+            employee.setLastModifiedDate(Utility.today());
+            EmployeeInfo employeeInfo = employee.getInfo();
+
+            boolean res = employeeDao.updateEmployee(employee);
+            if (!res) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
+                        Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Employee update success");
+
+            employeeInfo.setEmployeeInfoId(employeeDao.getEmployeeInfoByEmployeeID(employee.getEmployeeId()).getEmployeeInfoId());
+            employeeInfo.setEmployee(employee);
+            employeeInfo.setStatus(employeeDao.getEmployeeStatusById(employee.getInfo().getStatus().getEmployeeStatusId()));
+            employeeDao.updateEmployeeInfo(employeeInfo);
+            logger.info("Employee info update success");
+
+            logger.info("Request body for login update: " + Utility.getLoginObject(employee, currentUserId, 2));
+            String result = httpClient.sendPut(APIProvider.API_LOGIN_SESSION_UPDATE + employee.getUserId(),
+                    Utility.getLoginObject(employee, currentUserId, 2), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+            logger.info("v1/login_session/update api call result: " + result);
+
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
+                        Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Employee update:: End");
+
+            /*logger.info("Notification create:: Start");
+            String email = employeeDto.getEmailList().get(0).getEmail();
+            JSONArray recipients = new JSONArray();
+            recipients.put(email);
+
+            logger.info("Get HR email list.");
+            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.HR_ROLE_TYPE,
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONArray resultArray = new JSONArray(result);
+            if(resultArray.length() > 0){
+                recipients.put(resultArray);
+            }
+
+            logger.info("Get Manager email list.");
+            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.MANAGER_ROLE_TYPE,
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            resultArray = new JSONArray(result);
+            if(resultArray.length() > 0){
+                recipients.put(resultArray);
+            }
+
+            JSONObject contentObj = new JSONObject();
+            contentObj.put("Recipient", recipients);
+            contentObj.put("EmployeeFirstName", employee.getFirstName());
+            contentObj.put("EmployeeLastName", employee.getLastName());
+            contentObj.put("TenantName", tenantName);
+            contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+
+            logger.info("Request body for notification create: " + Utility.getNotificationObject(contentObj,
+                    NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID));
+
+            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
+                    NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+            }
+
+            if(!employeeDto.isActive()) {
+                logger.info("Notification create for in-active member.");
+                result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
+                        NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+                resultObj = new JSONObject(result);
+                if (!resultObj.has(Constants.MESSAGE)) {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+                }
+
+                logger.info("Notification create for in-active member to lead.");
+                List<Employee> leadList = employeeService.getTeamLeadsProfile(employeeID);
+                recipients = new JSONArray();
+
+                for(Employee teamLead : leadList){
+                    contentObj = new JSONObject();
+                    contentObj.put("Recipient", recipients.put(teamLead.getEmailInfo().get(0).getEmail()));
+                    contentObj.put("EmployeeFirstName", employee.getFirstName());
+                    contentObj.put("EmployeeLastName", employee.getLastName());
+                    contentObj.put("LeadFirstName", teamLead.getFirstName());
+                    contentObj.put("LeadLastName", teamLead.getLastName());
+                    contentObj.put("TenantName", tenantName);
+
+                    result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
+                            NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_LEAD), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+                    resultObj = new JSONObject(result);
+                    if (!resultObj.has(Constants.MESSAGE)) {
+                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
+                    }
+                }
+            }
+            logger.info("Notification create:: End");*/
+
+            return setEmployeesAllProperty(employee.getEmployeeId(), employee);
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
         }
-
-        employee.setUserId(existEmployee.getUserId());
-        employee.setCreatedDate(existEmployee.getCreatedDate());
-        employee.setLastModifiedDate(Utility.today());
-        EmployeeInfo employeeInfo = employee.getInfo();
-
-        boolean res = employeeDao.updateEmployee(employee);
-        if(!res){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0003,
-                    Constants.DEM_SERVICE_0003_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
-            throw new CustomException(errorMessage);
-        }
-        logger.info("Employee update success");
-
-        employeeInfo.setEmployeeInfoId(employeeDao.getEmployeeInfoByEmployeeID(employee.getEmployeeId()).getEmployeeInfoId());
-        employeeInfo.setEmployee(employee);
-        employeeDao.updateEmployeeInfo(employeeInfo);
-        logger.info("Employee info update success");
-
-        return setEmployeesAllProperty(employee.getEmployeeId(), employee);
     }
 
     private void validateInputForUpdate(Employee employee) throws CustomException {
@@ -246,6 +428,23 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             throw new CustomException(errorMessage);
         }
         return setEmployeesAllProperty(employee.getEmployeeId() ,employee);
+    }
+
+    @Override
+    public List<Employee> getTeamLeadsProfile(String employeeId) throws CustomException {
+
+        List<Employee> employeeList = employeeDao.getTeamLeadsProfileOfAnEmployee(employeeId);
+        if(employeeList == null){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
+            throw new CustomException(errorMessage);
+        }
+
+        List<Employee> employees = new ArrayList<>();
+        for(Employee employee : employeeList){
+            employees.add(setEmployeesAllProperty(employee.getEmployeeId(), employee));
+        }
+        return employees;
     }
 
     @Override

@@ -223,7 +223,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             if (!((leaveRequest.getApprovedStartDate().compareTo(existLeaveRequest.getStartDate()) >= 0
                     && leaveRequest.getApprovedStartDate().compareTo(existLeaveRequest.getEndDate()) <= 0)
                     && (leaveRequest.getApprovedEndDate().compareTo(existLeaveRequest.getStartDate()) >= 0
-                    && leaveRequest.getApprovedEndDate().compareTo(existLeaveRequest.getEndDate()) >= 0))) {
+                    && leaveRequest.getApprovedEndDate().compareTo(existLeaveRequest.getEndDate()) <= 0))) {
 
                 close(session);
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,

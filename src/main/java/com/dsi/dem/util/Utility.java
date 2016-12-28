@@ -212,13 +212,9 @@ public class Utility {
         return loginObject.toString();
     }
 
-    public static String getNotificationObject(String email, String body, Long templateId) throws JSONException {
-        JSONObject contentObj = new JSONObject();
-        contentObj.put("recipient", new JSONArray().put(email));
-        contentObj.put("body", body);
-
+    public static String getNotificationObject(JSONObject contentObj, Long templateId) throws JSONException {
         JSONObject notificationObj = new JSONObject();
-        notificationObj.put("notificationTypeId", Constants.NOTIFICATION_EMAIL_TYPE_ID);
+        notificationObj.put("notificationTypeId",  NotificationConstant.NOTIFICATION_EMAIL_TYPE_ID);
         notificationObj.put("notificationTemplateId", templateId);
         notificationObj.put("systemId", Constants.SYSTEM_ID);
         notificationObj.put("contentJson", contentObj.toString());
@@ -230,7 +226,7 @@ public class Utility {
     }
 
     public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {
-        logger.debug("Uploaded File Location: " + uploadedFileLocation);
+        logger.info("Uploaded File Location: " + uploadedFileLocation);
 
         OutputStream out = null;
         int read = 0;

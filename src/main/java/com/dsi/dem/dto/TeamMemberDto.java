@@ -17,16 +17,10 @@ public class TeamMemberDto {
 
     private String nickName;
 
-    private String currentDesignation;
-
-    private String photoUrl;
-
-    private String phone;
-
-    private String email;
+    private String employeeId;
 
     @ApiModelProperty(required = true)
-    private String employeeId;
+    private String userId;
 
     @ApiModelProperty(required = true)
     private String roleId;
@@ -91,44 +85,20 @@ public class TeamMemberDto {
         this.nickName = nickName;
     }
 
-    public String getCurrentDesignation() {
-        return currentDesignation;
-    }
-
-    public void setCurrentDesignation(String currentDesignation) {
-        this.currentDesignation = currentDesignation;
-    }
-
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public String getRoleName() {
         return roleName;
     }
 
     public void setRoleName(String roleName) {
         this.roleName = roleName;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public int getVersion() {

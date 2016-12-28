@@ -15,6 +15,7 @@ public class ErrorTypeConstants {
     public static final String DEM_ERROR_TYPE_007 = "dto";
     public static final String DEM_ERROR_TYPE_008 = "upload";
     public static final String DEM_ERROR_TYPE_009 = "range";
+    public static final String DEM_ERROR_TYPE_010 = "serviceFailed";
 
     //Employee
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0001 = "employee";
@@ -34,7 +35,7 @@ public class ErrorTypeConstants {
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0015 = "phoneType";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0016 = "designationName";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0017 = "employeeAttendances";
-    public static final String DEM_EMPLOYEE_ERROR_TYPE_0018 = "employeeInfo";
+    public static final String DEM_EMPLOYEE_ERROR_TYPE_0018 = "employeeStatus";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0019 = "employeeLeaveSummary";
 
 

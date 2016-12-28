@@ -2,6 +2,7 @@ package com.dsi.dem.dao;
 
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.ProjectTeam;
+import com.dsi.dem.model.RoleType;
 import com.dsi.dem.model.Team;
 import com.dsi.dem.model.TeamMember;
 import org.hibernate.Session;
@@ -22,6 +23,8 @@ public interface TeamDao {
     List<Team> getAllTeams();
     List<Team> searchTeams(String teamName, String status, String floor, String room,
                            String memberName, String projectName, String clientName, String from, String range);
+
+    RoleType getRoleTypeByRoleId(String roleId);
 
     void saveTeamMember(TeamMember teamMember) throws CustomException;
     void deleteTeamMember(String teamID, String teamMemberID) throws CustomException;

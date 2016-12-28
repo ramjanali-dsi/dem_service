@@ -14,8 +14,6 @@ public class Constants {
     public static final String SYSTEM_HEADER_ID = "0759a760-b9df-4c8a-8a64-fa31f256d13b";
 
     static final String SYSTEM_ID = "425744ba-6c10-47c0-91cf-5a4c05265b56";
-    static final Long NOTIFICATION_EMAIL_TYPE_ID = 1L;
-    public static final Long EMPLOYEE_CREATE_TEMPLATE_ID = 1L;
 
     static final String DATE_FORMAT="yyyy-MM-dd";
     public static final String TIMESTAMP_DATE_FORMAT="MMM dd, yyyy hh:mm:ss a";
@@ -64,16 +62,16 @@ public class Constants {
     public static final String DEM_SERVICE_0005_DESCRIPTION = "Not found.";
 
     public static final String DEM_SERVICE_0006 = "dem_service_0006";
-    public static final String DEM_SERVICE_0006_DESCRIPTION = "Already exist.";
+    public static final String DEM_SERVICE_0006_DESCRIPTION = "Photo upload failed.";
 
     public static final String DEM_SERVICE_0007 = "dem_service_0007";
     public static final String DEM_SERVICE_0007_DESCRIPTION = "Dto to Object convert failed.";
 
     public static final String DEM_SERVICE_0008 = "dem_service_0008";
-    public static final String DEM_SERVICE_0008_DESCRIPTION = "Upload file failed.";
+    public static final String DEM_SERVICE_0008_DESCRIPTION = "Upload failed.";
 
     public static final String DEM_SERVICE_0009 = "dem_service_0009";
-    public static final String DEM_SERVICE_0009_DESCRIPTION = "JSON read/write failed.";
+    public static final String DEM_SERVICE_0009_DESCRIPTION = "Another service call failed.";
 
     public static final String DEM_SERVICE_0010 = "dem_service_0010";
     public static final String DEM_SERVICE_0010_DESCRIPTION = "Read CSV file failed.";

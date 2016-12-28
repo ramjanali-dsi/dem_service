@@ -12,13 +12,14 @@ import java.util.List;
  */
 public interface EmployeeService {
 
-    Employee saveEmployee(Employee employee) throws CustomException;
+    Employee saveEmployee(Employee employee, String currentUserId, String tenantName) throws CustomException;
     void validateInputForCreation(Employee employee) throws CustomException;
-    Employee updateEmployee(Employee employee) throws CustomException;
+    Employee updateEmployee(Employee employee, String currentUserId, String tenantName) throws CustomException;
     void deleteEmployee(String employeeID) throws CustomException;
     Employee getEmployeeByID(String employeeID) throws CustomException;
     Employee getEmployeeByUserID(String userID) throws CustomException;
     Employee getEmployeeByEmployeeNO(String employeeNO) throws CustomException;
+    List<Employee> getTeamLeadsProfile(String employeeId) throws CustomException;
     List<Employee> getAllEmployees() throws CustomException;
     List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                    String accountID, String ipAddress, String nationalID, String tinID,

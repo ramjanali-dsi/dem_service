@@ -2,17 +2,9 @@ package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.TeamMemberDto;
 import com.dsi.dem.exception.CustomException;
-import com.dsi.dem.exception.ErrorMessage;
-import com.dsi.dem.model.TeamMember;
 import com.dsi.dem.service.TeamService;
 import com.dsi.dem.service.impl.TeamServiceImpl;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
-import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -30,8 +22,6 @@ import java.util.List;
 @Produces({MediaType.APPLICATION_JSON})
 @Consumes({MediaType.APPLICATION_JSON})
 public class TeamMemberResource {
-
-    private static final Logger logger = Logger.getLogger(TeamMemberResource.class);
 
     private static final TeamService teamService = new TeamServiceImpl();
 

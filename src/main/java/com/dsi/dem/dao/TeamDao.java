@@ -29,6 +29,7 @@ public interface TeamDao {
     void saveTeamMember(TeamMember teamMember) throws CustomException;
     void deleteTeamMember(String teamID, String teamMemberID) throws CustomException;
     TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID);
+    TeamMember getTeamLeadByTeamID(String teamID);
     List<TeamMember> getTeamMembers(String teamID, String employeeID);
 
     void saveTeamProject(ProjectTeam projectTeam) throws CustomException;

@@ -4,7 +4,6 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Employee;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.DateTime;
@@ -210,19 +209,6 @@ public class Utility {
             loginObject.put("active", employee.isActive());
         }
         return loginObject.toString();
-    }
-
-    public static String getNotificationObject(JSONObject contentObj, Long templateId) throws JSONException {
-        JSONObject notificationObj = new JSONObject();
-        notificationObj.put("notificationTypeId",  NotificationConstant.NOTIFICATION_EMAIL_TYPE_ID);
-        notificationObj.put("notificationTemplateId", templateId);
-        notificationObj.put("systemId", Constants.SYSTEM_ID);
-        notificationObj.put("contentJson", contentObj.toString());
-        notificationObj.put("maxRetryCount", 5);
-        notificationObj.put("isProcessed", true);
-        notificationObj.put("retryInterval", "1");
-
-        return notificationObj.toString();
     }
 
     public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {

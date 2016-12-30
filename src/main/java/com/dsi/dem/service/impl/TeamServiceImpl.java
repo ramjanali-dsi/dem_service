@@ -16,8 +16,11 @@ import com.dsi.dem.model.*;
 import com.dsi.dem.service.TeamService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
+import com.dsi.dem.util.NotificationConstant;
 import com.dsi.dem.util.Utility;
+import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.Session;
@@ -36,6 +39,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final TeamDao teamDao = new TeamDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
+
+    private static final HttpClient httpClient = new HttpClient();
 
     @Override
     public TeamDto saveTeam(TeamDto teamDto) throws CustomException {
@@ -283,9 +288,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         String result;
         boolean isCheck = true;
         try {
-
-            List<TeamMember> assignedTeamMember = new ArrayList<>();
-            List<TeamMember> unassignedTeamMember = new ArrayList<>();
+            List<TeamMember> assignedTeamMembers = new ArrayList<>();
+            List<TeamMember> unassignedTeamMembers = new ArrayList<>();
 
             List<TeamMember> teamMemberList = teamDao.getTeamMembers(teamID, null);
             for(TeamMember existMember : teamMemberList){
@@ -299,7 +303,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
                 if(isCheck){
                     logger.info("Unassigned team member.");
-                    unassignedTeamMember.add(existMember);
+                    unassignedTeamMembers.add(existMember);
                 }
             }
 
@@ -315,7 +319,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
                 if(isCheck){
                     logger.info("Assigned team member.");
-                    assignedTeamMember.add(newMember);
+                    assignedTeamMembers.add(newMember);
                 }
             }
 
@@ -336,6 +340,14 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             existTeam.setMemberCount(teamMembers.size());
             teamDao.updateTeam(existTeam);
             logger.info("Team (member count) update success.");
+
+            logger.info("Notification create:: Start");
+            TeamMember teamLeadMember = teamDao.getTeamLeadByTeamID(teamID);
+
+
+            for(TeamMember unassignedTeamMember : unassignedTeamMembers){
+
+            }
 
         } catch (JSONException je){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,

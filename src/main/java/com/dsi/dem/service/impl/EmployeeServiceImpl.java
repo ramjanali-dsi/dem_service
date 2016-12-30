@@ -6,11 +6,11 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.EmployeeService;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.NotificationConstant;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.util.*;
 import com.dsi.httpclient.HttpClient;
+import com.hazelcast.config.Config;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -19,6 +19,7 @@ import org.codehaus.jettison.json.JSONObject;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sabbir on 7/14/16.
@@ -87,12 +88,9 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
             logger.info("Employee Create:: End");
 
-            /*logger.info("Notification create:: Start");
-            String email = employeeEmailList.get(0).getEmail();
-            JSONArray recipients = new JSONArray();
-            recipients.put(email);
+            //logger.info("Notification create:: Start");
 
-            logger.info("Get HR email list.");
+            /*logger.info("Get HR email list.");
             result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.HR_ROLE_TYPE,
                     Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
 
@@ -108,21 +106,22 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             resultArray = new JSONArray(result);
             if(resultArray.length() > 0){
                 recipients.put(resultArray);
-            }
+            }*/
 
-            JSONObject contentObj = new JSONObject();
-            contentObj.put("Recipient", recipients);
-            contentObj.put("EmployeeFirstName", employee.getFirstName());
-            contentObj.put("EmployeeLastName", employee.getLastName());
-            contentObj.put("TenantName", tenantName);
-            contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
-            contentObj.put("Username", email);
-            contentObj.put("Password", resultObj.getString("password"));
+//            JSONArray notificationList = new JSONArray();
+//
+//            String email = employeeEmailList.get(0).getEmail();
+//            JSONObject contentObj = EmailBodyTemplate.getContentObjForEmployee(employee, tenantName, email,
+//                    resultObj.getString("password"));
+//
+//            logger.info("Request body for notification create (employee) : " + EmailBodyTemplate.getNotificationObject(contentObj,
+//                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID).toString());
+//
+//            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj, NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID));
+//
+//            //TODO a lot
 
-            logger.info("Request body for notification create: " + Utility.getNotificationObject(contentObj,
-                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID));
-
-            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
+            /*result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, EmailBodyTemplate.getNotificationObject(contentObj,
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
 
             resultObj = new JSONObject(result);
@@ -130,8 +129,8 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
                         Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
                 throw new CustomException(errorMessage);
-            }
-            logger.info("Notification create:: End");*/
+            }*/
+            //logger.info("Notification create:: End");
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 

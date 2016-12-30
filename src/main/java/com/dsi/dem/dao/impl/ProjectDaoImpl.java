@@ -148,7 +148,7 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
                         "WHERE pc.client.memberName like :clientName)");
                 hasClause = true;
             }
-            paramValue.put("clientName", clientName);
+            paramValue.put("clientName", "%" + clientName + "%");
         }
 
         if(!Utility.isNullOrEmpty(teamName)){
@@ -161,7 +161,7 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
                         "WHERE pt.team.name like :teamName)");
                 hasClause = true;
             }
-            paramValue.put("teamName", teamName);
+            paramValue.put("teamName", "%" + teamName + "%");
         }
 
         if(!Utility.isNullOrEmpty(memberName)){
@@ -176,7 +176,7 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
                         "OR tm.employee.lastName like :memberName OR tm.employee.nickName like :memberName))");
                 //hasClause = true;
             }
-            paramValue.put("memberName", memberName);
+            paramValue.put("memberName", "%" + memberName + "%");
         }
 
         queryBuilder.append(" ORDER BY p.projectName ASC");

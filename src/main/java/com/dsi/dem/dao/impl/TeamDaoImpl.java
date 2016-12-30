@@ -10,6 +10,7 @@ import com.dsi.dem.model.TeamMember;
 import com.dsi.dem.service.impl.CommonService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
+import com.dsi.dem.util.NotificationConstant;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
@@ -279,6 +280,19 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
         TeamMember teamMember = (TeamMember) query.uniqueResult();
         if(teamMember != null){
             return teamMember;
+        }
+        return null;
+    }
+
+    @Override
+    public TeamMember getTeamLeadByTeamID(String teamID) {
+        Query query = session.createQuery("FROM TeamMember tm WHERE tm.role.roleName =:roleName AND tm.team.teamId =:teamId");
+        query.setParameter("roleName", NotificationConstant.LEAD_ROLE_TYPE);
+        query.setParameter("teamId", teamID);
+
+        TeamMember member = (TeamMember) query.uniqueResult();
+        if(member != null){
+            return member;
         }
         return null;
     }

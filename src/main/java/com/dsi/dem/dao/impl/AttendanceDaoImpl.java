@@ -261,17 +261,21 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
     @Override
     public boolean isAvailableEmployeeOrTempAttendanceSheet(Date attendanceDate) {
         boolean success = false;
-        Query query = session.createQuery("FROM EmployeeAttendance ea WHERE ea.attendanceDate =:attendanceDate");
+        Query query = session.createQuery("SELECT COUNT(ea.employeeAttendanceId) FROM EmployeeAttendance ea " +
+                "WHERE ea.attendanceDate =:attendanceDate");
         query.setParameter("attendanceDate", attendanceDate);
 
-        if(query.list().size() > 0){
+        Long count = (Long) query.uniqueResult();
+        if(count > 0){
             success = true;
 
         } else {
-            query = session.createQuery("FROM TemporaryAttendance ta WHERE ta.attendanceDate =:attendanceDate");
+            query = session.createQuery("SELECT COUNT(ta.tempAttendanceId) FROM TemporaryAttendance ta " +
+                    "WHERE ta.attendanceDate =:attendanceDate");
             query.setParameter("attendanceDate", attendanceDate);
 
-            if(query.list().size() > 0){
+            count = (Long) query.uniqueResult();
+            if(count > 0){
                 success = true;
             }
         }

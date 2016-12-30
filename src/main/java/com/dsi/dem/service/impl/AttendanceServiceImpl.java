@@ -449,9 +449,9 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 }
             }
 
-        } catch (Exception e) {
+        } catch (IOException io) {
             close(session);
-            e.printStackTrace();
+            io.printStackTrace();
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_005);
             throw new CustomException(errorMessage);

@@ -1,6 +1,10 @@
 package com.dsi.dem.util;
 
+import com.dsi.checkauthorization.exception.CustomException;
+import com.dsi.dem.model.Client;
 import com.dsi.dem.model.Employee;
+import com.dsi.dem.model.Project;
+import com.dsi.dem.model.Team;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -33,6 +37,49 @@ public class EmailBodyTemplate {
         contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("Username", email);
         contentObj.put("Password", password);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentObjForGlobal(Employee employee, String tenantName,
+                                                          JSONArray email) throws JSONException {
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("EmployeeFirstName", employee.getFirstName());
+        contentObj.put("EmployeeLastName", employee.getLastName());
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForTeam(Team team, String tenantName, JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("TeamName", team.getName());
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForProject(Project project, String tenantName, JSONArray emailList) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", emailList);
+        contentObj.put("ProjectName", project.getProjectName());
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForClient(Client client, String projectName, String tenantName,
+                                                 JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("ClientName", client.getMemberName());
+        contentObj.put("ProjectName", projectName);
+        contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }

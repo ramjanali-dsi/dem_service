@@ -14,10 +14,12 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.ProjectService;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.util.*;
+import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.Session;
 
 import java.util.ArrayList;
@@ -35,8 +37,10 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
     private static final TeamDao teamDao = new TeamDaoImpl();
     private static final ClientDao clientDao = new ClientDaoImpl();
 
+    private static final HttpClient httpClient = new HttpClient();
+
     @Override
-    public ProjectDto saveProject(ProjectDto projectDto) throws CustomException {
+    public ProjectDto saveProject(ProjectDto projectDto, String tenantName) throws CustomException {
 
         logger.info("Project Create:: Start");
         if(Utility.isNullOrEmpty(projectDto.getTeamIds())){
@@ -74,8 +78,37 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
 
         logger.info("Project Create:: End");
         setProjectAllProperty(project);
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject contentObj = EmailBodyTemplate.getContentForProject(project, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+                    NotificationConstant.PROJECT_CREATE_TEMPLATE_ID));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return TRANSFORMER.getProjectDto(project);
     }
 
@@ -94,7 +127,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
     }
 
     @Override
-    public ProjectDto updateProject(String projectId, ProjectDto projectDto) throws CustomException {
+    public ProjectDto updateProject(String projectId, ProjectDto projectDto, String tenantName) throws CustomException {
 
         logger.info("Project Update:: Start");
 
@@ -123,8 +156,37 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
 
         setProjectAllProperty(existProject);
         logger.info("Project Update:: End");
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject contentObj = EmailBodyTemplate.getContentForProject(project, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+                    NotificationConstant.PROJECT_UPDATE_TEMPLATE_ID));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return TRANSFORMER.getProjectDto(existProject);
     }
 
@@ -137,7 +199,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
     }
 
     @Override
-    public void deleteProject(String projectID) throws CustomException {
+    public String deleteProject(String projectID, String tenantName) throws CustomException {
         logger.info("Project delete:: Start");
         Session session = getSession();
         projectDao.setSession(session);
@@ -148,8 +210,47 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         projectDao.deleteProject(projectID);
         logger.info("Delete project success");
         logger.info("Project delete:: End");
-
         close(session);
+
+        /*Project project = projectDao.getProjectByID(projectID);
+        try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject contentObj = EmailBodyTemplate.getContentForProject(project, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+                    NotificationConstant.PROJECT_DELETE_TEMPLATE_ID));
+
+            projectDao.deleteProjectTeam(projectID, null);
+            projectDao.deleteProjectClient(projectID, null);
+
+            projectDao.deleteProject(projectID);
+            logger.info("Delete project success");
+            logger.info("Project delete:: End");
+            close(session);
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
+        return null;
     }
 
     @Override

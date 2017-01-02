@@ -6,7 +6,9 @@ import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.service.impl.ProjectServiceImpl;
 import com.wordnik.swagger.annotations.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,6 +24,9 @@ public class ProjectResource {
 
     private static final ProjectService projectService = new ProjectServiceImpl();
 
+    @Context
+    HttpServletRequest request;
+
     @POST
     @ApiOperation(value = "Create Project", notes = "Create Project", position = 1)
     @ApiResponses(value = {
@@ -31,7 +36,10 @@ public class ProjectResource {
     public Response createProject(@ApiParam(value = "Project Dto", required = true)ProjectDto  projectDto)
             throws CustomException {
 
-        return Response.ok().entity(projectService.saveProject(projectDto)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(projectService.saveProject(projectDto, tenantName)).build();
     }
 
     @PUT
@@ -45,7 +53,10 @@ public class ProjectResource {
                                   @ApiParam(value = "Project Dto", required = true) ProjectDto projectDto)
             throws CustomException {
 
-        return Response.ok().entity(projectService.updateProject(projectID, projectDto)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(projectService.updateProject(projectID, projectDto, tenantName)).build();
     }
 
     @DELETE
@@ -57,8 +68,10 @@ public class ProjectResource {
     })
     public Response deleteProject(@PathParam("project_id") String projectID) throws CustomException {
 
-        projectService.deleteProject(projectID);
-        return Response.ok().entity(null).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(projectService.deleteProject(projectID, tenantName)).build();
     }
 
     @GET

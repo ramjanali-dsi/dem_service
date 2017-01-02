@@ -22,6 +22,9 @@ import com.dsi.dem.service.impl.LeaveServiceImpl;
 import com.dsi.dem.service.impl.TeamServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.hazelcast.config.Config;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -53,14 +56,55 @@ public class Test {
     private static final EmployeeDtoTransformer dtoTransformer = new EmployeeDtoTransformer();
     private static final LeaveDtoTransformer LEAVE_DTO_TRANSFORMER = new LeaveDtoTransformer();
 
+    //private static final HazelcastInstance instance = Hazelcast.newHazelcastInstance(new Config());
+
     public static void main(String[] args) throws CustomException {
 
+        //TODO HR & Manager email list API
+        /*logger.info("Get HR email list.");
+            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.HR_ROLE_TYPE,
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONArray resultArray = new JSONArray(result);
+            if(resultArray.length() > 0){
+                recipients.put(resultArray);
+            }
+
+            logger.info("Get Manager email list.");
+            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.MANAGER_ROLE_TYPE,
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            resultArray = new JSONArray(result);
+            if(resultArray.length() > 0){
+                recipients.put(resultArray);
+            }*/
+
+
+        /*Map<Integer, String> customerMap = instance.getMap("customers");
+
+        if(customerMap.isEmpty()){
+            customerMap.put(1, "Bangalore");
+            customerMap.put(2, "Chennai");
+            customerMap.put(3, "Hyderabad");
+
+            System.out.println("Map Size:" + customerMap.size());
+            Set<Map.Entry<Integer,String>> customers = customerMap.entrySet();
+
+            for (Map.Entry<Integer, String> entry : customers) {
+                System.out.println("Customer Id : " + entry.getKey() + " Customer Name : " + entry.getValue());
+            }
+        } else {
+            System.out.println("Not empty: Map Size:" + customerMap.size());
+            Set<Map.Entry<Integer,String>> customers = customerMap.entrySet();
+
+            for (Map.Entry<Integer, String> entry : customers) {
+                System.out.println("Customer Id : " + entry.getKey() + " Customer Name : " + entry.getValue());
+            }
+        }*/
+
         //createEmployeeTest();
-
         //updateEmployeeTest();
-
         //createTeamTest();
-
         //searchEmployeeTest();
 
         /*String date = "2016-05-01";
@@ -77,7 +121,6 @@ public class Test {
         }*/
 
         //System.out.print(Utility.getDateFromString("2016-05-01"));
-
         //System.out.println(Utility.getDaysBetween(Utility.getDateFormatFromDate(new Date()), Utility.getDateFromString("2016-10-31")));
 
         /*Date date = new Date();
@@ -109,7 +152,6 @@ public class Test {
         System.out.println(approveStart.after(start) && approveStart.before(end) && approveEnd.compareTo(start) >= 0 && approveEnd.compareTo(end) <= 0);
         System.out.println(approveStart.after(start) && approveStart.before(end) && approveEnd.after(start) && approveEnd.before(end));*/
 
-
         /*Date start = Utility.getDateFromString("2016-10-22");
         Date end = Utility.getDateFromString("2016-10-23");
 
@@ -118,7 +160,6 @@ public class Test {
         System.out.println(Utility.checkDate(start, end, check));*/
 
         //leaveCheckTest();
-
         //attendanceRead();
 
         /*String time1 = "08:08:19";
@@ -154,7 +195,6 @@ public class Test {
         System.out.println(Utility.getDaysBetween(Utility.getDateFromString(date), Utility.getDateFromString(date2)) + 1);*/
 
         //myLeaveRequestPatch();
-
         //attendanceTest();
 
         /*LeaveRequestDto requestDto = new LeaveRequestDto();
@@ -177,7 +217,7 @@ public class Test {
             e.printStackTrace();
         }*/
 
-        /*String csvFile = "/home/sabbir/Downloads/attendance.csv";
+        String csvFile = "/home/sabbir/Downloads/attendance.csv";
 
         try {
             InputStream inputStream = new FileInputStream(csvFile);
@@ -187,7 +227,7 @@ public class Test {
             e.printStackTrace();
         } catch (CustomException e) {
             e.printStackTrace();
-        }*/
+        }
 
         /*try {
             System.out.println(new Gson().toJson(dtoTransformer.getEmployeesDto(employeeService.searchEmployees(null, null, null, null, null,
@@ -208,7 +248,6 @@ public class Test {
             e.printStackTrace();
         }
         System.out.println(finalFormat.format(my));*/
-
 
         //attendanceRead();
 
@@ -245,21 +284,18 @@ public class Test {
         Date approveStart = Utility.getDateFromString("2016-12-02");
         Date approveEnd = Utility.getDateFromString("2016-12-02");
 
-
         if((approveStart.compareTo(start) >= 0 && approveStart.compareTo(end) <= 0)
                 && (approveEnd.compareTo(start) >= 0 && approveEnd.compareTo(end) <= 0)){
-
             System.out.println("Dates are in range.");
         }*/
 
         /*EmployeeDao employeeDao = new EmployeeDaoImpl();
-
         List<Employee> employeeList = employeeDao.getTeamLeadsProfileOfAnEmployee("6aefc8a6-85be-4d14-a7ad-ba3ebf0137a7");
-
         System.out.println(new Gson().toJson(employeeList));*/
-
         //System.out.println(Utility.getWeekendBetweenDate(start, end));
 
+
+        //attendanceRead();
     }
 
     private static void myLeaveRequestPatch() {

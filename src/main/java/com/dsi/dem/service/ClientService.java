@@ -13,9 +13,9 @@ import java.util.List;
  */
 public interface ClientService {
 
-    ClientDto saveClient(ClientDto clientDto) throws CustomException;
-    ClientDto updateClient(ClientDto clientDto, String clientId) throws CustomException;
-    void deleteClient(String clientID) throws CustomException;
+    ClientDto saveClient(ClientDto clientDto, String tenantName) throws CustomException;
+    ClientDto updateClient(ClientDto clientDto, String clientId, String tenantName) throws CustomException;
+    String deleteClient(String clientID, String tenantName) throws CustomException;
     ClientDto getClientByID(String clientID) throws CustomException;
     List<Client> getAllClients() throws CustomException;
     List<ClientDto> searchClients(String clientName, String organization, String clientEmail,

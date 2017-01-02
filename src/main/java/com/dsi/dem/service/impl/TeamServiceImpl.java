@@ -1,5 +1,6 @@
 package com.dsi.dem.service.impl;
 
+import com.dsi.checkauthorization.model.Role;
 import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.ProjectDao;
 import com.dsi.dem.dao.TeamDao;
@@ -14,10 +15,7 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.TeamService;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.NotificationConstant;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.util.*;
 import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -43,7 +41,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     private static final HttpClient httpClient = new HttpClient();
 
     @Override
-    public TeamDto saveTeam(TeamDto teamDto) throws CustomException {
+    public TeamDto saveTeam(TeamDto teamDto, String tenantName) throws CustomException {
         logger.info("Team Create:: Start");
         logger.info("Convert Team Dto to Team Object");
         Team team = TRANSFORMER.getTeam(teamDto);
@@ -70,12 +68,21 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         teamDao.saveTeam(team);
         logger.info("Save team success");
 
+        String leadEmail = "";
         for(TeamMember member : team.getMembers()){
+
+            RoleType roleType = teamDao.getRoleTypeByRoleId(member.getRole().getRoleId());
+            Employee employee = employeeDao.getEmployeeByUserID(member.getEmployee().getUserId());
+
             member.setVersion(1);
             member.setTeam(team);
-            member.setRole(teamDao.getRoleTypeByRoleId(member.getRole().getRoleId()));
-            member.setEmployee(employeeDao.getEmployeeByUserID(member.getEmployee().getUserId()));
+            member.setRole(roleType);
+            member.setEmployee(employee);
             teamDao.saveTeamMember(member);
+
+            if(roleType.getRoleName().equals(NotificationConstant.LEAD_ROLE_TYPE)){
+                leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
+            }
         }
         logger.info("Save team members success");
 
@@ -86,8 +93,42 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
         setTeamAllProperty(team.getTeamId(), team);
         logger.info("Team Create:: End");
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            emailList.put(leadEmail);
+            globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_LEAD));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return TRANSFORMER.getTeamDto(team);
     }
 
@@ -106,7 +147,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
-    public TeamDto updateTeam(TeamDto teamDto, String teamId) throws CustomException {
+    public TeamDto updateTeam(TeamDto teamDto, String teamId, String tenantName) throws CustomException {
         logger.info("Team Update:: Start");
         logger.info("Convert Team Dto to Team Object");
         Team team = TRANSFORMER.getTeam(teamDto);
@@ -115,7 +156,6 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
         Session session = getSession();
         teamDao.setSession(session);
-        //employeeDao.setSession(session);
 
         team.setTeamId(teamId);
         if(teamDao.getTeamByID(team.getTeamId()) == null){
@@ -137,8 +177,51 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
         setTeamAllProperty(teamId, existTeam);
         logger.info("Team Update:: End");
-
         close(session);
+
+        String leadEmail = "";
+        for(TeamMember member : team.getMembers()){
+
+            if(member.getRole().getRoleName().equals(NotificationConstant.LEAD_ROLE_TYPE)){
+                leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail();
+                break;
+            }
+        }
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            emailList.put(leadEmail);
+            globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_LEAD));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return TRANSFORMER.getTeamDto(existTeam);
     }
 
@@ -151,7 +234,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
-    public void deleteTeam(String teamID) throws CustomException {
+    public String deleteTeam(String teamID, String tenantName) throws CustomException {
         logger.info("Team delete:: Start");
         Session session = getSession();
         teamDao.setSession(session);
@@ -162,8 +245,55 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         teamDao.deleteTeam(teamID);
         logger.info("Delete team success");
         logger.info("Team delete:: End");
-
         close(session);
+
+        /*Team team = teamDao.getTeamByID(teamID);
+        TeamMember leadMember = teamDao.getTeamLeadByTeamID(teamID);
+        String leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(leadMember.getEmployee().getEmployeeId()).get(0).getEmail();
+
+        try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            emailList.put(leadEmail);
+            globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_LEAD));
+
+            teamDao.deleteTeamMember(teamID, null);
+            teamDao.deleteProjectTeam(teamID, null);
+
+            teamDao.deleteTeam(teamID);
+            logger.info("Delete team success");
+            logger.info("Team delete:: End");
+            close(session);
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
+        return null;
     }
 
     @Override

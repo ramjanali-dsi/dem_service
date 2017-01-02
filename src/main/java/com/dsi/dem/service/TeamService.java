@@ -15,9 +15,9 @@ import java.util.List;
  */
 public interface TeamService {
 
-    TeamDto saveTeam(TeamDto teamDto) throws CustomException;
-    TeamDto updateTeam(TeamDto teamDto, String teamId) throws CustomException;
-    void deleteTeam(String teamID) throws CustomException;
+    TeamDto saveTeam(TeamDto teamDto, String tenantName) throws CustomException;
+    TeamDto updateTeam(TeamDto teamDto, String teamId, String tenantName) throws CustomException;
+    String deleteTeam(String teamID, String tenantName) throws CustomException;
     TeamDto getTeamByID(String teamID) throws CustomException;
     List<Team> getAllTeams() throws CustomException;
     List<TeamDto> searchTeams(String teamName, String status, String floor, String room,

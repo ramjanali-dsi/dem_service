@@ -15,9 +15,9 @@ import java.util.List;
  */
 public interface ProjectService {
 
-    ProjectDto saveProject(ProjectDto projectDto) throws CustomException;
-    ProjectDto updateProject(String projectId, ProjectDto projectDto) throws CustomException;
-    void deleteProject(String projectID) throws CustomException;
+    ProjectDto saveProject(ProjectDto projectDto, String tenantName) throws CustomException;
+    ProjectDto updateProject(String projectId, ProjectDto projectDto, String tenantName) throws CustomException;
+    String deleteProject(String projectID, String tenantName) throws CustomException;
     ProjectDto getProjectByID(String projectID) throws CustomException;
     List<Project> getAllProjects() throws CustomException;
     List<ProjectDto> searchProjects(String projectName, String status, String clientName, String teamName,

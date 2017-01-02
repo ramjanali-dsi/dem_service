@@ -13,10 +13,12 @@ import com.dsi.dem.model.Client;
 import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
 import com.dsi.dem.service.ClientService;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.util.*;
+import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.Session;
 
 import java.util.ArrayList;
@@ -33,8 +35,10 @@ public class ClientServiceImpl extends CommonService implements ClientService {
     private static final ClientDao clientDao = new ClientDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
 
+    private static final HttpClient httpClient = new HttpClient();
+
     @Override
-    public ClientDto saveClient(ClientDto clientDto) throws CustomException {
+    public ClientDto saveClient(ClientDto clientDto, String tenantName) throws CustomException {
         logger.info("Client create:: Start");
         if(Utility.isNullOrEmpty(clientDto.getProjectIds())){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
@@ -64,8 +68,45 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         saveClientProject(clientDto.getProjectIds(), client);
         setAllClientProperty(client);
         logger.info("Client create:: End");
-
         close(session);
+
+        /*String projectNames = "";
+        for(int i=0; i<client.getProjects().size(); i++) {
+            projectNames += client.getProjects().get(i).getProject().getProjectName();
+            if (i != client.getProjects().size() - 1) {
+                projectNames += ",";
+            }
+        }
+
+        try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailBodyTemplate.getContentForClient(client, projectNames, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.CLIENT_CREATE_TEMPLATE_ID));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return TRANSFORMER.getClientDto(client);
     }
 
@@ -96,7 +137,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
     }
 
     @Override
-    public ClientDto updateClient(ClientDto clientDto, String clientId) throws CustomException {
+    public ClientDto updateClient(ClientDto clientDto, String clientId, String tenantName) throws CustomException {
         logger.info("Client Update:: Start");
         logger.info("Convert Client Dto to Client Object");
         Client client = TRANSFORMER.getClient(clientDto);
@@ -127,8 +168,45 @@ public class ClientServiceImpl extends CommonService implements ClientService {
 
         setAllClientProperty(existClient);
         logger.info("Client Update:: End");
-
         close(session);
+
+        /*String projectNames = "";
+        for(int i=0; i<client.getProjects().size(); i++) {
+            projectNames += client.getProjects().get(i).getProject().getProjectName();
+            if (i != client.getProjects().size() - 1) {
+                projectNames += ",";
+            }
+        }
+
+        try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailBodyTemplate.getContentForClient(client, projectNames, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.CLIENT_UPDATE_TEMPLATE_ID));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return TRANSFORMER.getClientDto(existClient);
     }
 
@@ -141,7 +219,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
     }
 
     @Override
-    public void deleteClient(String clientID) throws CustomException {
+    public String deleteClient(String clientID, String tenantName) throws CustomException {
         logger.info("Client delete:: Start");
         Session session = getSession();
         clientDao.setSession(session);
@@ -150,8 +228,55 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         clientDao.deleteClient(clientID);
         logger.info("Delete client success");
         logger.info("Client delete:: End");
-
         close(session);
+
+        /*Client client = clientDao.getClientByID(clientID);
+        setAllClientProperty(client);
+
+        String projectNames = "";
+        for(int i=0; i<client.getProjects().size(); i++) {
+            projectNames += client.getProjects().get(i).getProject().getProjectName();
+            if (i != client.getProjects().size() - 1) {
+                projectNames += ",";
+            }
+        }
+
+        try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailBodyTemplate.getContentForClient(client, projectNames, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.CLIENT_DELETE_TEMPLATE_ID));
+
+            clientDao.deleteClientProject(clientID, null);
+            clientDao.deleteClient(clientID);
+            logger.info("Delete client success");
+            logger.info("Client delete:: End");
+            close(session);
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
+        return null;
     }
 
     @Override

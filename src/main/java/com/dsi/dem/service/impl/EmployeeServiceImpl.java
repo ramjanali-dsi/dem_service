@@ -88,49 +88,36 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
             logger.info("Employee Create:: End");
 
-            //logger.info("Notification create:: Start");
+            /*logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
 
-            /*logger.info("Get HR email list.");
-            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.HR_ROLE_TYPE,
+            String email = employeeEmailList.get(0).getEmail();
+            JSONObject contentObj = EmailBodyTemplate.getContentObjForEmployee(employee, tenantName, email,
+                    resultObj.getString("password"));
+
+            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            contentObj = EmailBodyTemplate.getContentObjForGlobal(employee, tenantName, emailList);
+
+            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
                     Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONArray resultArray = new JSONArray(result);
-            if(resultArray.length() > 0){
-                recipients.put(resultArray);
-            }
-
-            logger.info("Get Manager email list.");
-            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.MANAGER_ROLE_TYPE,
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            resultArray = new JSONArray(result);
-            if(resultArray.length() > 0){
-                recipients.put(resultArray);
-            }*/
-
-//            JSONArray notificationList = new JSONArray();
-//
-//            String email = employeeEmailList.get(0).getEmail();
-//            JSONObject contentObj = EmailBodyTemplate.getContentObjForEmployee(employee, tenantName, email,
-//                    resultObj.getString("password"));
-//
-//            logger.info("Request body for notification create (employee) : " + EmailBodyTemplate.getNotificationObject(contentObj,
-//                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID).toString());
-//
-//            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj, NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID));
-//
-//            //TODO a lot
-
-            /*result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, EmailBodyTemplate.getNotificationObject(contentObj,
-                    NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
 
             resultObj = new JSONObject(result);
             if(!resultObj.has(Constants.MESSAGE)){
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
                         Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
                 throw new CustomException(errorMessage);
-            }*/
-            //logger.info("Notification create:: End");
+            }
+            logger.info("Notification create:: End");*/
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 
@@ -282,77 +269,53 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             logger.info("Employee update:: End");
 
             /*logger.info("Notification create:: Start");
-            String email = employeeDto.getEmailList().get(0).getEmail();
-            JSONArray recipients = new JSONArray();
-            recipients.put(email);
+            JSONArray notificationList = new JSONArray();
 
-            logger.info("Get HR email list.");
-            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.HR_ROLE_TYPE,
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+            String email = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
+            JSONObject empContentObj = EmailBodyTemplate.getContentObjForEmployee(employee, tenantName, email, null);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(empContentObj,
+                    NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_EMPLOYEE));
 
-            JSONArray resultArray = new JSONArray(result);
-            if(resultArray.length() > 0){
-                recipients.put(resultArray);
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailBodyTemplate.getContentObjForGlobal(employee, tenantName, emailList);
+            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            if(!employee.isActive()){
+                logger.info("Notification create for in-active member.");
+
+                notificationList.put(EmailBodyTemplate.getNotificationObject(empContentObj,
+                        NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                        NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                logger.info("Notification create for in-active member to lead.");
+                List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(employee.getEmployeeId());
+                if(!Utility.isNullOrEmpty(leadList)){
+
+                    emailList = new JSONArray();
+                    for(Employee teamLead : leadList){
+                        emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                    }
+
+                    globalContentObj = EmailBodyTemplate.getContentObjForGlobal(employee, tenantName, emailList);
+                    notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                            NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_LEAD));
+                }
             }
+            logger.info("Notification create request body :: " + notificationList.toString());
 
-            logger.info("Get Manager email list.");
-            result = httpClient.getRequest(APIProvider.API_USER_ROLE + NotificationConstant.MANAGER_ROLE_TYPE,
+            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
                     Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            resultArray = new JSONArray(result);
-            if(resultArray.length() > 0){
-                recipients.put(resultArray);
-            }
-
-            JSONObject contentObj = new JSONObject();
-            contentObj.put("Recipient", recipients);
-            contentObj.put("EmployeeFirstName", employee.getFirstName());
-            contentObj.put("EmployeeLastName", employee.getLastName());
-            contentObj.put("TenantName", tenantName);
-            contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
-
-            logger.info("Request body for notification create: " + Utility.getNotificationObject(contentObj,
-                    NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID));
-
-            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
-                    NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
 
             resultObj = new JSONObject(result);
             if(!resultObj.has(Constants.MESSAGE)){
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-            }
-
-            if(!employeeDto.isActive()) {
-                logger.info("Notification create for in-active member.");
-                result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
-                        NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-                resultObj = new JSONObject(result);
-                if (!resultObj.has(Constants.MESSAGE)) {
-                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-                }
-
-                logger.info("Notification create for in-active member to lead.");
-                List<Employee> leadList = employeeService.getTeamLeadsProfile(employeeID);
-                recipients = new JSONArray();
-
-                for(Employee teamLead : leadList){
-                    contentObj = new JSONObject();
-                    contentObj.put("Recipient", recipients.put(teamLead.getEmailInfo().get(0).getEmail()));
-                    contentObj.put("EmployeeFirstName", employee.getFirstName());
-                    contentObj.put("EmployeeLastName", employee.getLastName());
-                    contentObj.put("LeadFirstName", teamLead.getFirstName());
-                    contentObj.put("LeadLastName", teamLead.getLastName());
-                    contentObj.put("TenantName", tenantName);
-
-                    result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, Utility.getNotificationObject(contentObj,
-                            NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_LEAD), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-                    resultObj = new JSONObject(result);
-                    if (!resultObj.has(Constants.MESSAGE)) {
-                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-                    }
-                }
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
             }
             logger.info("Notification create:: End");*/
 

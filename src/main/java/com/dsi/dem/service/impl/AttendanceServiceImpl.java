@@ -351,7 +351,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         Map<String, String> outMap = new HashMap<>();
 
         Session session = getSession();
-        //employeeDao.setSession(session);
         attendanceDao.setSession(session);
 
         try {
@@ -408,6 +407,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                                                 Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_ATTENDANCE_ERROR_TYPE_0007);
                                         throw new CustomException(errorMessage);
                                     }
+
+                                    close(session);
                                     checkDateFlag = false;
                                 }
 
@@ -465,12 +466,13 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             logger.info("Total employee list: " + employeeList.size());
             Employee currentEmployee = employeeDao.getEmployeeByUserID(userID);
             if(currentEmployee == null){
-                close(session);
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
                         Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
                 throw new CustomException(errorMessage);
             }
 
+            session = getSession();
+            attendanceDao.setSession(session);
             once = true;
             DraftAttendance draftAttendance;
 
@@ -495,20 +497,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                     attendanceDao.saveTempAttendance(tempAttendance);
 
-                    if (once) {
-                        Date date = attendanceDateValidation(attendanceDateTime);
-
-                        draftAttendance = attendanceDao.getDraftAttendanceFileByDate(date);
-                        if(draftAttendance == null) {
-                            draftAttendance = new DraftAttendance();
-                            draftAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
-                            draftAttendance.setCreatedDate(Utility.todayTimeStamp());
-                            draftAttendance.setLastModifiedDate(Utility.todayTimeStamp());
-                            attendanceDao.saveAttendanceDraft(draftAttendance);
-                        }
-                        once = false;
-                    }
-
                 } else {
                     TemporaryAttendance tempAttendance = new TemporaryAttendance();
                     tempAttendance.setEmployee(employee);
@@ -522,6 +510,21 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                     attendanceDao.saveTempAttendance(tempAttendance);
                 }
+
+                if (once) {
+                    Date date = attendanceDateValidation(attendanceDateTime);
+
+                    draftAttendance = attendanceDao.getDraftAttendanceFileByDate(date);
+                    if(draftAttendance == null) {
+                        draftAttendance = new DraftAttendance();
+                        draftAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
+                        draftAttendance.setCreatedDate(Utility.todayTimeStamp());
+                        draftAttendance.setLastModifiedDate(Utility.todayTimeStamp());
+                        attendanceDao.saveAttendanceDraft(draftAttendance);
+                    }
+                    once = false;
+                }
+
                 logger.info("Save temporary attendance success");
             }
         }

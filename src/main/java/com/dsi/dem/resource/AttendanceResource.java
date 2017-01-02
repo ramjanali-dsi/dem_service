@@ -5,7 +5,6 @@ import com.dsi.dem.dto.transformer.AttendanceDtoTransformer;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.service.AttendanceService;
 import com.dsi.dem.service.impl.AttendanceServiceImpl;
-import com.dsi.dem.util.Utility;
 import com.wordnik.swagger.annotations.*;
 import com.wordnik.swagger.jaxrs.PATCH;
 import org.apache.log4j.Logger;
@@ -88,29 +87,6 @@ public class AttendanceResource {
         return Response.ok().entity(DTO_TRANSFORMER.getTempAttendancesDto(
                 attendanceService.getAllTempAttendances(attendanceDate))).build();
     }
-
-    /*@PATCH
-    @Path("/temporary/{temp_attendance_id}")
-    @ApiOperation(value = "Update Employees Temporary Attendance", notes = "Create Employees Temporary Attendance", position = 3)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Employees temporary attendance update success"),
-            @ApiResponse(code = 500, message = "Employees temporary attendance update failed, unauthorized.")
-    })
-    public Response updateTemporaryAttendance(@PathParam("temp_attendance_id") String tempAttendanceId,
-                                              @ApiParam(value = "Employees Attendance Info", required = true)
-                                                      AttendanceDto attendanceDto) throws CustomException {
-
-        String userID = request.getAttribute("user_id") != null ?
-                request.getAttribute("user_id").toString() : null;
-        logger.info("User id: " + userID);
-
-        logger.info("Update employees temporary attendance: start");
-        attendanceService.updateTempAttendance(attendanceDto, userID, tempAttendanceId);
-        logger.info("Update employees temporary attendance: end");
-
-        return Response.ok().entity(DTO_TRANSFORMER.getTempAttendanceDto(attendanceService.
-                getTemporaryAttendance(tempAttendanceId))).build();
-    }*/
 
     @GET
     @Path("/temporary")

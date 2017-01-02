@@ -89,7 +89,7 @@ public class Utility {
     }
 
     public static String getTimeCalculation(String dateTime1, String dateTime2){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
         Date date1;
         Date date2;
         String time = "";
@@ -99,10 +99,9 @@ public class Utility {
 
             long difference = (date2.getTime() - date1.getTime()) / 1000;
 
-            long s = difference % 60;
             long m = (difference / 60) % 60;
             long h = (difference / (60 * 60)) % 24;
-            time += String.format("%02d:%02d:%02d", h,m,s);
+            time += String.format("%02d:%02d", h,m);
 
         } catch (ParseException e) {
             logger.error("Date parse error occurs: " + e.getMessage());
@@ -167,7 +166,7 @@ public class Utility {
 
     public static Timestamp getTimeStampFromString(String date){
         Timestamp timestamp = null;
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
         try {
             timestamp = new Timestamp(dateFormat.parse(date).getTime());
 
@@ -179,8 +178,8 @@ public class Utility {
 
     public static String getTime(String date){
         Timestamp timestamp = null;
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
         try {
             timestamp = new Timestamp(dateFormat.parse(date).getTime());
 

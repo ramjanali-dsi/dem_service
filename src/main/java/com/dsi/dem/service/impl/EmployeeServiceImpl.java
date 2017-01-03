@@ -92,19 +92,19 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             JSONArray notificationList = new JSONArray();
 
             String email = employeeEmailList.get(0).getEmail();
-            JSONObject contentObj = EmailBodyTemplate.getContentObjForEmployee(employee, tenantName, email,
+            JSONObject contentObj = EmailContent.getContentObjForEmployee(employee, tenantName, email,
                     resultObj.getString("password"));
 
-            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+            notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_EMPLOYEE));
 
 
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            contentObj = EmailBodyTemplate.getContentObjForGlobal(employee, tenantName, emailList);
+            contentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
 
-            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+            notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -272,24 +272,24 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             JSONArray notificationList = new JSONArray();
 
             String email = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
-            JSONObject empContentObj = EmailBodyTemplate.getContentObjForEmployee(employee, tenantName, email, null);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(empContentObj,
+            JSONObject empContentObj = EmailContent.getContentObjForEmployee(employee, tenantName, email, null);
+            notificationList.put(EmailContent.getNotificationObject(empContentObj,
                     NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_EMPLOYEE));
 
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailBodyTemplate.getContentObjForGlobal(employee, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            JSONObject globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             if(!employee.isActive()){
                 logger.info("Notification create for in-active member.");
 
-                notificationList.put(EmailBodyTemplate.getNotificationObject(empContentObj,
+                notificationList.put(EmailContent.getNotificationObject(empContentObj,
                         NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_EMPLOYEE));
 
-                notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 logger.info("Notification create for in-active member to lead.");
@@ -301,8 +301,8 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                         emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
                     }
 
-                    globalContentObj = EmailBodyTemplate.getContentObjForGlobal(employee, tenantName, emailList);
-                    notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+                    globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_LEAD));
                 }
             }

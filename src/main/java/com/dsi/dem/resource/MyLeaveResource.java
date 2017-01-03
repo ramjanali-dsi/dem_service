@@ -83,10 +83,14 @@ public class MyLeaveResource {
                                                 @ApiParam(value = "Employees Leave Request", required = true)
                                                         LeaveRequestDto leaveRequestDto) throws CustomException {
 
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        return Response.ok().entity(leaveService.updateLeaveRequest(leaveRequestDto, userID, leaveRequestID)).build();
+        return Response.ok().entity(leaveService.updateLeaveRequest(leaveRequestDto, userID,
+                leaveRequestID, tenantName)).build();
     }
 
     @POST
@@ -98,10 +102,13 @@ public class MyLeaveResource {
     public Response createEmployeesLeaveRequest(@ApiParam(value = "Employees Leave Request", required = true)
                                                             LeaveRequestDto leaveRequestDto) throws CustomException {
 
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        return Response.ok().entity(leaveService.saveLeaveRequest(leaveRequestDto, userID)).build();
+        return Response.ok().entity(leaveService.saveLeaveRequest(leaveRequestDto, userID, tenantName)).build();
     }
 
     @DELETE

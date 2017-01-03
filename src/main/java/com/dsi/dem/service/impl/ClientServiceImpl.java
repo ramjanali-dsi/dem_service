@@ -85,8 +85,8 @@ public class ClientServiceImpl extends CommonService implements ClientService {
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailBodyTemplate.getContentForClient(client, projectNames, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_CREATE_TEMPLATE_ID));
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -185,8 +185,8 @@ public class ClientServiceImpl extends CommonService implements ClientService {
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailBodyTemplate.getContentForClient(client, projectNames, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_UPDATE_TEMPLATE_ID));
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -248,8 +248,8 @@ public class ClientServiceImpl extends CommonService implements ClientService {
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailBodyTemplate.getContentForClient(client, projectNames, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_DELETE_TEMPLATE_ID));
 
             clientDao.deleteClientProject(clientID, null);

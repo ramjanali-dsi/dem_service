@@ -100,7 +100,6 @@ public class ProjectResource {
                                                @QueryParam("from") String from,
                                                @QueryParam("range") String range) throws CustomException {
 
-
         return Response.ok().entity(projectService.searchProjects(projectName, status, clientName,
                 teamName, memberName, from, range)).build();
     }

@@ -14,10 +14,12 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.LeaveService;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.util.*;
+import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.Session;
 
 import java.util.ArrayList;
@@ -36,6 +38,8 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     private static final LeaveDao leaveDao = new LeaveDaoImpl();
     private static final HolidayDao holidayDao = new HolidayDaoImpl();
 
+    private static final HttpClient httpClient = new HttpClient();
+
     @Override
     public boolean isAvailableLeaveTypes(String leaveType, String userId) throws CustomException {
         logger.info("Available leave type for this User id: " + userId);
@@ -53,7 +57,6 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         logger.info("Read leave summary by employee id: " + employeeID);
         Session session = getSession();
         leaveDao.setSession(session);
-        //employeeDao.setSession(session);
 
         EmployeeLeave employeeLeave = leaveDao.getEmployeeLeaveSummary(employeeID);
         if(employeeLeave == null){
@@ -192,7 +195,8 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     @Override
-    public LeaveRequestDto approveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId, String leaveRequestId) throws CustomException {
+    public LeaveRequestDto approveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId,
+                                               String leaveRequestId, String tenantName) throws CustomException {
         logger.info("Employees leave request approval:: Start");
         logger.info("Approved user id: " + userId);
         if(Utility.isNullOrEmpty(userId)){
@@ -208,7 +212,6 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         Session session = getSession();
         leaveDao.setSession(session);
-        //employeeDao.setSession(session);
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
         LeaveRequest existLeaveRequest = leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null);
@@ -246,8 +249,61 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(existLeaveRequest);
         logger.info("Employees leave request approval:: End");
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            String email = employeeDao.getEmployeeEmailsByEmployeeID(leaveRequest.getEmployee().getEmployeeId()).get(0).getEmail();
+            JSONObject globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest,
+                    tenantName, new JSONArray().put(email));
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(leaveRequest.getEmployee().getEmployeeId());
+            if(!Utility.isNullOrEmpty(teamLeads)){
+
+                emailList = new JSONArray();
+                for(Employee teamLead : teamLeads){
+                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                }
+
+                globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, emailList);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD));
+            }
+
+            //TODO client email notification
+            if(leaveRequest.isClientNotify()){
+
+            }
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return requestDto;
     }
 
@@ -300,7 +356,9 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     @Override
-    public LeaveRequestDto saveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId) throws CustomException {
+    public LeaveRequestDto saveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId,
+                                            String tenantName) throws CustomException {
+
         logger.info("Employees leave request create:: Start");
         logger.info("Apply user ID: " + userId);
         if(Utility.isNullOrEmpty(userId)){
@@ -313,7 +371,6 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         Session session = getSession();
         leaveDao.setSession(session);
-        //employeeDao.setSession(session);
         holidayDao.setSession(session);
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
@@ -330,8 +387,50 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         logger.info("Employees leave request create:: End");
 
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(leaveRequest);
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.LEAVE_APPLY_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(leaveRequest.getEmployee().getEmployeeId());
+            if(!Utility.isNullOrEmpty(teamLeads)){
+
+                emailList = new JSONArray();
+                for(Employee teamLead : teamLeads){
+                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                }
+
+                globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.LEAVE_APPLY_TEMPLATE_ID_FOR_LEAD));
+            }
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return requestDto;
     }
 
@@ -476,7 +575,8 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     @Override
-    public LeaveRequestDto updateLeaveRequest(LeaveRequestDto leaveRequestDto, String userId, String leaveRequestId) throws CustomException {
+    public LeaveRequestDto updateLeaveRequest(LeaveRequestDto leaveRequestDto, String userId,
+                                              String leaveRequestId, String tenantName) throws CustomException {
         logger.info("Employees leave request update:: Start");
         if(Utility.isNullOrEmpty(userId)){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
@@ -538,8 +638,60 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         logger.info("Employees leave request update:: End");
 
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(existLeaveRequest);
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList);
+
+            JSONArray leadEmails = new JSONArray();
+            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(leaveRequest.getEmployee().getEmployeeId());
+            if (!Utility.isNullOrEmpty(teamLeads)) {
+
+                for (Employee teamLead : teamLeads) {
+                    leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                }
+            }
+            JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, leadEmails);
+
+            if(mode == 1) {
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.PENDING_EDIT_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                notificationList.put(EmailContent.getNotificationObject(leadContentObj,
+                        NotificationConstant.PENDING_EDIT_TEMPLATE_ID_FOR_LEAD));
+
+            } else if(mode == 2){
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.PENDING_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                notificationList.put(EmailContent.getNotificationObject(leadContentObj,
+                        NotificationConstant.PENDING_CANCEL_TEMPLATE_ID_FOR_LEAD));
+            }
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return requestDto;
     }
 

@@ -1,10 +1,7 @@
 package com.dsi.dem.util;
 
 import com.dsi.checkauthorization.exception.CustomException;
-import com.dsi.dem.model.Client;
-import com.dsi.dem.model.Employee;
-import com.dsi.dem.model.Project;
-import com.dsi.dem.model.Team;
+import com.dsi.dem.model.*;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -12,7 +9,7 @@ import org.codehaus.jettison.json.JSONObject;
 /**
  * Created by sabbir on 12/9/16.
  */
-public class EmailBodyTemplate {
+public class EmailContent {
 
     public static JSONObject getNotificationObject(JSONObject contentObj, Long templateId) throws JSONException {
         JSONObject notificationObj = new JSONObject();
@@ -79,6 +76,34 @@ public class EmailBodyTemplate {
         contentObj.put("Recipient", email);
         contentObj.put("ClientName", client.getMemberName());
         contentObj.put("ProjectName", projectName);
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForApplyLeaveRequest(LeaveRequest leaveRequest, String tenantName,
+                                                            JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("EmployeeFirstName", leaveRequest.getEmployee().getFirstName());
+        contentObj.put("EmployeeLastName", leaveRequest.getEmployee().getLastName());
+        contentObj.put("LeaveStartDate", leaveRequest.getStartDate());
+        contentObj.put("LeaveEndDate", leaveRequest.getEndDate());
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForApproveLeaveRequest(LeaveRequest leaveRequest, String tenantName,
+                                                              JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("EmployeeFirstName", leaveRequest.getEmployee().getFirstName());
+        contentObj.put("EmployeeLastName", leaveRequest.getEmployee().getLastName());
+        contentObj.put("ApprovedStartDate", leaveRequest.getApprovedStartDate());
+        contentObj.put("ApprovedEndDate", leaveRequest.getApprovedEndDate());
         contentObj.put("TenantName", tenantName);
 
         return contentObj;

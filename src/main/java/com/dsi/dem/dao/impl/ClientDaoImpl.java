@@ -98,6 +98,20 @@ public class ClientDaoImpl extends CommonService implements ClientDao {
     }
 
     @Override
+    public List<Client> getAllClientsByEmployeeId(String employeeId) {
+        Query query = session.createQuery("FROM Client c WHERE c.clientId in (SELECT pc.client.clientId FROM ProjectClient pc " +
+                "WHERE pc.project.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt WHERE pt.team.teamId in " +
+                "(SELECT tm.team.teamId FROM TeamMember tm WHERE tm.employee.employeeId =:employeeID)))");
+        query.setParameter("employeeID", employeeId);
+
+        List<Client> clients = query.list();
+        if(clients != null){
+            return clients;
+        }
+        return null;
+    }
+
+    @Override
     public List<Client> getAllClients() {
         Query query = session.createQuery("FROM Client");
 

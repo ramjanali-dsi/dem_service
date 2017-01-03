@@ -102,13 +102,13 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             emailList.put(leadEmail);
-            globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_LEAD));
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -195,13 +195,13 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             emailList.put(leadEmail);
-            globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_LEAD));
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -258,13 +258,13 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             emailList.put(leadEmail);
-            globalContentObj = EmailBodyTemplate.getContentForTeam(team, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(globalContentObj,
+            globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_LEAD));
 
             teamDao.deleteTeamMember(teamID, null);

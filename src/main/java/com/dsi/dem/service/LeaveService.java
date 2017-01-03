@@ -27,10 +27,12 @@ public interface LeaveService {
                                                 String approvedLastName, String approvedNickName, String appliedStartDate, String appliedEndDate,
                                                 String leaveStatus, String from, String range, String userId) throws CustomException;
 
-    LeaveRequestDto approveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId, String leaveRequestId) throws CustomException;
+    LeaveRequestDto approveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId,
+                                        String leaveRequestId, String tenantName) throws CustomException;
 
-    LeaveRequestDto saveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId) throws CustomException;
-    LeaveRequestDto updateLeaveRequest(LeaveRequestDto leaveRequestDto, String userId, String leaveRequestId) throws CustomException;
+    LeaveRequestDto saveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId, String tenantName) throws CustomException;
+    LeaveRequestDto updateLeaveRequest(LeaveRequestDto leaveRequestDto, String userId,
+                                       String leaveRequestId, String tenantName) throws CustomException;
     void deleteLeaveRequest(String leaveRequestID, String userID) throws CustomException;
     LeaveRequest getLeaveRequestById(String leaveRequestID, String employeeID) throws CustomException;
     List<LeaveRequest> getLeaveRequestByEmployeeID(String employeeID) throws CustomException;

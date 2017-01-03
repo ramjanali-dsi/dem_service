@@ -30,6 +30,17 @@ public class NotificationConstant {
     public static final Long PROJECT_UPDATE_TEMPLATE_ID = 22L;
     public static final Long PROJECT_DELETE_TEMPLATE_ID = 23L;
 
+    public static final Long LEAVE_APPLY_TEMPLATE_ID_FOR_MANAGER_HR = 24L;
+    public static final Long LEAVE_APPLY_TEMPLATE_ID_FOR_LEAD = 25L;
+    public static final Long PENDING_EDIT_TEMPLATE_ID_FOR_MANAGER_HR = 26L;
+    public static final Long PENDING_EDIT_TEMPLATE_ID_FOR_LEAD = 27L;
+    public static final Long PENDING_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR = 28L;
+    public static final Long PENDING_CANCEL_TEMPLATE_ID_FOR_LEAD = 29L;
+    public static final Long LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR = 30L;
+    public static final Long LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD = 31L;
+    public static final Long LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE = 32L;
+    public static final Long LEAVE_APPROVE_TEMPLATE_ID_FOR_CLIENT = 33L;
+
     public static final String WEBSITE_LINK = "http://103.245.204.114:3000/#/";
 
     public static final String HR_ROLE_TYPE = "HR";

@@ -87,8 +87,8 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject contentObj = EmailBodyTemplate.getContentForProject(project, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_CREATE_TEMPLATE_ID));
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -165,8 +165,8 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject contentObj = EmailBodyTemplate.getContentForProject(project, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_UPDATE_TEMPLATE_ID));
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -220,8 +220,8 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             JSONArray emailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject contentObj = EmailBodyTemplate.getContentForProject(project, tenantName, emailList);
-            notificationList.put(EmailBodyTemplate.getNotificationObject(contentObj,
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_DELETE_TEMPLATE_ID));
 
             projectDao.deleteProjectTeam(projectID, null);

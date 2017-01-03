@@ -18,6 +18,7 @@ public interface ClientDao {
     void deleteClient(String clientID) throws CustomException;
     Client getClientByID(String clientID);
     Client getClientByName(String name);
+    List<Client> getAllClientsByEmployeeId(String employeeId);
     List<Client> getAllClients();
     List<Client> searchClients(String clientName, String organization, String clientEmail,
                                String from, String range);

@@ -102,9 +102,13 @@ public class LeaveRequestResource {
                                          @ApiParam(value = "Employees Leave Request", required = true)
                                                  LeaveRequestDto leaveRequestDto) throws CustomException {
 
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        return Response.ok().entity(leaveService.approveLeaveRequest(leaveRequestDto, userID, leaveRequestId)).build();
+        return Response.ok().entity(leaveService.approveLeaveRequest(leaveRequestDto, userID,
+                leaveRequestId, tenantName)).build();
     }
 }

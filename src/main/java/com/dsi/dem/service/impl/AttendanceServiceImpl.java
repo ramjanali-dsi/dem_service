@@ -1,9 +1,11 @@
 package com.dsi.dem.service.impl;
 
 import com.dsi.dem.dao.AttendanceDao;
+import com.dsi.dem.dao.ClientDao;
 import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.LeaveDao;
 import com.dsi.dem.dao.impl.AttendanceDaoImpl;
+import com.dsi.dem.dao.impl.ClientDaoImpl;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.LeaveDaoImpl;
 import com.dsi.dem.dto.AttendanceDto;
@@ -11,12 +13,13 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.AttendanceService;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.ReadXMLFile;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.util.*;
+import com.dsi.httpclient.HttpClient;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.Session;
 import org.joda.time.DateTime;
 
@@ -25,10 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by sabbir on 10/19/16.
@@ -40,18 +40,22 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
     private static final LeaveDao leaveDao = new LeaveDaoImpl();
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final AttendanceDao attendanceDao = new AttendanceDaoImpl();
+    private static final ClientDao clientDao = new ClientDaoImpl();
+
+    private static final HttpClient httpClient = new HttpClient();
 
     @Override
     public void saveAttendance(List<AttendanceDto> attendanceDtoList, String userID,
-                               String attendanceDate) throws CustomException {
+                               String attendanceDate, String tenantName) throws CustomException {
 
         logger.info("Employees attendance schedule create: start");
         Date date = attendanceDateValidation(attendanceDate);
 
+        List<String> unNotifiedEmployeeIds = new ArrayList<>();
+        List<String> presentApproveLeaveEmployeeIds = new ArrayList<>();
         Session session = getSession();
         attendanceDao.setSession(session);
         leaveDao.setSession(session);
-        //employeeDao.setSession(session);
 
         for(AttendanceDto attendanceDto : attendanceDtoList){
 
@@ -70,8 +74,14 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             attendance.setAbsent(attendanceDto.isAbsent());
             attendance.setCheckInTime(attendanceDto.getCheckInTime());
             attendance.setCheckOutTime(attendanceDto.getCheckOutTime());
-            attendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
-                    attendanceDto.getCheckOutTime()));
+
+            if(attendanceDto.isAbsent()){
+                attendance.setTotalHour(attendanceDto.getTotalHour());
+
+            } else {
+                attendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
+                        attendanceDto.getCheckOutTime()));
+            }
 
             attendance.setEmployee(temporaryAttendance.getEmployee());
             attendance.setAttendanceDate(temporaryAttendance.getAttendanceDate());
@@ -92,8 +102,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                     logger.info("Employee has no pre & post leave request.");
 
-                    LeaveRequest leaveRequest = new LeaveRequest();
-
                     leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
                     leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
                     leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
@@ -102,6 +110,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                             + leaveSummary.getTotalSpecialLeave());
                     leaveDao.updateEmployeeLeaveSummary(leaveSummary);
                     logger.info("Leave summary updated for absent.");
+
+                    unNotifiedEmployeeIds.add(temporaryAttendance.getEmployee().getEmployeeId());
                 }
 
             } else {
@@ -113,14 +123,18 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 if(leaveRequest != null){
                     leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
 
-                    if(leaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.SICK_TYPE_NAME)){
-                        leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() - 1);
+                    switch (leaveRequest.getLeaveType().getLeaveTypeName()) {
+                        case Constants.SICK_TYPE_NAME:
+                            leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() - 1);
 
-                    } else if(leaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.CASUAL_TYPE_NAME)){
-                        leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() - 1);
+                            break;
+                        case Constants.CASUAL_TYPE_NAME:
+                            leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() - 1);
 
-                    } else if(leaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.SPECIAL_TYPE_NAME)){
-                        leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() - 1);
+                            break;
+                        case Constants.SPECIAL_TYPE_NAME:
+                            leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() - 1);
+                            break;
                     }
 
                     leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
@@ -129,6 +143,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                             + leaveSummary.getTotalSpecialLeave());
                     leaveDao.updateEmployeeLeaveSummary(leaveSummary);
                     logger.info("Leave summary updated for present.");
+
+                    presentApproveLeaveEmployeeIds.add(temporaryAttendance.getEmployee().getEmployeeId());
                 }
             }
         }
@@ -140,11 +156,212 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         attendanceDao.deleteAttendanceDraft(Utility.getDateFromString(attendanceDate));
 
         logger.info("Employees attendance schedule create: End");
-
         close(session);
+
+        /*try {
+            logger.info("Employees attendance schedule create: start");
+            Date date = attendanceDateValidation(attendanceDate);
+
+            JSONArray notificationList = new JSONArray();
+
+            Session session = getSession();
+            attendanceDao.setSession(session);
+            leaveDao.setSession(session);
+
+            JSONArray hrManagerEmailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, hrManagerEmailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.ATTENDANCE_CONFIRM_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            for (AttendanceDto attendanceDto : attendanceDtoList) {
+
+                JSONArray hrManagerLeadEmailList = new JSONArray();
+                TemporaryAttendance temporaryAttendance = attendanceDao.getTemporaryAttendance(
+                        attendanceDto.getTempAttendanceId());
+                if (temporaryAttendance == null) {
+                    close(session);
+                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                            Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_ATTENDANCE_ERROR_TYPE_0006);
+                    throw new CustomException(errorMessage);
+                }
+
+                validationForAttendance(session, attendanceDto);
+
+                EmployeeAttendance attendance = new EmployeeAttendance();
+                attendance.setAbsent(attendanceDto.isAbsent());
+                attendance.setCheckInTime(attendanceDto.getCheckInTime());
+                attendance.setCheckOutTime(attendanceDto.getCheckOutTime());
+                attendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
+                        attendanceDto.getCheckOutTime()));
+
+                attendance.setEmployee(temporaryAttendance.getEmployee());
+                attendance.setAttendanceDate(temporaryAttendance.getAttendanceDate());
+                attendance.setCreatedBy(temporaryAttendance.getCreatedBy());
+                attendance.setModifiedBy(employeeDao.getEmployeeByUserID(userID).getEmployeeId());
+                attendance.setCreatedDate(Utility.today());
+                attendance.setLastModifiedDate(Utility.today());
+                attendance.setVersion(1);
+                attendanceDao.saveAttendance(attendance);
+                logger.info("Save employee attendance success");
+
+                String email;
+                JSONArray leadEmails = new JSONArray();
+                EmployeeLeave leaveSummary;
+                if (attendance.isAbsent()) {
+                    //TODO Approved pre & post leave request check for this date
+
+                    if (!leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
+                            attendance.getEmployee().getEmployeeNo(), date)) {
+
+                        logger.info("Employee has no pre & post leave request.");
+
+                        leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
+                        leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
+                        leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
+                                + leaveSummary.getTotalSickUsed()
+                                + leaveSummary.getTotalNotNotify()
+                                + leaveSummary.getTotalSpecialLeave());
+                        leaveDao.updateEmployeeLeaveSummary(leaveSummary);
+                        logger.info("Leave summary updated for absent.");
+
+                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
+                                .get(0).getEmail();
+                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
+                                attendanceDate, tenantName, new JSONArray().put(email));
+
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                        List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
+                        if (!Utility.isNullOrEmpty(leadList)) {
+                            for (Employee employee : leadList) {
+                                leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
+                            }
+                        }
+
+                        hrManagerLeadEmailList.put(hrManagerEmailList);
+                        hrManagerLeadEmailList.put(leadList);
+
+                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
+                                attendanceDate, tenantName, hrManagerLeadEmailList);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+                    }
+
+                } else {
+                    //TODO Approved pre & post leave request check for this date
+
+                    LeaveRequest leaveRequest = leaveDao.getLeaveRequestByStatusAndEmployee(
+                            attendance.getEmployee().getEmployeeNo(), date);
+
+                    if (leaveRequest != null) {
+                        leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
+
+                        switch (leaveRequest.getLeaveType().getLeaveTypeName()) {
+                            case Constants.SICK_TYPE_NAME:
+                                leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() - 1);
+
+                                break;
+                            case Constants.CASUAL_TYPE_NAME:
+                                leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() - 1);
+
+                                break;
+                            case Constants.SPECIAL_TYPE_NAME:
+                                leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() - 1);
+                                break;
+                        }
+
+                        leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
+                                + leaveSummary.getTotalSickUsed()
+                                + leaveSummary.getTotalNotNotify()
+                                + leaveSummary.getTotalSpecialLeave());
+                        leaveDao.updateEmployeeLeaveSummary(leaveSummary);
+                        logger.info("Leave summary updated for present.");
+
+                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
+                                .get(0).getEmail();
+                        globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
+                                leaveRequest, attendanceDate, tenantName, new JSONArray().put(email));
+
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                        List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
+                        if (!Utility.isNullOrEmpty(leadList)) {
+                            for (Employee employee : leadList) {
+                                leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
+                            }
+                        }
+
+                        hrManagerLeadEmailList.put(hrManagerEmailList);
+                        hrManagerLeadEmailList.put(leadEmails);
+
+                        globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
+                                leaveRequest, attendanceDate, tenantName, hrManagerLeadEmailList);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+
+                        if(leaveRequest.isClientNotify()){
+                            JSONArray clientEmails = new JSONArray();
+                            clientDao.setSession(session);
+
+                            List<Client> clientList = clientDao.getAllClientsByEmployeeId(leaveRequest.getEmployee().getEmployeeId());
+
+                            if (!Utility.isNullOrEmpty(clientList)) {
+                                for (Client client : clientList) {
+                                    if (client.isNotify()) {
+                                        clientEmails.put(client.getMemberEmail());
+                                    }
+                                }
+                            }
+
+                            globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
+                                    leaveRequest, attendanceDate, tenantName, clientEmails);
+                            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                    NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_CLIENT));
+                        }
+                    }
+                }
+            }
+
+            logger.info("Delete all temporary attendances.");
+            attendanceDao.deleteTempAttendance(Utility.getDateFromString(attendanceDate));
+
+            logger.info("Delete attendance draft file.");
+            attendanceDao.deleteAttendanceDraft(Utility.getDateFromString(attendanceDate));
+
+            logger.info("Employees attendance schedule create: End");
+            close(session);
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je) {
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
     }
 
     private void validationForAttendance(Session session, AttendanceDto attendanceDto) throws CustomException {
+
         if(!attendanceDto.isAbsent()) {
             if (Utility.isNullOrEmpty(attendanceDto.getCheckInTime())
                     || Utility.isNullOrEmpty(attendanceDto.getCheckOutTime())) {
@@ -194,7 +411,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
     }
 
     @Override
-    public void deleteAttendance(String attendanceDate) throws CustomException {
+    public void deleteAttendance(String attendanceDate, String tenantName) throws CustomException {
         logger.info("Delete all attendances:: Start");
         attendanceDateValidation(attendanceDate);
 
@@ -207,6 +424,42 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         logger.info("Delete temporary attendances & draft file success");
         logger.info("Delete all attendances:: End");
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.ATTENDANCE_DELETE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            attendanceDao.deleteTempAttendance(Utility.getDateFromString(attendanceDate));
+            attendanceDao.deleteAttendanceDraft(Utility.getDateFromString(attendanceDate));
+
+            logger.info("Delete temporary attendances & draft file success");
+            logger.info("Delete all attendances:: End");
+            close(session);
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
     }
 
     @Override
@@ -330,7 +583,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
 
     @Override
-    public List<DraftAttendance> saveTempAttendance(InputStream inputStream, String userID) throws CustomException {
+    public List<DraftAttendance> saveTempAttendance(InputStream inputStream, String userID,
+                                                    String tenantName) throws CustomException {
 
         logger.info("Attendance sheet upload:: Start");
         if (inputStream == null) {
@@ -412,35 +666,32 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                                     checkDateFlag = false;
                                 }
 
+                                String employeeIdVal = lineSplit[CSV_EMPLOYEE_ID_COLUMN].replace("\'", "");
                                 if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.IN_TIME)) {
 
-                                    if (inMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]) != null) {
+                                    if (inMap.get(employeeIdVal) != null) {
                                         Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
-                                        Timestamp prevDate = Utility.getTimeStampFromString(inMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]));
+                                        Timestamp prevDate = Utility.getTimeStampFromString(inMap.get(employeeIdVal));
 
                                         if (prevDate.after(nextDate)) {
-                                            inMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
-                                                    lineSplit[CSV_DATE_TIME_COLUMN]);
+                                            inMap.put(employeeIdVal, lineSplit[CSV_DATE_TIME_COLUMN]);
                                         }
 
                                     } else {
-                                        inMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
-                                                lineSplit[CSV_DATE_TIME_COLUMN]);
+                                        inMap.put(employeeIdVal, lineSplit[CSV_DATE_TIME_COLUMN]);
                                     }
 
                                 } else if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.OUT_TIME)) {
-                                    if (outMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]) != null) {
+                                    if (outMap.get(employeeIdVal) != null) {
                                         Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
-                                        Timestamp prevDate = Utility.getTimeStampFromString(outMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]));
+                                        Timestamp prevDate = Utility.getTimeStampFromString(outMap.get(employeeIdVal));
 
                                         if (prevDate.before(nextDate)) {
-                                            outMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
-                                                    lineSplit[CSV_DATE_TIME_COLUMN]);
+                                            outMap.put(employeeIdVal, lineSplit[CSV_DATE_TIME_COLUMN]);
                                         }
 
                                     } else {
-                                        outMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
-                                                lineSplit[CSV_DATE_TIME_COLUMN]);
+                                        outMap.put(employeeIdVal, lineSplit[CSV_DATE_TIME_COLUMN]);
                                     }
                                 }
                             }
@@ -461,6 +712,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         logger.info("InTimeMap: -------> " + new Gson().toJson(inMap));
         logger.info("\n\nOutTimeMap: ------> " + new Gson().toJson(outMap));
 
+        DraftAttendance draftAttendance;
         List<Employee> employeeList = employeeDao.getAllEmployees();
         if(!Utility.isNullOrEmpty(employeeList)){
             logger.info("Total employee list: " + employeeList.size());
@@ -474,7 +726,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             session = getSession();
             attendanceDao.setSession(session);
             once = true;
-            DraftAttendance draftAttendance;
 
             for(Employee employee : employeeList){
                 String employeeNo = employee.getEmployeeNo();
@@ -532,14 +783,46 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         List<DraftAttendance> draftAttendances = attendanceDao.getAllDraftAttendanceFileDetails(
                 Constants.FROM, Constants.RANGE);
         logger.info("Attendance sheet upload:: End");
-
         close(session);
+
+        /*try{
+            if(draftAttendance != null) {
+                logger.info("Notification create:: Start");
+                JSONArray notificationList = new JSONArray();
+
+                JSONArray emailList = new JSONArray();
+                //TODO Manager & HR email config
+
+                JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDateTime,
+                        tenantName, emailList);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.ATTENDANCE_UPLOAD_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                logger.info("Notification create request body :: " + notificationList.toString());
+                String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                        Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+                JSONObject resultObj = new JSONObject(result);
+                if (!resultObj.has(Constants.MESSAGE)) {
+                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                            Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                    throw new CustomException(errorMessage);
+                }
+                logger.info("Notification create:: End");
+            }
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return draftAttendances;
     }
 
     @Override
     public void updateTempAttendance(List<AttendanceDto> attendanceDtoList, String userID,
-                                     String attendanceDate) throws CustomException {
+                                     String attendanceDate, String tenantName) throws CustomException {
 
         logger.info("Update employees temporary attendance: Start");
         attendanceDateValidation(attendanceDate);
@@ -551,7 +834,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         }
 
         Session session = getSession();
-        //employeeDao.setSession(session);
         attendanceDao.setSession(session);
 
         for(AttendanceDto attendanceDto : attendanceDtoList){
@@ -587,8 +869,36 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             logger.info("Update temporary attendance success");
         }
         logger.info("Update employees temporary attendance: End");
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.ATTENDANCE_SAVE_DRAFT_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
     }
 
     @Override

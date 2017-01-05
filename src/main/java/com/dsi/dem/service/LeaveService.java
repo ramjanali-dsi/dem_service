@@ -42,8 +42,8 @@ public interface LeaveService {
                                                     String appliedEndDate, String deniedReason, String deniedBy, String leaveRequestId,
                                                     String from, String range) throws CustomException;
 
-    LeaveRequestDto saveSpecialLeave(LeaveRequestDto specialLeaveDto) throws CustomException;
-    LeaveRequestDto updateSpecialLeave(LeaveRequestDto specialLeaveDto, String leaveRequestId) throws CustomException;
+    LeaveRequestDto saveSpecialLeave(LeaveRequestDto specialLeaveDto, String tenantName) throws CustomException;
+    LeaveRequestDto updateSpecialLeave(LeaveRequestDto specialLeaveDto, String leaveRequestId, String tenantName) throws CustomException;
     void deleteSpecialLeave(String leaveRequestId) throws CustomException;
     List<LeaveDetailsDto> searchOrReadAllSpecialLeave(String employeeNo, String firstName, String lastName,
                                                       String nickName, String leaveStatus, String leaveType, String requestType,

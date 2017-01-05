@@ -135,8 +135,8 @@ public class HolidayDaoImpl extends CommonService implements HolidayDao {
         queryBuilder.append("FROM Holiday h");
 
         if(!Utility.isNullOrEmpty(holidayName)){
-            queryBuilder.append(" WHERE h.holidayName =:holidayName");
-            paramValue.put("holidayName", holidayName);
+            queryBuilder.append(" WHERE h.holidayName like :holidayName");
+            paramValue.put("holidayName", "%" + holidayName + "%");
             hasClause = true;
         }
 
@@ -155,7 +155,7 @@ public class HolidayDaoImpl extends CommonService implements HolidayDao {
             paramValue.put("holidayId", holidayId);
         }
 
-        queryBuilder.append(" ORDER BY h.createdDate ASC");
+        queryBuilder.append(" ORDER BY h.year ASC");
 
         logger.info("Query builder: " + queryBuilder.toString());
         Query query = session.createQuery(queryBuilder.toString());

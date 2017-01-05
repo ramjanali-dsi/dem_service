@@ -61,10 +61,13 @@ public class AttendanceResource {
     public Response createEmployeesTemporaryAttendance(@FormDataParam("file") InputStream fileInputStream,
                                                        @FormDataParam("file") FormDataContentDisposition fileDetails) throws CustomException {
 
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        return Response.ok().entity(attendanceService.saveTempAttendance(fileInputStream, userID)).build();
+        return Response.ok().entity(attendanceService.saveTempAttendance(fileInputStream, userID, tenantName)).build();
     }
 
     @PATCH
@@ -78,11 +81,14 @@ public class AttendanceResource {
                                               @ApiParam(value = "Employees Attendance Info", required = true)
                                                       List<AttendanceDto> attendanceDtoList) throws CustomException {
 
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
         logger.info("User id: " + userID);
 
-        attendanceService.updateTempAttendance(attendanceDtoList, userID, attendanceDate);
+        attendanceService.updateTempAttendance(attendanceDtoList, userID, attendanceDate, tenantName);
 
         return Response.ok().entity(DTO_TRANSFORMER.getTempAttendancesDto(
                 attendanceService.getAllTempAttendances(attendanceDate))).build();
@@ -125,11 +131,14 @@ public class AttendanceResource {
                                               @ApiParam(value = "Employees Attendance Info", required = true)
                                                       List<AttendanceDto> attendanceDtoList) throws CustomException {
 
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
         logger.info("User id: " + userID);
 
-        attendanceService.saveAttendance(attendanceDtoList, userID, attendanceDate);
+        attendanceService.saveAttendance(attendanceDtoList, userID, attendanceDate, tenantName);
 
         return Response.ok().entity(DTO_TRANSFORMER.getEmployeesAttendanceList(
                 attendanceService.getAllAttendancesByDate(attendanceDate))).build();
@@ -180,7 +189,10 @@ public class AttendanceResource {
     })
     public Response deleteAllAttendances(@QueryParam("attendanceDate") String attendanceDate) throws CustomException {
 
-        attendanceService.deleteAttendance(attendanceDate);
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        attendanceService.deleteAttendance(attendanceDate, tenantName);
         return Response.ok().entity(null).build();
     }
 }

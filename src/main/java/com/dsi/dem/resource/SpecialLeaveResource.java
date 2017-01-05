@@ -36,7 +36,10 @@ public class SpecialLeaveResource {
     public Response createSpecialLeave(@ApiParam(value = "Employees Leave Request", required = true)
                                                LeaveRequestDto leaveRequestDto) throws CustomException {
 
-        return Response.ok().entity(leaveService.saveSpecialLeave(leaveRequestDto)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(leaveService.saveSpecialLeave(leaveRequestDto, tenantName)).build();
     }
 
     @PATCH
@@ -50,8 +53,11 @@ public class SpecialLeaveResource {
                                        @ApiParam(value = "Employees Leave Request", required = true)
                                                LeaveRequestDto leaveRequestDto) throws CustomException {
 
-        return Response.ok().entity(leaveService.updateSpecialLeave
-                (leaveRequestDto, leaveRequestID)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(leaveService.updateSpecialLeave(leaveRequestDto,
+                leaveRequestID, tenantName)).build();
     }
 
     @DELETE

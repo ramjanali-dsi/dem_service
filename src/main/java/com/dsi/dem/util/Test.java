@@ -22,9 +22,6 @@ import com.dsi.dem.service.impl.LeaveServiceImpl;
 import com.dsi.dem.service.impl.TeamServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.hazelcast.config.Config;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -58,7 +55,7 @@ public class Test {
 
     //private static final HazelcastInstance instance = Hazelcast.newHazelcastInstance(new Config());
 
-    public static void main(String[] args) throws CustomException {
+    public static void main(String[] args) throws CustomException, IOException {
 
         //TODO HR & Manager email list API
         /*logger.info("Get HR email list.");
@@ -144,13 +141,16 @@ public class Test {
         //searchLeaveTests();
 
         /*Date approveStart = Utility.getDateFromString("2016-10-21");
-        Date approveEnd = Utility.getDateFromString("2016-10-22");
+        Date approveEnd = Utility.getDateFromString("2016-10-21");
 
-        Date start = Utility.getDateFromString("2016-10-20");
-        Date end = Utility.getDateFromString("2016-10-22");
+        Date start = Utility.getDateFromString("2016-10-21");
+        Date end = Utility.getDateFromString("2016-10-21");
 
-        System.out.println(approveStart.after(start) && approveStart.before(end) && approveEnd.compareTo(start) >= 0 && approveEnd.compareTo(end) <= 0);
-        System.out.println(approveStart.after(start) && approveStart.before(end) && approveEnd.after(start) && approveEnd.before(end));*/
+
+        if(!((approveStart.compareTo(start) >= 0 && approveStart.compareTo(end) <=0 )
+                && ((approveEnd.compareTo(start) >= 0 && approveEnd.compareTo(end) <=0 )))){
+            System.out.println(true);
+        }*/
 
         /*Date start = Utility.getDateFromString("2016-10-22");
         Date end = Utility.getDateFromString("2016-10-23");
@@ -162,10 +162,10 @@ public class Test {
         //leaveCheckTest();
         //attendanceRead();
 
-        /*String time1 = "08:08:19";
-        String time2 = "17:23:21";
+        /*String time1 = "08:08";
+        String time2 = "17:23";
 
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
         Date date1 = null;
         String time = "";
         try {
@@ -178,11 +178,10 @@ public class Test {
 
             difference = difference/1000;
 
-            long s = difference % 60;
             long m = (difference / 60) % 60;
             long h = (difference / (60 * 60)) % 24;
 
-            time += String.format("%02d:%02d:%02d", h,m,s);
+            time += String.format("%02d:%02d", h,m);
             System.out.println(time);
 
         } catch (ParseException e) {
@@ -217,7 +216,7 @@ public class Test {
             e.printStackTrace();
         }*/
 
-        String csvFile = "/home/sabbir/Downloads/attendance.csv";
+        /*String csvFile = "/home/sabbir/Downloads/attendance.csv";
 
         try {
             InputStream inputStream = new FileInputStream(csvFile);
@@ -227,7 +226,7 @@ public class Test {
             e.printStackTrace();
         } catch (CustomException e) {
             e.printStackTrace();
-        }
+        }*/
 
         /*try {
             System.out.println(new Gson().toJson(dtoTransformer.getEmployeesDto(employeeService.searchEmployees(null, null, null, null, null,
@@ -296,6 +295,20 @@ public class Test {
 
 
         //attendanceRead();
+
+       /* Session session = SessionUtil.getSession();
+        leaveDao.setSession(session);
+        List<LeaveRequest> leaveRequests = leaveDao.searchOrReadSpecialLeaveRequests(null, null, null, null, null, null, null ,null, "0", "10");
+        System.out.println(new Gson().toJson(leaveRequests));*/
+
+        /*String body = "{\"approvedDaysCount\":1,\"approvedStartDate\":\"2016-12-31\",\"approvedEndDate\":\"2017-01-12\",\"clientNotify\":false,\"deniedReason\":\"sabbir\",\"leaveStatusName\":\"Approved\"}";
+        String userId = "f9e9a19f-4859-4e8c-a8f4-dc134629a57b";
+        String leaveRequestId = "4af247b1-29c2-4ebc-ada9-d29c37227ad6";
+
+        ObjectMapper mapper = new ObjectMapper();
+        LeaveRequestDto requestDto = mapper.readValue(body, LeaveRequestDto.class);
+
+        leaveService.approveLeaveRequest(requestDto, userId, leaveRequestId, null);*/
     }
 
     private static void myLeaveRequestPatch() {
@@ -315,7 +328,7 @@ public class Test {
     }
 
     private static void attendanceRead() {
-        String csvFile = "/home/sabbir/Downloads/attendance.csv";
+        String csvFile = "/home/sabbir/Downloads/3_jan.csv";
         BufferedReader br = null;
         String line = "";
         String cvsSplitBy = ",";
@@ -365,34 +378,35 @@ public class Test {
 
                             if (lineSplit[CSV_FUNCTION_KEY_COLUMN].equals(ReadXMLFile.STATUS)) {
 
+                                String employeeId = lineSplit[CSV_EMPLOYEE_ID_COLUMN].replace("\'", "");
                                 if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.IN_TIME)) {
 
-                                    if (inMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]) != null) {
+                                    if (inMap.get(employeeId) != null) {
                                         Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
-                                        Timestamp prevDate = Utility.getTimeStampFromString(inMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]));
+                                        Timestamp prevDate = Utility.getTimeStampFromString(inMap.get(employeeId));
 
                                         if (prevDate.after(nextDate)) {
-                                            inMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
+                                            inMap.put(employeeId,
                                                     lineSplit[CSV_DATE_TIME_COLUMN]);
                                         }
 
                                     } else {
-                                        inMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
+                                        inMap.put(employeeId,
                                                 lineSplit[CSV_DATE_TIME_COLUMN]);
                                     }
 
                                 } else if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.OUT_TIME)) {
-                                    if (outMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]) != null) {
+                                    if (outMap.get(employeeId) != null) {
                                         Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
-                                        Timestamp prevDate = Utility.getTimeStampFromString(outMap.get(lineSplit[CSV_EMPLOYEE_ID_COLUMN]));
+                                        Timestamp prevDate = Utility.getTimeStampFromString(outMap.get(employeeId));
 
                                         if (prevDate.before(nextDate)) {
-                                            outMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
+                                            outMap.put(employeeId,
                                                     lineSplit[CSV_DATE_TIME_COLUMN]);
                                         }
 
                                     } else {
-                                        outMap.put(lineSplit[CSV_EMPLOYEE_ID_COLUMN],
+                                        outMap.put(employeeId,
                                                 lineSplit[CSV_DATE_TIME_COLUMN]);
                                     }
                                 }

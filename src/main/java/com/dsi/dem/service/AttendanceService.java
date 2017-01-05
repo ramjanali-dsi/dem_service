@@ -15,9 +15,10 @@ import java.util.List;
  */
 public interface AttendanceService {
 
-    void saveAttendance(List<AttendanceDto> attendanceDtoList, String userID, String attendanceDate) throws CustomException;
+    void saveAttendance(List<AttendanceDto> attendanceDtoList, String userID,
+                        String attendanceDate, String tenantName) throws CustomException;
     void updateAttendance(EmployeeAttendance attendance) throws CustomException;
-    void deleteAttendance(String attendanceDate) throws CustomException;
+    void deleteAttendance(String attendanceDate, String tenantName) throws CustomException;
     EmployeeAttendance getAttendanceByID(String attendanceId, String employeeId) throws CustomException;
     List<EmployeeAttendance> getEmployeesAllAttendances(String employeeId) throws CustomException;
     List<EmployeeAttendance> getAllAttendancesByDate(String attendanceDate) throws CustomException;
@@ -28,8 +29,9 @@ public interface AttendanceService {
     boolean isAvailableEmployeeOrTempAttendanceSheet(String attendanceDate) throws CustomException;
     boolean getAttendanceStatus(String attendanceDate, String mode) throws CustomException;
 
-    List<DraftAttendance> saveTempAttendance(InputStream inputStream, String userID) throws CustomException;
-    void updateTempAttendance(List<AttendanceDto> attendanceDtoList, String userID, String attendanceDate) throws CustomException;
+    List<DraftAttendance> saveTempAttendance(InputStream inputStream, String userID, String tenantName) throws CustomException;
+    void updateTempAttendance(List<AttendanceDto> attendanceDtoList, String userID,
+                              String attendanceDate, String tenantName) throws CustomException;
     void deleteTempAttendance() throws CustomException;
     List<TemporaryAttendance> getAllTempAttendances(String attendanceDate) throws CustomException;
     TemporaryAttendance getTemporaryAttendance(String tempAttendanceId) throws CustomException;

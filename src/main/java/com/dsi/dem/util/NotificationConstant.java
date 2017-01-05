@@ -40,10 +40,49 @@ public class NotificationConstant {
     public static final Long LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD = 31L;
     public static final Long LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE = 32L;
     public static final Long LEAVE_APPROVE_TEMPLATE_ID_FOR_CLIENT = 33L;
+    public static final Long LEAVE_DENIED_TEMPLATE_ID_FOR_MANAGER_HR = 34L;
+    public static final Long LEAVE_DENIED_TEMPLATE_ID_FOR_EMPLOYEE = 35L;
+    public static final Long PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR = 36L;
+    public static final Long PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_LEAD = 37L;
+    public static final Long PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MEMBERS = 38L;
+    public static final Long PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_CLIENT = 39L;
+    public static final Long SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_MANAGER_HR = 40L;
+    public static final Long SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_LEAD = 41L;
+    public static final Long SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_EMPLOYEE = 42L;
+    public static final Long PENDING_SPECIAL_LEAVE_TEMPLATE_ID_FOR_EMPLOYEE = 43L;
+    public static final Long PENDING_SPECIAL_LEAVE_TEMPLATE_ID_FOR_MANAGER_HR = 44L;
+    public static final Long PENDING_SPECIAL_LEAVE_TEMPLATE_ID_FOR_LEAD = 45L;
+    public static final Long PENDING_SPECIAL_CANCEL_LEAVE_TEMPLATE_ID_FOR_EMPLOYEE = 46L;
+    public static final Long PENDING_SPECIAL_CANCEL_LEAVE_TEMPLATE_ID_FOR_MANAGER_HR = 47L;
+    public static final Long PENDING_SPECIAL_CANCEL_LEAVE_TEMPLATE_ID_FOR_LEAD = 48L;
+    public static final Long PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_EMPLOYEE = 49L;
+    public static final Long PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_MANAGER_HR = 50L;
+    public static final Long PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_LEAD = 51L;
+    public static final Long PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_CLIENT = 52L;
+    public static final Long SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE = 53L;
+    public static final Long SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR = 54L;
+    public static final Long SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD = 55L;
+    public static final Long SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_MEMBERS = 56L;
+    public static final Long SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_CLIENT = 57L;
+    public static final Long SPECIAL_LEAVE_DENIED_TEMPLATE_ID_FOR_MANAGER_HR = 58L;
+    public static final Long SPECIAL_LEAVE_DENIED_TEMPLATE_ID_FOR_EMPLOYEE = 59L;
+
+    public static final Long ATTENDANCE_UPLOAD_TEMPLATE_ID_FOR_MANAGER_HR = 60L;
+    public static final Long ATTENDANCE_SAVE_DRAFT_TEMPLATE_ID_FOR_MANAGER_HR = 61L;
+    public static final Long ATTENDANCE_DELETE_TEMPLATE_ID_FOR_MANAGER_HR = 62L;
+    public static final Long ATTENDANCE_CONFIRM_TEMPLATE_ID_FOR_MANAGER_HR = 63L;
+    public static final Long ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD = 64L;
+    public static final Long ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE = 65L;
+    public static final Long ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD = 66L;
+    public static final Long ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE = 67L;
+    public static final Long ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE = 68L;
+    public static final Long ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR_LEAD = 69L;
+    public static final Long ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_CLIENT = 70L;
 
     public static final String WEBSITE_LINK = "http://103.245.204.114:3000/#/";
 
     public static final String HR_ROLE_TYPE = "HR";
     public static final String MANAGER_ROLE_TYPE = "Manager";
     public static final String LEAD_ROLE_TYPE = "Lead";
+    public static final String MEMBER_ROLE_TYPE = "Member";
 }

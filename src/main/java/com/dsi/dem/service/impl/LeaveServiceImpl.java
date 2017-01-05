@@ -1,11 +1,7 @@
 package com.dsi.dem.service.impl;
 
-import com.dsi.dem.dao.EmployeeDao;
-import com.dsi.dem.dao.HolidayDao;
-import com.dsi.dem.dao.LeaveDao;
-import com.dsi.dem.dao.impl.EmployeeDaoImpl;
-import com.dsi.dem.dao.impl.HolidayDaoImpl;
-import com.dsi.dem.dao.impl.LeaveDaoImpl;
+import com.dsi.dem.dao.*;
+import com.dsi.dem.dao.impl.*;
 import com.dsi.dem.dto.LeaveDetailsDto;
 import com.dsi.dem.dto.LeaveRequestDto;
 import com.dsi.dem.dto.LeaveSummaryDto;
@@ -23,6 +19,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.hibernate.Session;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,6 +34,8 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final LeaveDao leaveDao = new LeaveDaoImpl();
     private static final HolidayDao holidayDao = new HolidayDaoImpl();
+    private static final TeamDao teamDao = new TeamDaoImpl();
+    private static final ClientDao clientDao = new ClientDaoImpl();
 
     private static final HttpClient httpClient = new HttpClient();
 
@@ -214,19 +213,19 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         leaveDao.setSession(session);
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
+        LeaveType leaveType = leaveDao.getLeaveTypeByID(leaveRequest.getLeaveType().getLeaveTypeId());
         LeaveRequest existLeaveRequest = leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null);
-
-        existLeaveRequest.setLastModifiedDate(Utility.today());
-        existLeaveRequest.setApprovedDate(Utility.today());
-        existLeaveRequest.setLeaveStatus(leaveDao.getLeaveStatusByName(leaveRequest.getLeaveStatus().getLeaveStatusName()));
-        existLeaveRequest.setApprovalId(employeeDao.getEmployeeByUserID(userId).getEmployeeId());
 
         if(leaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)) {
 
-            if (!((leaveRequest.getApprovedStartDate().compareTo(existLeaveRequest.getStartDate()) >= 0
-                    && leaveRequest.getApprovedStartDate().compareTo(existLeaveRequest.getEndDate()) <= 0)
-                    && (leaveRequest.getApprovedEndDate().compareTo(existLeaveRequest.getStartDate()) >= 0
-                    && leaveRequest.getApprovedEndDate().compareTo(existLeaveRequest.getEndDate()) <= 0))) {
+            Date approveStartDate = Utility.getDateFormatFromDate(leaveRequest.getApprovedStartDate());
+            Date approveEndDate = Utility.getDateFormatFromDate(leaveRequest.getApprovedEndDate());
+            Date startDate = Utility.getDateFormatFromDate(existLeaveRequest.getStartDate());
+            Date endDate = Utility.getDateFormatFromDate(existLeaveRequest.getEndDate());
+
+            //Check approved dates are in range
+            if(!((!startDate.after(approveStartDate) && !endDate.before(approveStartDate))
+                && (!startDate.after(approveEndDate) && !endDate.before(approveEndDate)))){
 
                 close(session);
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
@@ -240,6 +239,11 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             existLeaveRequest.setApprovedEndDate(leaveRequest.getApprovedEndDate());
             existLeaveRequest.setClientNotify(leaveRequest.isClientNotify());
         }
+
+        existLeaveRequest.setLastModifiedDate(Utility.today());
+        existLeaveRequest.setApprovedDate(Utility.today());
+        existLeaveRequest.setLeaveStatus(leaveDao.getLeaveStatusByName(leaveRequest.getLeaveStatus().getLeaveStatusName()));
+        existLeaveRequest.setApprovalId(employeeDao.getEmployeeByUserID(userId).getEmployeeId());
         existLeaveRequest.setDeniedReason(leaveRequest.getDeniedReason());
 
         leaveDao.updateLeaveRequest(existLeaveRequest);
@@ -251,39 +255,126 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         logger.info("Employees leave request approval:: End");
         close(session);
 
-        /*try{
+        /*JSONObject globalContentObj;
+        JSONArray hrManagerEmailList, leadEmails, membersEmail, clientEmails, emailList;
+        try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             String email = employeeDao.getEmployeeEmailsByEmployeeID(leaveRequest.getEmployee().getEmployeeId()).get(0).getEmail();
-            JSONObject globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest,
-                    tenantName, new JSONArray().put(email));
-            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                    NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
-
-            JSONArray emailList = new JSONArray();
+            hrManagerEmailList = new JSONArray();
             //TODO Manager & HR email config
 
-            globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, emailList);
-            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                    NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR));
+            if(leaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
 
-            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(leaveRequest.getEmployee().getEmployeeId());
-            if(!Utility.isNullOrEmpty(teamLeads)){
+                leadEmails = new JSONArray();
+                membersEmail = new JSONArray();
+                clientEmails = new JSONArray();
 
-                emailList = new JSONArray();
-                for(Employee teamLead : teamLeads){
-                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                session = getSession();
+                teamDao.setSession(session);
+                clientDao.setSession(session);
+                List<TeamMember> teamMemberList = teamDao.getTeamMembers(null, leaveRequest.getEmployee().getEmployeeId());
+
+                if(!Utility.isNullOrEmpty(teamMemberList)){
+
+                    for(TeamMember member : teamMemberList){
+
+                        if(member.getRole().getRoleName().equals(NotificationConstant.LEAD_ROLE_TYPE)){
+                            leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+
+                        } else if(member.getRole().getRoleName().equals(NotificationConstant.MEMBER_ROLE_TYPE)){
+                            membersEmail.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+                        }
+                    }
                 }
 
-                globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, emailList);
-                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                        NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD));
-            }
+                if(leaveRequest.isClientNotify()) {
+                    List<Client> clientList = clientDao.getAllClientsByEmployeeId(leaveRequest.getEmployee().getEmployeeId());
 
-            //TODO client email notification
-            if(leaveRequest.isClientNotify()){
+                    if (!Utility.isNullOrEmpty(clientList)) {
+                        for (Client client : clientList) {
+                            if (client.isNotify()) {
+                                clientEmails.put(client.getMemberEmail());
+                            }
+                        }
+                    }
+                }
 
+                if(leaveType.getType().equals(Constants.SPECIAL_LEAVE_TYPE)){
+                    globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName,
+                            new JSONArray().put(email));
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                    globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    if(leadEmails.length() > 0) {
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName, leadEmails);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD));
+                    }
+
+                    if(membersEmail.length() > 0){
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName, membersEmail);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_MEMBERS));
+                    }
+
+                    if(clientEmails.length() > 0){
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName, clientEmails);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_CLIENT));
+                    }
+
+                } else {
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest,
+                            tenantName, new JSONArray().put(email));
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    if(leadEmails.length() > 0) {
+                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, leadEmails);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD));
+                    }
+
+                    if(clientEmails.length() > 0){
+                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, clientEmails);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_CLIENT));
+                    }
+                }
+                close(session);
+
+            } else if (leaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.DENIED_LEAVE_REQUEST)) {
+
+                if(leaveType.getType().equals(Constants.SPECIAL_TYPE_NAME)){
+                    globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.SPECIAL_LEAVE_DENIED_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName,
+                            new JSONArray().put(email));
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.SPECIAL_LEAVE_DENIED_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                } else {
+                    globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.LEAVE_DENIED_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName,
+                            new JSONArray().put(email));
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.LEAVE_DENIED_TEMPLATE_ID_FOR_EMPLOYEE));
+                }
             }
 
             logger.info("Notification create request body :: " + notificationList.toString());
@@ -597,6 +688,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         LeaveRequest existLeaveRequest = leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null);
 
         if(mode == 1){
+            logger.info("Edit mode.");
             existLeaveRequest.setStartDate(leaveRequest.getStartDate());
             existLeaveRequest.setEndDate(leaveRequest.getEndDate());
             existLeaveRequest.setDaysCount(Utility.getDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1);
@@ -615,6 +707,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         logger.info("Update leave request success");
 
         if(mode == 2 && existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
+            logger.info("Cancel approve leave request.");
             EmployeeLeave leaveSummary = leaveDao.getEmployeeLeaveSummary(existLeaveRequest.getEmployee().getEmployeeId());
 
             if(existLeaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.CASUAL_TYPE_NAME)){
@@ -640,39 +733,92 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(existLeaveRequest);
         close(session);
 
-        /*try{
-            logger.info("Notification create:: Start");
+        /*logger.info("Notification create:: Start");
+        JSONObject globalContentObj;
+        JSONArray hrManagerEmailList, leadEmails, memberEmails;
+        try{
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
+            leadEmails = new JSONArray();
+            memberEmails = new JSONArray();
+            hrManagerEmailList = new JSONArray();
             //TODO Manager & HR email config
 
-            JSONObject globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList);
+            globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
 
-            JSONArray leadEmails = new JSONArray();
-            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(leaveRequest.getEmployee().getEmployeeId());
-            if (!Utility.isNullOrEmpty(teamLeads)) {
+            session = getSession();
+            teamDao.setSession(session);
+            clientDao.setSession(session);
+            List<TeamMember> teamMemberList = teamDao.getTeamMembers(null, leaveRequest.getEmployee().getEmployeeId());
 
-                for (Employee teamLead : teamLeads) {
-                    leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+            if(!Utility.isNullOrEmpty(teamMemberList)){
+
+                for(TeamMember member : teamMemberList){
+
+                    if(member.getRole().getRoleName().equals(NotificationConstant.LEAD_ROLE_TYPE)){
+                        leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+
+                    } else if(member.getRole().getRoleName().equals(NotificationConstant.MEMBER_ROLE_TYPE)){
+                        memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+                    }
                 }
             }
+
             JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, leadEmails);
 
             if(mode == 1) {
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.PENDING_EDIT_TEMPLATE_ID_FOR_MANAGER_HR));
 
-                notificationList.put(EmailContent.getNotificationObject(leadContentObj,
-                        NotificationConstant.PENDING_EDIT_TEMPLATE_ID_FOR_LEAD));
+                if(leadEmails.length() > 0) {
+                    notificationList.put(EmailContent.getNotificationObject(leadContentObj,
+                            NotificationConstant.PENDING_EDIT_TEMPLATE_ID_FOR_LEAD));
+                }
 
-            } else if(mode == 2){
+            } else if(mode == 2 && !existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.PENDING_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
 
-                notificationList.put(EmailContent.getNotificationObject(leadContentObj,
-                        NotificationConstant.PENDING_CANCEL_TEMPLATE_ID_FOR_LEAD));
+                if(leadEmails.length() > 0) {
+                    notificationList.put(EmailContent.getNotificationObject(leadContentObj,
+                            NotificationConstant.PENDING_CANCEL_TEMPLATE_ID_FOR_LEAD));
+                }
+
+            } else if(mode == 2 && existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
+                globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                if(leadEmails.length() > 0) {
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, leadEmails);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_LEAD));
+                }
+
+                if(memberEmails.length() > 0) {
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, memberEmails);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MEMBERS));
+                }
+
+                if(leaveRequest.isClientNotify()){
+                    List<Client> clientList = clientDao.getAllClientsByEmployeeId(leaveRequest.getEmployee().getEmployeeId());
+
+                    if(!Utility.isNullOrEmpty(clientList)){
+                        JSONArray emailList = new JSONArray();
+                        for(Client client : clientList){
+                            if(client.isNotify()) {
+                                emailList.put(client.getMemberEmail());
+                            }
+                        }
+
+                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, emailList);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_CLIENT));
+                    }
+                }
             }
+            close(session);
 
             logger.info("Notification create request body :: " + notificationList.toString());
             String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
@@ -836,14 +982,13 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     @Override
-    public LeaveRequestDto saveSpecialLeave(LeaveRequestDto specialLeaveDto) throws CustomException {
+    public LeaveRequestDto saveSpecialLeave(LeaveRequestDto specialLeaveDto, String tenantName) throws CustomException {
         logger.info("Special leave application create:: Start");
         logger.info("Convert LeaveRequest Dto to LeaveRequest Object.");
         LeaveRequest leaveRequest = LEAVE_DTO_TRANSFORMER.getLeaveRequest(specialLeaveDto);
 
         Session session = getSession();
         leaveDao.setSession(session);
-        //employeeDao.setSession(session);
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
         validateInputForSpecialLeaveCreation(leaveRequest, specialLeaveDto.getEmployeeId(), session);
@@ -859,8 +1004,57 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(leaveRequest);
         logger.info("Employees special leave request create:: End");
-
         close(session);
+
+        /*try{
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            String email = employeeDao.getEmployeeEmailsByEmployeeID(leaveRequest.getEmployee().getEmployeeId()).get(0).getEmail();
+            JSONObject globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName,
+                    new JSONArray().put(email));
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_EMPLOYEE));
+
+            JSONArray emailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest,
+                    tenantName, emailList);
+            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                    NotificationConstant.SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_MANAGER_HR));
+
+            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(leaveRequest.getEmployee().getEmployeeId());
+            if(!Utility.isNullOrEmpty(teamLeads)){
+
+                emailList = new JSONArray();
+                for(Employee teamLead : teamLeads){
+                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                }
+
+                globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, emailList);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_LEAD));
+            }
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return requestDto;
     }
 
@@ -948,14 +1142,14 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     @Override
-    public LeaveRequestDto updateSpecialLeave(LeaveRequestDto specialLeaveDto, String leaveRequestId) throws CustomException {
+    public LeaveRequestDto updateSpecialLeave(LeaveRequestDto specialLeaveDto, String leaveRequestId,
+                                              String tenantName) throws CustomException {
         logger.info("Special leave request update:: Start");
         logger.info("Convert LeaveRequest Dto to LeaveRequest Object.");
         LeaveRequest leaveRequest = LEAVE_DTO_TRANSFORMER.getLeaveRequest(specialLeaveDto);
 
         Session session = getSession();
         leaveDao.setSession(session);
-        //employeeDao.setSession(session);
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
         int mode = specialLeaveDto.getMode();
@@ -1005,8 +1199,114 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(existLeaveRequest);
         logger.info("Special leave request update:: End");
-
         close(session);
+
+        /*logger.info("Notification create:: Start");
+        JSONObject globalContentObj, employeeContentObj;
+        JSONArray hrManagerEmailList, leadEmails;
+        try{
+            JSONArray notificationList = new JSONArray();
+
+            String email = employeeDao.getEmployeeEmailsByEmployeeID(leaveRequest.getEmployee().getEmployeeId()).get(0).getEmail();
+            employeeContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName,
+                    new JSONArray().put(email));
+
+            leadEmails = new JSONArray();
+            hrManagerEmailList = new JSONArray();
+            //TODO Manager & HR email config
+
+            globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+
+            List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(leaveRequest.getEmployee().getEmployeeId());
+            if(!Utility.isNullOrEmpty(leadList)){
+
+                for(Employee lead : leadList){
+                    leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(lead.getEmployeeId()).get(0).getEmail());
+                }
+            }
+
+            JSONObject leadContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, leadEmails);
+
+            if(mode == 1) {
+                notificationList.put(EmailContent.getNotificationObject(employeeContentObj,
+                        NotificationConstant.PENDING_SPECIAL_LEAVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.PENDING_SPECIAL_LEAVE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                if(leadEmails.length() > 0) {
+                    notificationList.put(EmailContent.getNotificationObject(leadContentObj,
+                            NotificationConstant.PENDING_SPECIAL_LEAVE_TEMPLATE_ID_FOR_LEAD));
+                }
+
+            } else if(mode == 2 && !existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
+                notificationList.put(EmailContent.getNotificationObject(employeeContentObj,
+                        NotificationConstant.PENDING_SPECIAL_CANCEL_LEAVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.PENDING_SPECIAL_CANCEL_LEAVE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                if(leadEmails.length() > 0) {
+                    notificationList.put(EmailContent.getNotificationObject(leadContentObj,
+                            NotificationConstant.PENDING_SPECIAL_CANCEL_LEAVE_TEMPLATE_ID_FOR_LEAD));
+                }
+
+            } else if(mode == 2 && existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
+                globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName,
+                        new JSONArray().put(email));
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                if(leadEmails.length() > 0) {
+                    globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName, leadEmails);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_LEAD));
+                }
+
+                if(leaveRequest.isClientNotify()){
+                    session = getSession();
+                    clientDao.setSession(session);
+
+                    List<Client> clientList = clientDao.getAllClientsByEmployeeId(leaveRequest.getEmployee().getEmployeeId());
+                    close(session);
+
+                    if(!Utility.isNullOrEmpty(clientList)){
+                        JSONArray emailList = new JSONArray();
+                        for(Client client : clientList){
+                            if(client.isNotify()) {
+                                emailList.put(client.getMemberEmail());
+                            }
+                        }
+
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(leaveRequest, tenantName, emailList);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_CLIENT));
+                    }
+                }
+            }
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            JSONObject resultObj = new JSONObject(result);
+            if(!resultObj.has(Constants.MESSAGE)){
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
+
         return requestDto;
     }
 

@@ -106,6 +106,17 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
     }
 
     @Override
+    public int getAttendanceCountByIdAndDate(String employeeId, Date startDate, Date endDate) {
+        Query query = session.createQuery("FROM EmployeeAttendance et WHERE et.employee.employeeId =:employeeId " +
+                "AND (et.attendanceDate BETWEEN :startDate AND :endDate) AND et.isAbsent = true");
+        query.setParameter("employeeId", employeeId);
+        query.setParameter("startDate", startDate);
+        query.setParameter("endDate", endDate);
+
+        return query.list().size();
+    }
+
+    @Override
     public List<EmployeeAttendance> getEmployeesAllAttendances(String employeeId) {
         Query query = session.createQuery("FROM EmployeeAttendance et WHERE et.employee.employeeId =:employeeID");
         query.setParameter("employeeID", employeeId);

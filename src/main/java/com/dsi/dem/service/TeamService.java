@@ -24,8 +24,9 @@ public interface TeamService {
                            String memberName, String projectName, String clientName, String from,
                            String range) throws CustomException;
 
-    List<TeamMemberDto> createTeamMembers(String teamId, List<TeamMemberDto> teamMembers) throws CustomException;
-    void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException;
+    List<TeamMemberDto> createTeamMembers(String teamId, List<TeamMemberDto> teamMembers,
+                                          String tenantName) throws CustomException;
+    void saveTeamMembers(List<TeamMember> teamMembers, String teamID, String tenantName) throws CustomException;
     void deleteTeamMember(String teamMemberID) throws CustomException;
     TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID) throws CustomException;
     List<TeamMember> getTeamMembers(String teamID, String employeeID) throws CustomException;

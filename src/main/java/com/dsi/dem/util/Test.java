@@ -293,7 +293,6 @@ public class Test {
         System.out.println(new Gson().toJson(employeeList));*/
         //System.out.println(Utility.getWeekendBetweenDate(start, end));
 
-
         //attendanceRead();
 
        /* Session session = SessionUtil.getSession();

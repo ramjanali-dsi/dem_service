@@ -41,7 +41,7 @@ public class TeamMemberResource {
         String tenantName = request.getAttribute("tenant_name") != null ?
                 request.getAttribute("tenant_name").toString() : null;
 
-        return Response.ok().entity(teamService.createTeamMembers(teamID, teamMemberDtoList)).build();
+        return Response.ok().entity(teamService.createTeamMembers(teamID, teamMemberDtoList, tenantName)).build();
     }
 
     @DELETE

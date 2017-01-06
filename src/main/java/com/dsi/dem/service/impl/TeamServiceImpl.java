@@ -369,7 +369,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
-    public List<TeamMemberDto> createTeamMembers(String teamId, List<TeamMemberDto> teamMembers) throws CustomException {
+    public List<TeamMemberDto> createTeamMembers(String teamId, List<TeamMemberDto> teamMembers,
+                                                 String tenantName) throws CustomException {
         logger.info("Team members create:: Start");
         logger.info("Convert TeamMember Dto to TeamMember Object");
         List<TeamMember> teamMemberList = TRANSFORMER.getTeamMembers(teamMembers);
@@ -385,7 +386,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         Session session = getSession();
         teamDao.setSession(session);
 
-        saveTeamMembers(teamMemberList, teamId);
+        saveTeamMembers(teamMemberList, teamId, tenantName);
         List<TeamMember> teamMembersList = teamDao.getTeamMembers(teamId, null);
         logger.info("Team members create:: End");
 
@@ -394,7 +395,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
-    public void saveTeamMembers(List<TeamMember> teamMembers, String teamID) throws CustomException {
+    public void saveTeamMembers(List<TeamMember> teamMembers, String teamID, String tenantName) throws CustomException {
 
         teamDao.deleteTeamMember(teamID, null);
         logger.info("Delete all team members.");
@@ -415,6 +416,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         logger.info("Team (member count) update success.");
 
         /*JSONObject resultObj, contentObj;
+        JSONArray memberEmails = new JSONArray();
         String result;
         boolean isCheck = true;
         try {
@@ -434,6 +436,10 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                 if(isCheck){
                     logger.info("Unassigned team member.");
                     unassignedTeamMembers.add(existMember);
+
+                } else {
+                    memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(existMember.getEmployee().getEmployeeId())
+                            .get(0).getEmail());
                 }
             }
 
@@ -472,12 +478,100 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             logger.info("Team (member count) update success.");
 
             logger.info("Notification create:: Start");
-            TeamMember teamLeadMember = teamDao.getTeamLeadByTeamID(teamID);
+            JSONArray notificationList = new JSONArray();
 
+            JSONArray hrManagerEmailList = new JSONArray();
+            //TODO Manager & HR email config
 
-            for(TeamMember unassignedTeamMember : unassignedTeamMembers){
-
+            JSONArray clientEmails = new JSONArray();
+            List<ProjectTeam> teamProjects = teamDao.getProjectTeams(teamID);
+            if(!Utility.isNullOrEmpty(teamProjects)){
+                for(ProjectTeam teamProject : teamProjects){
+                    List<ProjectClient> projectClients = projectDao.getProjectClients(teamProject.getProject().getProjectId());
+                    if(!Utility.isNullOrEmpty(projectClients)){
+                        for(ProjectClient projectClient : projectClients){
+                            if(projectClient.getClient().isNotify()) {
+                                clientEmails.put(projectClient.getClient().getMemberEmail());
+                            }
+                        }
+                    }
+                }
             }
+
+            TeamMember teamLeadMember = teamDao.getTeamLeadByTeamID(teamID);
+            String leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(teamLeadMember.getEmployee().getEmployeeId()).get(0).getEmail();
+
+            if(!Utility.isNullOrEmpty(assignedTeamMembers)) {
+                for (TeamMember assignMember : assignedTeamMembers) {
+
+                    contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(),
+                            existTeam.getName(), null, null, teamLeadMember.getEmployee(),
+                            tenantName, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), existTeam.getName(),
+                            null, null, teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_LEAD));
+
+                    if(memberEmails.length() > 0) {
+                        contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), existTeam.getName(),
+                                null, null, teamLeadMember.getEmployee(), tenantName, memberEmails);
+                        notificationList.put(EmailContent.getNotificationObject(contentObj,
+                                NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MEMBERS));
+                    }
+
+                    if(clientEmails.length() > 0){
+                        contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), existTeam.getName(),
+                                null, null, teamLeadMember.getEmployee(), tenantName, clientEmails);
+                        notificationList.put(EmailContent.getNotificationObject(contentObj,
+                                NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_CLIENT));
+                    }
+                }
+            }
+
+            if(!Utility.isNullOrEmpty(unassignedTeamMembers)){
+                for(TeamMember unassignedMember : unassignedTeamMembers){
+
+                    contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(),
+                            existTeam.getName(), null, null, teamLeadMember.getEmployee(),
+                            tenantName, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), existTeam.getName(),
+                            null, null, teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_LEAD));
+
+                    if(memberEmails.length() > 0) {
+                        contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), existTeam.getName(),
+                                null, null, teamLeadMember.getEmployee(), tenantName, memberEmails);
+                        notificationList.put(EmailContent.getNotificationObject(contentObj,
+                                NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
+                    }
+
+                    if(clientEmails.length() > 0){
+                        contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), existTeam.getName(),
+                                null, null, teamLeadMember.getEmployee(), tenantName, clientEmails);
+                        notificationList.put(EmailContent.getNotificationObject(contentObj,
+                                NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
+                    }
+                }
+            }
+
+            logger.info("Notification create request body :: " + notificationList.toString());
+            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+            logger.info("Notification create:: End");
 
         } catch (JSONException je){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,

@@ -20,6 +20,7 @@ public interface AttendanceDao {
     void updateAttendance(EmployeeAttendance attendance) throws CustomException;
     void deleteAttendance(String attendanceId, String employeeId) throws CustomException;
     EmployeeAttendance getAttendanceByID(String attendanceId, String employeeId);
+    int getAttendanceCountByIdAndDate(String employeeId, Date startDate, Date endDate);
     List<EmployeeAttendance> getEmployeesAllAttendances(String employeeId);
     List<EmployeeAttendance> getAllAttendancesByDate(Date attendanceDate);
     List<EmployeeAttendance> searchOrReadAttendances(String userId, String employeeNo, String isAbsent, String firstName,

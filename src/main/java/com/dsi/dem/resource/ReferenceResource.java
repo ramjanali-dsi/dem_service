@@ -4,6 +4,7 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.service.ReferenceService;
 import com.dsi.dem.service.impl.ReferenceServiceImpl;
 import com.dsi.dem.util.Constants;
+import com.dsi.dem.util.InMemoryCache;
 import com.wordnik.swagger.annotations.Api;
 import org.apache.log4j.Logger;
 
@@ -27,6 +28,27 @@ public class ReferenceResource {
     private static final Logger logger = Logger.getLogger(ReferenceResource.class);
 
     private static final ReferenceService referenceService = new ReferenceServiceImpl();
+
+    /*private static final InMemoryCache<String, String> cache = new InMemoryCache<String, String>
+            (240, 500, 50);
+
+    @GET
+    @Path("/cache_test")
+    public Response getCacheTest() {
+        logger.info("Initial cache size : "  + cache.size());
+        if(cache.get("key") == null){
+            logger.info("Cache empty.");
+
+            cache.put("key", "sabbir");
+
+        } else {
+            logger.info("Cache size: " + cache.size());
+
+            cache.put("key", "x_sabbir");
+        }
+
+        return Response.ok().entity(cache.get("key")).build();
+    }*/
 
     @GET
     @Path("/role")

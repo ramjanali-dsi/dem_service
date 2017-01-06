@@ -185,6 +185,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
             Session session = getSession();
             holidayDao.setSession(session);
 
+            int count = 0;
             for(HolidayDto holidayDto : holidayDtoList){
                 Holiday holiday = holidayDao.getHolidayById(holidayDto.getHolidayId());
                 if(holiday == null){
@@ -196,6 +197,13 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
 
                 holiday.setPublish(holiday.getPublish() + 1);
                 holidayDao.updateHoliday(holiday);
+
+                if(count % 20 == 0){
+                    session.flush();
+                    session.clear();
+                }
+                count++;
+
                 //TODO sent email;
             }
             close(session);

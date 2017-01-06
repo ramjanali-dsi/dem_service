@@ -57,6 +57,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         attendanceDao.setSession(session);
         leaveDao.setSession(session);
 
+        int count = 0;
         for(AttendanceDto attendanceDto : attendanceDtoList){
 
             TemporaryAttendance temporaryAttendance = attendanceDao.getTemporaryAttendance(
@@ -92,6 +93,12 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             attendance.setVersion(1);
             attendanceDao.saveAttendance(attendance);
             logger.info("Save employee attendance success");
+
+            if(count % 20 == 0){
+                session.flush();
+                session.clear();
+            }
+            count++;
 
             EmployeeLeave leaveSummary;
             if(attendance.isAbsent()){
@@ -727,6 +734,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             attendanceDao.setSession(session);
             once = true;
 
+            int count = 0;
             for(Employee employee : employeeList){
                 String employeeNo = employee.getEmployeeNo();
                 logger.info("Employee no: " + employeeNo);
@@ -775,6 +783,12 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                     }
                     once = false;
                 }
+
+                if(count % 20 == 0){
+                    session.flush();
+                    session.clear();
+                }
+                count++;
 
                 logger.info("Save temporary attendance success");
             }
@@ -836,6 +850,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         Session session = getSession();
         attendanceDao.setSession(session);
 
+        int count = 0;
         for(AttendanceDto attendanceDto : attendanceDtoList){
             if(attendanceDto.getVersion() == 0){
                 close(session);
@@ -866,6 +881,13 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             existTempAttendance.setVersion(attendanceDto.getVersion());
 
             attendanceDao.updateTempAttendance(existTempAttendance);
+
+            if(count % 20 == 0){
+                session.flush();
+                session.clear();
+            }
+            count++;
+
             logger.info("Update temporary attendance success");
         }
         logger.info("Update employees temporary attendance: End");

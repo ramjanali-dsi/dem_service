@@ -34,6 +34,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final LeaveDao leaveDao = new LeaveDaoImpl();
     private static final HolidayDao holidayDao = new HolidayDaoImpl();
+    private static final AttendanceDao attendanceDao = new AttendanceDaoImpl();
     private static final TeamDao teamDao = new TeamDaoImpl();
     private static final ClientDao clientDao = new ClientDaoImpl();
 
@@ -211,6 +212,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         Session session = getSession();
         leaveDao.setSession(session);
+        attendanceDao.setSession(session);
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
         LeaveType leaveType = leaveDao.getLeaveTypeByID(leaveRequest.getLeaveType().getLeaveTypeId());
@@ -424,17 +426,33 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     private void updateLeaveSummary(LeaveRequest existLeaveRequest) throws CustomException {
         EmployeeLeave leaveSummary = leaveDao.getEmployeeLeaveSummary(existLeaveRequest.getEmployee().getEmployeeId());
 
-        if(existLeaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.CASUAL_TYPE_NAME)){
-            leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() +
-                    Utility.getDaysBetween(existLeaveRequest.getStartDate(), existLeaveRequest.getEndDate()) + 1);
+        int result = 0;
+        if(existLeaveRequest.getRequestType().getLeaveRequestTypeName().equals(Constants.POST_REQUEST_TYPE_NAME)){
+            logger.info("Post request type leave application.");
+            logger.info("Check un-notified attendances.");
 
-        } else if(existLeaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.SICK_TYPE_NAME)){
-            leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() +
-                    Utility.getDaysBetween(existLeaveRequest.getStartDate(), existLeaveRequest.getEndDate()) + 1);
+            result = attendanceDao.getAttendanceCountByIdAndDate(existLeaveRequest.getEmployee().getEmployeeId(),
+                    existLeaveRequest.getApprovedStartDate(), existLeaveRequest.getApprovedEndDate());
 
-        } else if(existLeaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.SPECIAL_TYPE_NAME)){
-            leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() +
-                    Utility.getDaysBetween(existLeaveRequest.getStartDate(), existLeaveRequest.getEndDate()) + 1);
+            logger.info("Total un-notified attendance count: " + result);
+        }
+        leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() - result);
+
+        switch (existLeaveRequest.getLeaveType().getLeaveTypeName()) {
+            case Constants.CASUAL_TYPE_NAME:
+                leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() +
+                        Utility.getDaysBetween(existLeaveRequest.getStartDate(), existLeaveRequest.getEndDate()) + 1);
+
+                break;
+            case Constants.SICK_TYPE_NAME:
+                leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() +
+                        Utility.getDaysBetween(existLeaveRequest.getStartDate(), existLeaveRequest.getEndDate()) + 1);
+
+                break;
+            case Constants.SPECIAL_TYPE_NAME:
+                leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() +
+                        Utility.getDaysBetween(existLeaveRequest.getStartDate(), existLeaveRequest.getEndDate()) + 1);
+                break;
         }
 
         leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed() +

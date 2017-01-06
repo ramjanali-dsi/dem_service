@@ -59,6 +59,24 @@ public class EmailContent {
         return contentObj;
     }
 
+    public static JSONObject getContentForTeamMemberAssignUnAssign(Employee employee, String teamName, String projectName,
+                                                                   String clientName, Employee lead, String tenantName,
+                                                                   JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("TeamName", teamName);
+        contentObj.put("EmployeeFirstName", employee.getFirstName());
+        contentObj.put("EmployeeLastName", employee.getLastName());
+        contentObj.put("ProjectName", projectName);
+        contentObj.put("ClientName", clientName);
+        contentObj.put("LeadFirstName", lead.getFirstName());
+        contentObj.put("LeadLastName", lead.getLastName());
+        contentObj.put("TenantName", lead);
+
+        return contentObj;
+    }
+
     public static JSONObject getContentForProject(Project project, String tenantName, JSONArray emailList) throws JSONException {
 
         JSONObject contentObj = new JSONObject();

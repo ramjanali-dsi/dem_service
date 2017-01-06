@@ -25,6 +25,14 @@ public class NotificationConstant {
     public static final Long TEAM_DELETE_TEMPLATE_ID_FOR_MANAGER_HR = 13L;
     public static final Long TEAM_DELETE_TEMPLATE_ID_FOR_LEAD = 20L;
     public static final Long TEAM_MEMBER_TEMPLATE_ID = 14L;
+    public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MANAGER_HR = 71L;
+    public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_LEAD = 71L;
+    public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_CLIENT = 71L;
+    public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MEMBERS = 71L;
+    public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR = 71L;
+    public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_LEAD = 71L;
+    public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT = 71L;
+    public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS = 71L;
 
     public static final Long PROJECT_CREATE_TEMPLATE_ID = 21L;
     public static final Long PROJECT_UPDATE_TEMPLATE_ID = 22L;

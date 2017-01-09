@@ -2,6 +2,7 @@ package com.dsi.dem.service.impl;
 
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
+import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.InMemoryCache;
@@ -10,11 +11,12 @@ import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 /**
  * Created by sabbir on 1/6/17.
  */
-public class NotificationServiceImpl {
+public class NotificationServiceImpl implements NotificationService {
 
     private static final Logger logger = Logger.getLogger(NotificationServiceImpl.class);
 
@@ -27,36 +29,41 @@ public class NotificationServiceImpl {
                 (240, 500, 50);
     }
 
-    public JSONArray getHrManagerEmailList() throws CustomException{
+    public JSONArray getHrManagerEmailList() throws CustomException {
 
+        JSONObject resultObj;
         JSONArray hrManagerEmailList = new JSONArray();
         try {
-            logger.info("Get HR email list.");
+            logger.info("Get HR & Manager email list.");
             JSONArray hrEmailList = cache.get(NotificationConstant.HR_ROLE_TYPE);
-
-            if (hrEmailList == null) {
-                logger.info("Read hr email list from another service.");
-                String result = httpClient.getRequest(APIProvider.API_USER_ROLE_TYPE + NotificationConstant.HR_ROLE_TYPE,
-                        Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-                hrEmailList = new JSONArray(result);
-                cache.put(NotificationConstant.HR_ROLE_TYPE, hrEmailList);
-            }
-
-            logger.info("Get Manager email list.");
             JSONArray managerEmailList = cache.get(NotificationConstant.MANAGER_ROLE_TYPE);
 
-            if (managerEmailList == null) {
-                logger.info("Read manager email list from another service.");
-                String result = httpClient.getRequest(APIProvider.API_USER_ROLE_TYPE + NotificationConstant.MANAGER_ROLE_TYPE,
-                        Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+            if (hrEmailList == null) {
+                logger.info("Read hr & manager email list from another service.");
+                String result = httpClient.getRequest(APIProvider.API_USER_ROLE, Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
 
-                managerEmailList = new JSONArray(result);
-                cache.put(NotificationConstant.MANAGER_ROLE_TYPE, managerEmailList);
+                logger.info("API result Data :: " + result);
+                resultObj = new JSONObject(result);
+                if(resultObj.has(NotificationConstant.HR_ROLE_TYPE)){
+                    hrEmailList = resultObj.getJSONArray(NotificationConstant.HR_ROLE_TYPE);
+                    cache.put(NotificationConstant.HR_ROLE_TYPE, hrEmailList);
+
+                    managerEmailList = resultObj.getJSONArray(NotificationConstant.MANAGER_ROLE_TYPE);
+                    cache.put(NotificationConstant.MANAGER_ROLE_TYPE, managerEmailList);
+                }
             }
 
-            hrManagerEmailList.put(hrEmailList);
-            hrManagerEmailList.put(managerEmailList);
+            if(hrEmailList != null && hrEmailList.length() > 0) {
+                for (int i = 0; i < hrEmailList.length(); i++) {
+                    hrManagerEmailList.put(hrEmailList.get(i));
+                }
+            }
+
+            if(managerEmailList != null && managerEmailList.length() > 0) {
+                for (int i = 0; i < managerEmailList.length(); i++) {
+                    hrManagerEmailList.put(managerEmailList.get(i));
+                }
+            }
             return hrManagerEmailList;
 
         } catch (JSONException je){

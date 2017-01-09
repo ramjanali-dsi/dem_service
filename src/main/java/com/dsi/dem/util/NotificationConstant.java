@@ -7,11 +7,11 @@ public class NotificationConstant {
 
     static final Long NOTIFICATION_EMAIL_TYPE_ID = 1L;
     public static final Long EMPLOYEE_CREATE_TEMPLATE_ID_FOR_EMPLOYEE = 4L;
-    public static final Long EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR = 15L;
+    public static final Long EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR = 4L;
     public static final Long EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_EMPLOYEE = 5L;
-    public static final Long EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR = 16L;
+    public static final Long EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR = 5L;
     public static final Long EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_EMPLOYEE = 6L;
-    public static final Long EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_MANAGER_HR = 17L;
+    public static final Long EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_MANAGER_HR = 6L;
     public static final Long EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_LEAD = 7L;
 
     public static final Long CLIENT_CREATE_TEMPLATE_ID = 8L;

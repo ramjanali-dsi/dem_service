@@ -18,7 +18,7 @@ public class EmailContent {
         notificationObj.put("systemId", Constants.SYSTEM_ID);
         notificationObj.put("contentJson", contentObj.toString());
         notificationObj.put("maxRetryCount", 5);
-        notificationObj.put("isProcessed", true);
+        notificationObj.put("processed", true);
         notificationObj.put("retryInterval", "1");
 
         return notificationObj;

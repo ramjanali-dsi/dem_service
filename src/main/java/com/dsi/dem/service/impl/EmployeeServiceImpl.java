@@ -6,6 +6,7 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.EmployeeService;
+import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.*;
 import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
@@ -25,6 +26,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
     private static final Logger logger = Logger.getLogger(EmployeeServiceImpl.class);
 
+    private static final NotificationService notificationService = new NotificationServiceImpl();
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final HttpClient httpClient = new HttpClient();
 
@@ -85,20 +87,17 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
             logger.info("Employee Create:: End");
 
-            /*logger.info("Notification create:: Start");
+            logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             String email = employeeEmailList.get(0).getEmail();
-            JSONObject contentObj = EmailContent.getContentObjForEmployee(employee, tenantName, email,
-                    resultObj.getString("password"));
+            JSONObject contentObj = EmailContent.getContentObjForEmployee(employee, tenantName,
+                    resultObj.getString("password"), email);
 
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_EMPLOYEE));
 
-
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
+            JSONArray emailList = notificationService.getHrManagerEmailList();
             contentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
 
             notificationList.put(EmailContent.getNotificationObject(contentObj,
@@ -114,7 +113,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                         Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
                 throw new CustomException(errorMessage);
             }
-            logger.info("Notification create:: End");*/
+            logger.info("Notification create:: End");
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 
@@ -265,17 +264,15 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             }
             logger.info("Employee update:: End");
 
-            /*logger.info("Notification create:: Start");
+            logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             String email = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
-            JSONObject empContentObj = EmailContent.getContentObjForEmployee(employee, tenantName, email, null);
+            JSONObject empContentObj = EmailContent.getContentObjForEmployee(employee, tenantName, null, email);
             notificationList.put(EmailContent.getNotificationObject(empContentObj,
                     NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_EMPLOYEE));
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
+            JSONArray emailList = notificationService.getHrManagerEmailList();
             JSONObject globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
@@ -314,7 +311,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                         Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
                 throw new CustomException(errorMessage);
             }
-            logger.info("Notification create:: End");*/
+            logger.info("Notification create:: End");
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 

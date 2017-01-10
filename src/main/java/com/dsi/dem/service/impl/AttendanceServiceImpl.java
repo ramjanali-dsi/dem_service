@@ -13,8 +13,8 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
 import com.dsi.dem.service.AttendanceService;
+import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.*;
-import com.dsi.httpclient.HttpClient;
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
@@ -38,11 +38,10 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
     private static final Logger logger = Logger.getLogger(AttendanceServiceImpl.class);
 
     private static final LeaveDao leaveDao = new LeaveDaoImpl();
+    private static final ClientDao clientDao = new ClientDaoImpl();
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final AttendanceDao attendanceDao = new AttendanceDaoImpl();
-    private static final ClientDao clientDao = new ClientDaoImpl();
-
-    private static final HttpClient httpClient = new HttpClient();
+    private static final NotificationService notificationService = new NotificationServiceImpl();
 
     @Override
     public void saveAttendance(List<AttendanceDto> attendanceDtoList, String userID,
@@ -348,16 +347,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             logger.info("Employees attendance schedule create: End");
             close(session);
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je) {
@@ -450,16 +440,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             logger.info("Delete all attendances:: End");
             close(session);
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -719,7 +700,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         logger.info("InTimeMap: -------> " + new Gson().toJson(inMap));
         logger.info("\n\nOutTimeMap: ------> " + new Gson().toJson(outMap));
 
-        DraftAttendance draftAttendance;
+        DraftAttendance draftAttendance = null;
         List<Employee> employeeList = employeeDao.getAllEmployees();
         if(!Utility.isNullOrEmpty(employeeList)){
             logger.info("Total employee list: " + employeeList.size());
@@ -812,16 +793,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.ATTENDANCE_UPLOAD_TEMPLATE_ID_FOR_MANAGER_HR));
 
-                logger.info("Notification create request body :: " + notificationList.toString());
-                String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                        Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-                JSONObject resultObj = new JSONObject(result);
-                if (!resultObj.has(Constants.MESSAGE)) {
-                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                            Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                    throw new CustomException(errorMessage);
-                }
+                notificationService.createNotification(notificationList.toString());
                 logger.info("Notification create:: End");
             }
 
@@ -874,6 +846,11 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 existTempAttendance.setCheckOutTime(attendanceDto.getCheckOutTime());
                 existTempAttendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
                         attendanceDto.getCheckOutTime()));
+
+            } else {
+                existTempAttendance.setCheckInTime(null);
+                existTempAttendance.setCheckOutTime(null);
+                existTempAttendance.setTotalHour(null);
             }
             existTempAttendance.setAbsent(attendanceDto.isAbsent());
             existTempAttendance.setLastModifiedDate(Utility.today());
@@ -897,23 +874,12 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
+            JSONArray emailList = notificationService.getHrManagerEmailList();
             JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.ATTENDANCE_SAVE_DRAFT_TEMPLATE_ID_FOR_MANAGER_HR));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){

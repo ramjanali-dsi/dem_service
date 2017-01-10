@@ -72,4 +72,26 @@ public class NotificationServiceImpl implements NotificationService {
             throw new CustomException(errorMessage);
         }
     }
+
+    public void createNotification(String notificationList) throws CustomException {
+        logger.info("Notification create request body :: " + notificationList);
+
+        try {
+            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList,
+                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+
+            logger.info("v1/notification api call result:: " + result);
+            JSONObject resultObj = new JSONObject(result);
+            if (!resultObj.has(Constants.MESSAGE)) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
+                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
+                throw new CustomException(errorMessage);
+            }
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }
+    }
 }

@@ -9,4 +9,6 @@ import org.codehaus.jettison.json.JSONArray;
 public interface NotificationService {
 
     JSONArray getHrManagerEmailList() throws CustomException;
+
+    void createNotification(String notificationList) throws CustomException;
 }

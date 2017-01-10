@@ -8,16 +8,13 @@ import com.dsi.dem.model.*;
 import com.dsi.dem.service.EmployeeService;
 import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.*;
-import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by sabbir on 7/14/16.
@@ -26,9 +23,9 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
     private static final Logger logger = Logger.getLogger(EmployeeServiceImpl.class);
 
+    private static final CallAnotherResource callAnotherService = new CallAnotherResource();
     private static final NotificationService notificationService = new NotificationServiceImpl();
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
-    private static final HttpClient httpClient = new HttpClient();
 
     @Override
     public Employee saveEmployee(Employee employee, String currentUserID, String tenantName) throws CustomException {
@@ -37,17 +34,8 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
         try {
             logger.info("Employee Create:: Start");
-            logger.info("Request body for login create: " + Utility.getLoginObject(employee, currentUserID, 1));
-            String result = httpClient.sendPost(APIProvider.API_LOGIN_SESSION_CREATE,
-                    Utility.getLoginObject(employee, currentUserID, 1), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-            logger.info("v1/login_session/create api call result: " + result);
-
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            JSONObject resultObj = callAnotherService.sendPost(APIProvider.API_LOGIN_SESSION_CREATE,
+                    Utility.getLoginObject(employee, currentUserID, 1));
 
             List<EmployeeDesignation> employeeDesignationList = employee.getDesignations();
             List<EmployeeEmail> employeeEmailList = employee.getEmailInfo();
@@ -103,16 +91,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
@@ -251,17 +230,8 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             employeeDao.updateEmployeeInfo(employeeInfo);
             logger.info("Employee info update success");
 
-            logger.info("Request body for login update: " + Utility.getLoginObject(employee, currentUserId, 2));
-            String result = httpClient.sendPut(APIProvider.API_LOGIN_SESSION_UPDATE + employee.getUserId(),
-                    Utility.getLoginObject(employee, currentUserId, 2), Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-            logger.info("v1/login_session/update api call result: " + result);
-
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0002,
-                        Constants.DEM_SERVICE_0002_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
-                throw new CustomException(errorMessage);
-            }
+            callAnotherService.sendPut(APIProvider.API_LOGIN_SESSION_UPDATE + employee.getUserId(),
+                    Utility.getLoginObject(employee, currentUserId, 2));
             logger.info("Employee update:: End");
 
             logger.info("Notification create:: Start");
@@ -300,17 +270,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                             NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_LEAD));
                 }
             }
-            logger.info("Notification create request body :: " + notificationList.toString());
-
-            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
@@ -451,7 +411,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
         return employees;
     }
 
-    public Employee setEmployeesAllProperty(String employeeID, Employee employee) {
+    private Employee setEmployeesAllProperty(String employeeID, Employee employee) {
         EmployeeInfo info = employeeDao.getEmployeeInfoByEmployeeID(employeeID);
         if(info != null){
             employee.setInfo(info);

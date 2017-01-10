@@ -8,14 +8,10 @@ import com.dsi.dem.model.*;
 import com.dsi.dem.service.*;
 import com.dsi.dem.service.impl.*;
 import com.dsi.dem.util.*;
-import com.dsi.httpclient.HttpClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wordnik.swagger.annotations.*;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -45,9 +41,9 @@ public class EmployeeResource {
     private static final EmailService emailService = new EmailServiceImpl();
     private static final ContactService contactService = new ContactServiceImpl();
     private static final DesignationService designationService = new DesignationServiceImpl();
-    private static final EmployeeDtoTransformer EMPLOYEE_DTO_TRANSFORMER = new EmployeeDtoTransformer();
+    private static final CallAnotherResource callAnotherService = new CallAnotherResource();
 
-    private static final HttpClient httpClient = new HttpClient();
+    private static final EmployeeDtoTransformer EMPLOYEE_DTO_TRANSFORMER = new EmployeeDtoTransformer();
 
     @Context
     HttpServletRequest request;
@@ -161,51 +157,29 @@ public class EmployeeResource {
     })
     public Response deleteEmployee(@PathParam("employee_id") String employeeID) throws CustomException {
 
-        String userID = "";
-        try {
-            logger.info("Employee delete:: Start");
-            Employee employee = employeeService.getEmployeeByID(employeeID);
-            userID = employee.getUserId();
+        logger.info("Employee delete:: Start");
+        Employee employee = employeeService.getEmployeeByID(employeeID);
+        String userID = employee.getUserId();
 
-            List<TeamMember> memberList = teamService.getTeamMembers(null, employeeID);
-            if(!Utility.isNullOrEmpty(memberList)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
-                        Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0003);
-                throw new CustomException(errorMessage);
-            }
-
-            logger.info("User info delete:: start");
-            String result = httpClient.sendDelete(APIProvider.API_USER + userID,
-                    "", Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-            logger.info("v1/user/" + userID + "api call result: " + result);
-
-            JSONObject resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-            }
-            logger.info("User info delete:: end");
-
-            logger.info("Login info delete:: start");
-            result = httpClient.sendDelete(APIProvider.API_LOGIN_SESSION_DELETE + userID,
-                    "", Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-            logger.info("v1/login_session/delete/" + userID + "api call result: " + result);
-
-            resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(result).build();
-            }
-            logger.info("Login info delete:: end");
-
-            employeeService.deleteEmployee(employeeID);
-            logger.info("Employee delete:: End");
-
-            return Response.ok().entity(null).build();
-
-        } catch (JSONException je) {
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
-                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+        List<TeamMember> memberList = teamService.getTeamMembers(null, employeeID);
+        if(!Utility.isNullOrEmpty(memberList)){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0003);
             throw new CustomException(errorMessage);
         }
+
+        logger.info("User info delete:: start");
+        callAnotherService.sendDelete(APIProvider.API_USER + userID);
+        logger.info("User info delete:: end");
+
+        logger.info("Login info delete:: start");
+        callAnotherService.sendDelete(APIProvider.API_LOGIN_SESSION_DELETE + userID);
+        logger.info("Login info delete:: end");
+
+        employeeService.deleteEmployee(employeeID);
+        logger.info("Employee delete:: End");
+
+        return Response.ok().entity(null).build();
     }
 
     @GET

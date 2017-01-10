@@ -13,9 +13,9 @@ import com.dsi.dem.dto.transformer.ProjectDtoTransformer;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
+import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.util.*;
-import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -36,8 +36,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
     private static final ProjectDao projectDao = new ProjectDaoImpl();
     private static final TeamDao teamDao = new TeamDaoImpl();
     private static final ClientDao clientDao = new ClientDaoImpl();
-
-    private static final HttpClient httpClient = new HttpClient();
+    private static final NotificationService notificationService = new NotificationServiceImpl();
 
     @Override
     public ProjectDto saveProject(ProjectDto projectDto, String tenantName) throws CustomException {
@@ -91,16 +90,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_CREATE_TEMPLATE_ID));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -169,16 +159,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_UPDATE_TEMPLATE_ID));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -232,16 +213,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             logger.info("Project delete:: End");
             close(session);
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){

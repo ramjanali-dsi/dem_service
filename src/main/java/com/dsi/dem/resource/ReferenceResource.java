@@ -2,7 +2,6 @@ package com.dsi.dem.resource;
 
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.service.ReferenceService;
-import com.dsi.dem.service.impl.NotificationServiceImpl;
 import com.dsi.dem.service.impl.ReferenceServiceImpl;
 import com.dsi.dem.util.Constants;
 import com.wordnik.swagger.annotations.Api;
@@ -28,15 +27,6 @@ public class ReferenceResource {
     private static final Logger logger = Logger.getLogger(ReferenceResource.class);
 
     private static final ReferenceService referenceService = new ReferenceServiceImpl();
-
-    /*private static final NotificationServiceImpl service = new NotificationServiceImpl();
-
-    @GET
-    @Path("/cache_test")
-    public Response getCacheTest() throws CustomException {
-
-        return Response.ok().entity(service.getHrManagerEmailList().toString()).build();
-    }*/
 
     @GET
     @Path("/role")

@@ -13,8 +13,8 @@ import com.dsi.dem.model.Client;
 import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
 import com.dsi.dem.service.ClientService;
+import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.*;
-import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -34,8 +34,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
     private static final ClientDtoTransformer TRANSFORMER = new ClientDtoTransformer();
     private static final ClientDao clientDao = new ClientDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
-
-    private static final HttpClient httpClient = new HttpClient();
+    private static final NotificationService notificationService = new NotificationServiceImpl();
 
     @Override
     public ClientDto saveClient(ClientDto clientDto, String tenantName) throws CustomException {
@@ -89,16 +88,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_CREATE_TEMPLATE_ID));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -189,16 +179,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_UPDATE_TEMPLATE_ID));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -230,10 +211,10 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         logger.info("Client delete:: End");
         close(session);
 
-        /*Client client = clientDao.getClientByID(clientID);
+        Client client = clientDao.getClientByID(clientID);
         setAllClientProperty(client);
 
-        String projectNames = "";
+        /*String projectNames = "";
         for(int i=0; i<client.getProjects().size(); i++) {
             projectNames += client.getProjects().get(i).getProject().getProjectName();
             if (i != client.getProjects().size() - 1) {
@@ -258,16 +239,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
             logger.info("Client delete:: End");
             close(session);
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){

@@ -14,9 +14,9 @@ import com.dsi.dem.dto.transformer.TeamDtoTransformer;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
+import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.service.TeamService;
 import com.dsi.dem.util.*;
-import com.dsi.httpclient.HttpClient;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -37,8 +37,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final TeamDao teamDao = new TeamDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
-
-    private static final HttpClient httpClient = new HttpClient();
+    private static final NotificationService notificationService = new NotificationServiceImpl();
 
     @Override
     public TeamDto saveTeam(TeamDto teamDto, String tenantName) throws CustomException {
@@ -111,16 +110,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_LEAD));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -204,16 +194,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_LEAD));
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -275,16 +256,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             logger.info("Team delete:: End");
             close(session);
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            String result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            JSONObject resultObj = new JSONObject(result);
-            if(!resultObj.has(Constants.MESSAGE)){
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
@@ -561,16 +533,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                 }
             }
 
-            logger.info("Notification create request body :: " + notificationList.toString());
-            result = httpClient.sendPost(APIProvider.API_NOTIFICATION_CREATE, notificationList.toString(),
-                    Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
-
-            resultObj = new JSONObject(result);
-            if (!resultObj.has(Constants.MESSAGE)) {
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0009,
-                        Constants.DEM_SERVICE_0009_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_010);
-                throw new CustomException(errorMessage);
-            }
+            notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){

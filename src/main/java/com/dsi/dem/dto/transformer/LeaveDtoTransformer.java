@@ -146,18 +146,18 @@ public class LeaveDtoTransformer extends CommonService {
         LeaveDetailsDto leaveDetailsDto = new LeaveDetailsDto();
         try {
             BeanUtils.copyProperties(leaveDetailsDto, employeeLeave.getEmployee());
-            leaveDetailsDto.setEmail(getEmail(employeeDao.getEmployeeEmailsByEmployeeID
+            leaveDetailsDto.setEmail(CommonTransformer.getEmail(employeeDao.getEmployeeEmailsByEmployeeID
                     (employeeLeave.getEmployee().getEmployeeId())));
-            leaveDetailsDto.setPhone(getPhone(employeeDao.getEmployeeContactsByEmployeeID
+            leaveDetailsDto.setPhone(CommonTransformer.getPhone(employeeDao.getEmployeeContactsByEmployeeID
                     (employeeLeave.getEmployee().getEmployeeId())));
-            leaveDetailsDto.setDesignation(getDesignation(employeeDao.getEmployeeDesignationsByEmployeeID
+            leaveDetailsDto.setDesignation(CommonTransformer.getDesignation(employeeDao.getEmployeeDesignationsByEmployeeID
                     (employeeLeave.getEmployee().getEmployeeId())));
 
             List<TeamMember> memberTeams = teamDao.getTeamMembers(null, employeeLeave.getEmployee().getEmployeeId());
-            leaveDetailsDto.setTeam(getTeamList(memberTeams));
+            leaveDetailsDto.setTeam(CommonTransformer.getTeamList(memberTeams));
 
             List<ProjectTeam> memberProjects = projectDao.getProjectTeams(null, employeeLeave.getEmployee().getEmployeeId());
-            leaveDetailsDto.setProject(getProjectList(memberProjects));
+            leaveDetailsDto.setProject(CommonTransformer.getProjectList(memberProjects));
 
             LeaveSummaryDto summaryDto = new LeaveSummaryDto();
             BeanUtils.copyProperties(summaryDto, employeeLeave);
@@ -168,19 +168,19 @@ public class LeaveDtoTransformer extends CommonService {
             leaveDetailsDto.setLeaveSummary(summaryDto);
 
             List<LeaveRequestDto> detailsDtoList = new ArrayList<>();
-            for(LeaveRequest leaveRequest : leaveRequests){
+            for (LeaveRequest leaveRequest : leaveRequests) {
                 LeaveRequestDto detailsDto = new LeaveRequestDto();
                 BeanUtils.copyProperties(detailsDto, leaveRequest);
                 BeanUtils.copyProperties(detailsDto, leaveRequest.getLeaveType());
                 BeanUtils.copyProperties(detailsDto, leaveRequest.getRequestType());
-                if(leaveRequest.getLeaveStatus() != null){
+                if (leaveRequest.getLeaveStatus() != null) {
                     BeanUtils.copyProperties(detailsDto, leaveRequest.getLeaveStatus());
                 }
 
-                if(leaveRequest.getApprovalId() != null) {
+                if (leaveRequest.getApprovalId() != null) {
                     Employee approvedBy = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
                     String name = approvedBy.getFirstName();
-                    if(approvedBy.getLastName() != null){
+                    if (approvedBy.getLastName() != null) {
                         name += " " + approvedBy.getLastName();
                     }
                     detailsDto.setApprovedBy(name);
@@ -197,72 +197,6 @@ public class LeaveDtoTransformer extends CommonService {
             throw new CustomException(errorMessage);
         }
         return leaveDetailsDto;
-    }
-
-    private String getProjectList(List<ProjectTeam> projectTeams){
-        String projects = "";
-        int i = 0;
-        for(ProjectTeam projectTeam : projectTeams){
-            projects += projectTeam.getProject().getProjectName();
-
-            if(i != projectTeams.size() - 1){
-                projects += ", ";
-            }
-        }
-        return projects;
-    }
-
-    private String getTeamList(List<TeamMember> teamMembers){
-        String teams = "";
-        int i = 0;
-        for(TeamMember teamMember : teamMembers){
-            teams += teamMember.getTeam().getName();
-
-            if(i != teamMembers.size() - 1){
-                teams += ", ";
-            }
-            i++;
-        }
-        return teams;
-    }
-
-    private String getPhone(List<EmployeeContact> contactList){
-        String phones = "";
-        int i = 0;
-        for(EmployeeContact contact : contactList){
-            phones += contact.getPhone();
-
-            if(i != contactList.size() - 1){
-                phones += ", ";
-            }
-            i++;
-        }
-        return phones;
-    }
-
-    private String getEmail(List<EmployeeEmail> emailList){
-        String emails = "";
-        int i = 0;
-        for(EmployeeEmail email : emailList){
-            emails += email.getEmail();
-
-            if(i != emailList.size() - 1){
-                emails += ", ";
-            }
-            i++;
-        }
-        return emails;
-    }
-
-    private String getDesignation(List<EmployeeDesignation> designationList){
-        String currentDesignation = "";
-        for(EmployeeDesignation designation : designationList){
-            if(designation.isCurrent()){
-                currentDesignation += designation.getName();
-                break;
-            }
-        }
-        return currentDesignation;
     }
 
     public List<LeaveDetailsDto> getAllEmployeesLeaveDetails(List<LeaveRequest> leaveDetails) throws CustomException {

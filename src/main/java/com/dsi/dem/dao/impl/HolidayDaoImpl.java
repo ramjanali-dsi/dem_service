@@ -90,6 +90,17 @@ public class HolidayDaoImpl extends CommonService implements HolidayDao {
     }
 
     @Override
+    public boolean checkHolidayForDate(Date date) {
+        Query query = session.createQuery("FROM Holiday h WHERE :date BETWEEN h.startDate AND h.endDate");
+        query.setParameter("date", date);
+
+        if(query.list().size() > 0){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public Holiday getHolidayById(String holidayId) {
         Query query = session.createQuery("FROM Holiday h WHERE h.holidayId =:holidayId");
         query.setParameter("holidayId", holidayId);

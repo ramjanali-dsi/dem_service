@@ -43,6 +43,9 @@ public class TemporaryAttendance {
     @Column(name = "total_hour", length = 10)
     private String totalHour;
 
+    @Column(columnDefinition = "TEXT")
+    private String comment;
+
     @Column(name = "is_transferred")
     private boolean isTransferred;
 
@@ -116,6 +119,14 @@ public class TemporaryAttendance {
 
     public void setTotalHour(String totalHour) {
         this.totalHour = totalHour;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public boolean isTransferred() {

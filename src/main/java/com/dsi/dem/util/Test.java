@@ -308,6 +308,9 @@ public class Test {
         LeaveRequestDto requestDto = mapper.readValue(body, LeaveRequestDto.class);
 
         leaveService.approveLeaveRequest(requestDto, userId, leaveRequestId, null);*/
+
+        Date date = new Date();
+        System.out.println(Utility.getLastDay(date));
     }
 
     private static void myLeaveRequestPatch() {

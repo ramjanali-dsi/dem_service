@@ -840,10 +840,11 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             throw new CustomException(errorMessage);
         }
 
-        if(!(leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null).getLeaveStatus()
-                .getLeaveStatusName().equals(Constants.APPLIED_LEAVE_REQUEST) ||
-                leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null).getLeaveStatus()
-                .getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST))){
+        LeaveRequest existLeaveRequest = leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null);
+        LeaveStatus leaveStatus = existLeaveRequest.getLeaveStatus();
+
+        if(!(leaveStatus.getLeaveStatusName().equals(Constants.APPLIED_LEAVE_REQUEST) ||
+                leaveStatus.getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST))){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
                     Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0014);
@@ -857,10 +858,9 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             throw new CustomException(errorMessage);
         }
 
-        if(mode == 2 && leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null).getLeaveStatus()
-                .getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
+        if(mode == 2 && leaveStatus.getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
 
-            if(!Utility.today().before(leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null).getApprovedStartDate())){
+            if(!Utility.today().before(existLeaveRequest.getApprovedStartDate())){
                 close(session);
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
                         Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0015);

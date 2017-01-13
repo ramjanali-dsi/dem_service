@@ -250,6 +250,9 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
         query.setParameter("statusName", statusName);
 
         total = (Long) query.uniqueResult();
+        if(total == null){
+            return 0;
+        }
         return total.intValue();
     }
 

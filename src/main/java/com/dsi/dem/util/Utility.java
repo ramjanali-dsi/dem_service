@@ -56,6 +56,18 @@ public class Utility {
         return interval.contains(new DateTime(checkDate));
     }
 
+    public static Boolean checkWeekendOfDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        boolean flag = false;
+        if((calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) ||
+                calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
+            flag = true;
+        }
+        return flag;
+    }
+
     public static Boolean getWeekendBetweenDate(Date startDate, Date endDate){
         Calendar calendar1 = Calendar.getInstance();
         calendar1.setTime(startDate);
@@ -115,6 +127,22 @@ public class Utility {
         calendar.setTime(date);
 
         return calendar.get(Calendar.YEAR);
+    }
+
+    public static Date getFirstDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+
+        return getDateFormatFromDate(calendar.getTime());
+    }
+
+    public static Date getLastDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+        return getDateFormatFromDate(calendar.getTime());
     }
 
     public static Date getDateFromAddYear(Date date) {
@@ -189,24 +217,19 @@ public class Utility {
         return timeFormat.format(timestamp);
     }
 
-    public static String getLoginObject(Employee employee, String currentUserId, int mode) throws JSONException {
+    public static String getLoginObject(Employee employee, String currentUserId) throws JSONException {
         JSONObject loginObject = new JSONObject();
-        if(mode == 1) {
-            loginObject.put("firstName", employee.getFirstName());
-            loginObject.put("lastName", employee.getLastName());
-            loginObject.put("gender", employee.getInfo().getGender());
-            loginObject.put("email", employee.getEmailInfo().get(0).getEmail());
-            loginObject.put("phone", employee.getContactInfo().get(0).getPhone());
-            loginObject.put("roleId", employee.getRoleId());
-            loginObject.put("createBy", currentUserId);
-            loginObject.put("modifiedBy", currentUserId);
-            loginObject.put("active", employee.isActive());
-            loginObject.put("version", 1);
+        loginObject.put("firstName", employee.getFirstName());
+        loginObject.put("lastName", employee.getLastName());
+        loginObject.put("gender", employee.getInfo().getGender());
+        loginObject.put("email", employee.getEmailInfo().get(0).getEmail());
+        loginObject.put("phone", employee.getContactInfo().get(0).getPhone());
+        loginObject.put("roleId", employee.getRoleId());
+        loginObject.put("createBy", currentUserId);
+        loginObject.put("modifiedBy", currentUserId);
+        loginObject.put("active", employee.isActive());
+        loginObject.put("version", 1);
 
-        } else if (mode == 2) {
-            loginObject.put("modifiedBy", currentUserId);
-            loginObject.put("active", employee.isActive());
-        }
         return loginObject.toString();
     }
 

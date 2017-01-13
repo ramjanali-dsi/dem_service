@@ -36,6 +36,8 @@ public class AttendanceDto {
 
     private String totalHour;
 
+    private String comment;
+
     private Date createdDate;
 
     private Date lastModifiedDate;
@@ -141,6 +143,14 @@ public class AttendanceDto {
 
     public void setTotalHour(String totalHour) {
         this.totalHour = totalHour;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     @JsonProperty

@@ -211,10 +211,10 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         logger.info("Client delete:: End");
         close(session);
 
-        Client client = clientDao.getClientByID(clientID);
+        /*Client client = clientDao.getClientByID(clientID);
         setAllClientProperty(client);
 
-        /*String projectNames = "";
+        String projectNames = "";
         for(int i=0; i<client.getProjects().size(); i++) {
             projectNames += client.getProjects().get(i).getProject().getProjectName();
             if (i != client.getProjects().size() - 1) {

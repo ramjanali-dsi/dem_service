@@ -18,6 +18,7 @@ public interface HolidayDao {
     void updateHoliday(Holiday holiday) throws CustomException;
     void deleteHoliday(String holidayId) throws CustomException;
     boolean checkHolidayFromRangeAndYear(Date startDate, Date endDate, int year);
+    boolean checkHolidayForDate(Date date);
     Holiday getHolidayById(String holidayId);
     Holiday getHolidayByNameAndYear(String holidayName, int year);
     List<Holiday> getHolidayByYear(int year);

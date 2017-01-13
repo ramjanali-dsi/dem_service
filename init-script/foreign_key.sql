@@ -44,11 +44,16 @@ ALTER TABLE dsi_team_member ADD CONSTRAINT FK_team_id_team FOREIGN KEY (team_id)
 
 ALTER TABLE `dsi_employee_email` CHANGE `is_preferred` `is_preferred` BIT(1) NULL DEFAULT NULL;
 
-ALTER TABLE  `ref_leave_status` ADD  `priority` INT NOT NULL AFTER  `name`;
-
 ALTER TABLE dsi_holiday ADD INDEX FK8409FAD33B3207CA (type_id), ADD CONSTRAINT FK8409FAD33B3207CA FOREIGN KEY (type_id) REFERENCES ref_holiday_type (holiday_type_id);
 
 ALTER TABLE  `dsi_employee_info` ADD  `employee_status_id` VARCHAR( 40 ) NOT NULL AFTER  `employee_id` ;
 
 ALTER TABLE `dsi_employee_info` ADD CONSTRAINT  FK_employee_status_id FOREIGN KEY (employee_status_id) REFERENCES ref_employee_status (employee_status_id);
 
+ALTER TABLE dsi_work_from_home ADD index FKA0312DCB567BCCB6 (status_id), ADD CONSTRAINT FKA0312DCB567BCCB6 FOREIGN KEY (status_id) REFERENCES ref_work_from_home_status (work_from_home_status_id);
+
+ALTER TABLE dsi_work_from_home ADD index FKA0312DCB3B82DD62 (apply_id), ADD CONSTRAINT FKA0312DCB3B82DD62 FOREIGN KEY (apply_id) REFERENCES dsi_employee (employee_id);
+
+ALTER TABLE `dsi_temp_attendance` ADD `comment` TEXT NULL DEFAULT NULL AFTER `total_hour`;
+
+ALTER TABLE `dsi_employee_attendance` ADD `comment` TEXT NULL DEFAULT NULL AFTER `total_hour`;

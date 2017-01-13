@@ -20,6 +20,8 @@ create table dsi_employee_leave (employee_leave_id varchar(40) not null, total_c
 
 create table dsi_leave_request (leave_request_id varchar(40) not null, apply_date date, approval_id varchar(40), approved_date date, approved_days_count integer, approved_end_date date, approved_start_date date, days_count integer, denied_reason TEXT, end_date date, is_client_notify bit, last_modified_date date, leave_reason TEXT, start_date date, apply_id varchar(40), leave_status_id varchar(40), leave_type_id varchar(40), request_type_id varchar(40), version integer, primary key (leave_request_id));
 
+create table dsi_work_from_home (work_from_home_id varchar(40) not null, apply_date date, approved_by varchar(40), approved_date date, denied_reason TEXT, last_modified_date date, reason TEXT, apply_id varchar(40), status_id varchar(40), version integer, primary key (work_from_home_id));
+
 create table dsi_project (project_id varchar(40) not null, description TEXT, name varchar(50), status_id varchar(40), version integer, primary key (project_id));
 
 create table dsi_project_client (project_client_id varchar(40) not null, client_id varchar(40), project_id varchar(40), version integer, primary key (project_client_id));
@@ -28,7 +30,7 @@ create table dsi_project_team (project_team_id varchar(40) not null, project_id 
 
 create table dsi_team (team_id varchar(40) not null, floor varchar(20), is_active bit, member_count integer, name varchar(50), room varchar(20), version integer, primary key (team_id));
 
-create table dsi_holiday (holiday_id varchar(40) not null, created_date date, description TEXT, end_date date, name varchar(40), is_active boolean, last_modified_date date, start_date date, version integer not null, year integer not null, publish integer not null type_id varchar(40), primary key (holiday_id));
+create table dsi_holiday (holiday_id varchar(40) not null, created_date date, description TEXT, end_date date, name varchar(40), is_active boolean, last_modified_date date, start_date date, version integer not null, year integer not null, publish integer not null, type_id varchar(40), primary key (holiday_id));
 
 create table dsi_team_member (team_member_id varchar(40) not null, employee_id varchar(40), role_id varchar(40), team_id varchar(40), version integer, primary key (team_member_id));
 
@@ -53,3 +55,5 @@ create table ref_project_status (project_status_id varchar(40) not null, descrip
 create table ref_role (role_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), primary key (role_id));
 
 create table ref_holiday_type (holiday_type_id varchar(40) not null, description TEXT, name varchar(50), is_active boolean, primary key (holiday_type_id));
+
+create table ref_work_from_home_status (work_from_home_status_id varchar(40) not null, description TEXT, is_active bit, name varchar(50), priority integer, primary key (work_from_home_status_id));

@@ -107,4 +107,14 @@ public class ErrorTypeConstants {
     public static final String DEM_ATTENDANCE_ERROR_TYPE_0007 = "hasAttendance";
     public static final String DEM_ATTENDANCE_ERROR_TYPE_0008 = "attendanceDraft";
 
+    //Work From Home
+    public static final String DEM_WFH_ERROR_TYPE_0001 = "workFromHome";
+    public static final String DEM_WFH_ERROR_TYPE_0002 = "reason";
+    public static final String DEM_WFH_ERROR_TYPE_0003 = "hasPendingWFH";
+    public static final String DEM_WFH_ERROR_TYPE_0004 = "editNotAllowedWFH";
+    public static final String DEM_WFH_ERROR_TYPE_0005 = "cancelNotAllowedWFH";
+    public static final String DEM_WFH_ERROR_TYPE_0006 = "maxWFH";
+    public static final String DEM_WFH_ERROR_TYPE_0007 = "hasApprovedWFH";
+    public static final String DEM_WFH_ERROR_TYPE_0008 = "applyDate";
 }
+

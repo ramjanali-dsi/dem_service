@@ -43,6 +43,9 @@ public class EmployeeAttendance {
     @Column(name = "total_hour", length = 10)
     private String totalHour;
 
+    @Column(columnDefinition = "TEXT")
+    private String comment;
+
     @Column(name = "created_date")
     @Type(type = "date")
     private Date createdDate;
@@ -113,6 +116,14 @@ public class EmployeeAttendance {
 
     public void setCheckOutTime(String checkOutTime) {
         this.checkOutTime = checkOutTime;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public Date getCreatedDate() {

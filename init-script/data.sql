@@ -10,7 +10,7 @@ INSERT INTO `dem_service`.`ref_employee_email_type` (`employee_email_type_id`, `
 INSERT INTO `dem_service`.`ref_employee_status` (`employee_status_id`, `description`, `is_active`, `name`) VALUES ('10021760-5ace-46b9-8b2b-b05cb2a65d43', NULL, b'1', 'Full-Time');
 INSERT INTO `dem_service`.`ref_employee_status` (`employee_status_id`, `description`, `is_active`, `name`) VALUES ('4797c659-b2e6-42e7-ac93-28c9e781b0b1', NULL, b'1', 'Part-Time');
 
-INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('19bad1c8-5e6c-41c1-bccb-5d4c360baf25', NULL, b'1', 'Applied', 1);
+INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('19bad1c8-5e6c-41c1-bccb-5d4c360baf25', NULL, b'1', 'Pending', 1);
 INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('0a30ce24-edbf-41b9-86cd-b6f9954bbf92', NULL, b'1', 'Approved', 2);
 INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('4c3b5ba4-f9ae-48d2-8320-a4d6e6d17583', NULL, b'1', 'Denied', 3);
 INSERT INTO `dem_service`.`ref_leave_status` (`leave_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('24a487dc-0167-4054-816e-7efbb1f89f8f', NULL, b'1', 'Canceled', 4);
@@ -37,6 +37,11 @@ INSERT INTO `dem_service`.`ref_holiday_type` (`holiday_type_id`, `description`, 
 INSERT INTO `dem_service`.`ref_holiday_type` (`holiday_type_id`, `description`, `name`, `is_active`) VALUES ('752f155d-acb7-4367-984f-9455872d2a5b', NULL, 'Religious', '1');
 INSERT INTO `dem_service`.`ref_holiday_type` (`holiday_type_id`, `description`, `name`, `is_active`) VALUES (' 70efdf5b-0815-4fe6-9656-b275b02501cb', NULL, 'Organizational', '1');
 INSERT INTO `dem_service`.`ref_holiday_type` (`holiday_type_id`, `description`, `name`, `is_active`) VALUES ('b15e1ef5-7289-4ec9-bfe6-c1b4dc484f97', NULL, 'Optional', '1');
+
+INSERT INTO `dem_service`.`ref_work_from_home_status` (`work_from_home_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('c12bba6c-c255-4376-bfbe-6cbe34ab3552', NULL, b'1', 'Pending', 1);
+INSERT INTO `dem_service`.`ref_work_from_home_status` (`work_from_home_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('fdb422fc-022b-4d09-9946-2004a974297b', NULL, b'1', 'Approved', 2);
+INSERT INTO `dem_service`.`ref_work_from_home_status` (`work_from_home_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('fd2995c7-b9b8-4686-b648-9b01f9e4474c', NULL, b'1', 'Denied', 3);
+INSERT INTO `dem_service`.`ref_work_from_home_status` (`work_from_home_status_id`, `description`, `is_active`, `name`, `priority`) VALUES ('f92902eb-1377-4424-a9f1-59a69a61cf62', NULL, b'1', 'Canceled', 4);
 
 
 ----------------------------------------------------- Insert into service_authenticate database ------------------------------------------
@@ -186,6 +191,8 @@ VALUES ('cd50860e-a4dc-4453-a055-6bee3212437d', b'1', 'v1/photo', 'GET', '1', '4
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
 VALUES ('ec76a4ca-9198-4e8d-bf23-fc2d521b676d', b'1', 'v1/user', 'GET', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('50e8bd15-2f28-4328-b509-112f1ee1063c', b'1', 'v1/user', 'PUT', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
 VALUES ('29ad3715-bdf4-451b-8fc1-de5e7e763c19', b'1', 'v1/user/role', 'GET', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
@@ -306,6 +313,18 @@ INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `me
 VALUES ('be87d9ed-969b-4185-bcc5-d727b111cc1a', b'1', 'v1/attendance_schedule', 'DELETE', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('414470f3-3b59-44e6-b017-26db1a144cef', b'1', 'v1/my_work_from_home_requests', 'POST', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('4c751fe7-0e6f-425f-994a-ed8dd13f1624', b'1', 'v1/my_work_from_home_requests', 'PATCH', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('8acf9d5a-523e-40a6-a734-b0d21b1873cb', b'1', 'v1/my_work_from_home_requests', 'GET', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('45f037f7-806d-4576-b7a0-d4981d017486', b'1', 'v1/work_from_home_requests', 'GET', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('3ee8c84d-e981-4b30-aea8-ac7de2622704', b'1', 'v1/work_from_home_requests/approval', 'POST', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
 VALUES ('1431fbd5-e59b-405b-9f40-082af5310531', b'1', 'v1/holiday', 'POST', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
 VALUES ('70a1e455-8517-43b7-a53c-3c85d179ea97', b'1', 'v1/holiday', 'PATCH', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
@@ -348,6 +367,14 @@ INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_
 VALUES ('73c7880a-1f2c-4a41-ab24-1311655633d3', 'System', '1', 'ba4c0274-35c5-4bee-9242-8918793fc87b');
 INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
 VALUES ('3d919f35-592e-4cd7-a429-a8695342cf31', 'System', '1', '29ad3715-bdf4-451b-8fc1-de5e7e763c19');
+INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
+VALUES ('c7e866cb-1ea8-45ff-aef1-1f3ca23dbb87', 'Authenticated', '1', '414470f3-3b59-44e6-b017-26db1a144cef');
+INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
+VALUES ('38ef809d-a951-4fd6-94a3-854a9e36d256', 'Authenticated', '1', '4c751fe7-0e6f-425f-994a-ed8dd13f1624');
+INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
+VALUES ('217f35eb-2c4a-4e1f-9089-aefe91a0c6b3', 'Authenticated', '1', '8acf9d5a-523e-40a6-a734-b0d21b1873cb');
+INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
+VALUES ('a3cd7eaa-7aa1-4caa-af7e-5b9dc70844af', 'System', '1', '50e8bd15-2f28-4328-b509-112f1ee1063c');
 
 
 INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)

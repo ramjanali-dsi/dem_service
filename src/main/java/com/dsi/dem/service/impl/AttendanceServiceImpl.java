@@ -83,6 +83,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         attendanceDto.getCheckOutTime()));
             }
 
+            attendance.setComment(attendanceDto.getComment());
             attendance.setEmployee(temporaryAttendance.getEmployee());
             attendance.setAttendanceDate(temporaryAttendance.getAttendanceDate());
             attendance.setCreatedBy(temporaryAttendance.getCreatedBy());
@@ -846,6 +847,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 existTempAttendance.setCheckOutTime(attendanceDto.getCheckOutTime());
                 existTempAttendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
                         attendanceDto.getCheckOutTime()));
+                existTempAttendance.setComment(attendanceDto.getComment());
 
             } else {
                 existTempAttendance.setCheckInTime(null);

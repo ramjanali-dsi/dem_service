@@ -35,7 +35,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
         try {
             logger.info("Employee Create:: Start");
             JSONObject resultObj = callAnotherService.sendPost(APIProvider.API_LOGIN_SESSION_CREATE,
-                    Utility.getLoginObject(employee, currentUserID, 1));
+                    Utility.getLoginObject(employee, currentUserID));
 
             List<EmployeeDesignation> employeeDesignationList = employee.getDesignations();
             List<EmployeeEmail> employeeEmailList = employee.getEmailInfo();
@@ -75,7 +75,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
             logger.info("Employee Create:: End");
 
-            logger.info("Notification create:: Start");
+            /*logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             String email = employeeEmailList.get(0).getEmail();
@@ -92,7 +92,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             notificationService.createNotification(notificationList.toString());
-            logger.info("Notification create:: End");
+            logger.info("Notification create:: End");*/
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 
@@ -230,11 +230,13 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             employeeDao.updateEmployeeInfo(employeeInfo);
             logger.info("Employee info update success");
 
+            setEmployeesAllProperty(employee.getEmployeeId(), employee);
+
             callAnotherService.sendPut(APIProvider.API_LOGIN_SESSION_UPDATE + employee.getUserId(),
-                    Utility.getLoginObject(employee, currentUserId, 2));
+                    Utility.getLoginObject(employee, currentUserId));
             logger.info("Employee update:: End");
 
-            logger.info("Notification create:: Start");
+            /*logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             String email = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
@@ -271,7 +273,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                 }
             }
             notificationService.createNotification(notificationList.toString());
-            logger.info("Notification create:: End");
+            logger.info("Notification create:: End");*/
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 

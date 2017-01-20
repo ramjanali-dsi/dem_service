@@ -28,15 +28,27 @@ public class NotificationConstant {
     public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MANAGER_HR = 71L;
     public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_LEAD = 71L;
     public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_CLIENT = 71L;
-    public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MEMBERS = 71L;
+    public static final Long TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_EMPLOYEE = 71L;
     public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR = 71L;
     public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_LEAD = 71L;
     public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT = 71L;
-    public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS = 71L;
+    public static final Long TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_EMPLOYEE = 71L;
+    public static final Long TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR = 71L;
+    public static final Long TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT = 71L;
+    public static final Long TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS = 71L;
+    public static final Long TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR = 71L;
+    public static final Long TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT = 71L;
+    public static final Long TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS = 71L;
 
     public static final Long PROJECT_CREATE_TEMPLATE_ID = 21L;
     public static final Long PROJECT_UPDATE_TEMPLATE_ID = 22L;
     public static final Long PROJECT_DELETE_TEMPLATE_ID = 23L;
+    public static final Long PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT = 23L;
+    public static final Long PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR = 23L;
+    public static final Long PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS = 23L;
+    public static final Long PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT = 23L;
+    public static final Long PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR = 23L;
+    public static final Long PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS = 23L;
 
     public static final Long LEAVE_APPLY_TEMPLATE_ID_FOR_MANAGER_HR = 24L;
     public static final Long LEAVE_APPLY_TEMPLATE_ID_FOR_LEAD = 25L;
@@ -86,6 +98,15 @@ public class NotificationConstant {
     public static final Long ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE = 68L;
     public static final Long ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR_LEAD = 69L;
     public static final Long ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_CLIENT = 70L;
+
+    public static final Long WFH_APPLY_TEMPLATE_ID_FOR_MANAGER_HR = 24L;
+    public static final Long WFH_APPLY_TEMPLATE_ID_FOR_LEAD = 25L;
+    public static final Long WFH_APPROVED_TEMPLATE_ID_FOR_MANAGER_HR = 24L;
+    public static final Long WFH_APPROVED_TEMPLATE_ID_FOR_LEAD = 25L;
+    public static final Long WFH_DENIED_TEMPLATE_ID_FOR_MANAGER_HR = 24L;
+    public static final Long WFH_DENIED_TEMPLATE_ID_FOR_LEAD = 25L;
+    public static final Long WFH_CANCELLED_TEMPLATE_ID_FOR_MANAGER_HR = 24L;
+    public static final Long WFH_CANCELLED_TEMPLATE_ID_FOR_LEAD = 25L;
 
     public static final String WEBSITE_LINK = "http://103.245.204.114:3000/#/";
 

@@ -37,6 +37,8 @@ public class ErrorTypeConstants {
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0017 = "employeeAttendances";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0018 = "employeeStatus";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0019 = "employeeLeaveSummary";
+    public static final String DEM_EMPLOYEE_ERROR_TYPE_0020 = "hasLeadRole";
+    public static final String DEM_EMPLOYEE_ERROR_TYPE_0021 = "hasAssignToTeam";
 
 
     //Project
@@ -55,6 +57,7 @@ public class ErrorTypeConstants {
     public static final String DEM_TEAM_ERROR_TYPE_0005 = "teamName";
     public static final String DEM_TEAM_ERROR_TYPE_0006 = "teamMemberInfo";
     public static final String DEM_TEAM_ERROR_TYPE_0007 = "teamRoleInfo";
+    public static final String DEM_TEAM_ERROR_TYPE_0008 = "teamMemberId";
 
 
     //Client
@@ -88,6 +91,7 @@ public class ErrorTypeConstants {
     public static final String DEM_LEAVE_ERROR_TYPE_0019 = "hasApprovedLeave";
     public static final String DEM_LEAVE_ERROR_TYPE_0020 = "specialPostMustBeSick";
     public static final String DEM_LEAVE_ERROR_TYPE_0021 = "specialPreMustBeSpecial";
+    public static final String DEM_LEAVE_ERROR_TYPE_0022 = "alreadyHasForWFH";
 
 
     //Holiday
@@ -116,5 +120,7 @@ public class ErrorTypeConstants {
     public static final String DEM_WFH_ERROR_TYPE_0006 = "maxWFH";
     public static final String DEM_WFH_ERROR_TYPE_0007 = "hasApprovedWFH";
     public static final String DEM_WFH_ERROR_TYPE_0008 = "applyDate";
+    public static final String DEM_WFH_ERROR_TYPE_0009 = "wfhNotAllowed";
+    public static final String DEM_WFH_ERROR_TYPE_0010 = "alreadyHasForLR";
 }
 

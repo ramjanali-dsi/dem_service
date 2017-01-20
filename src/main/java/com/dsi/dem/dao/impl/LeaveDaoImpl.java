@@ -224,6 +224,20 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
     }
 
     @Override
+    public boolean checkWFHRequest(String employeeId, Date startDate, Date endDate) {
+        Query query = session.createQuery("FROM WorkFromHome wfh WHERE wfh.employee.employeeId =:employeeId " +
+                "AND wfh.applyDate BETWEEN :startDate AND :endDate AND (wfh.status.workFromHomeStatusName =:statusName1 " +
+                "OR wfh.status.workFromHomeStatusName =:statusName2)");
+        query.setParameter("employeeId", employeeId);
+        query.setParameter("startDate", startDate);
+        query.setParameter("endDate", endDate);
+        query.setParameter("statusName1", Constants.APPLIED_WFH_REQUEST);
+        query.setParameter("statusName2", Constants.APPROVED_WFH_REQUEST);
+
+        return query.list().size() > 0;
+    }
+
+    @Override
     public boolean alreadyApprovedLeaveExist(String employeeID, Date leaveStartDate) {
         boolean success = false;
 

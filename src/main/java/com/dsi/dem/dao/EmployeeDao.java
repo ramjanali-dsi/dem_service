@@ -18,12 +18,15 @@ public interface EmployeeDao {
     Employee getEmployeeByID(String employeeID);
     Employee getEmployeeByUserID(String userID);
     Employee getEmployeeByEmployeeNO(String employeeNO);
-    List<Employee> getTeamLeadsProfileOfAnEmployee(String employeeId);
     List<Employee> getAllEmployees();
     List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                    String accountID, String ipAddress, String nationalID, String tinID,
                                    String phone, String email, String active, String joiningDate, String teamName,
                                    String projectName, String userID, String from, String range);
+
+    boolean checkEmployeeAsLead(String employeeId);
+    boolean checkEmployeeHasTeam(String employeeId);
+    List<Employee> getTeamLeadsProfileOfAnEmployee(String employeeId);
 
     EmployeeStatus getEmployeeStatusById(String statusId);
 

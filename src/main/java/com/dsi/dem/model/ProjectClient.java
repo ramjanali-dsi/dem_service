@@ -28,6 +28,9 @@ public class ProjectClient {
 
     private int version;
 
+    @Transient
+    private int activity;
+
     public String getProjectClientId() {
         return projectClientId;
     }
@@ -58,5 +61,13 @@ public class ProjectClient {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public int getActivity() {
+        return activity;
+    }
+
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 }

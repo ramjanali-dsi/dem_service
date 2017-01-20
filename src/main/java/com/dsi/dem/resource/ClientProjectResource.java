@@ -1,6 +1,7 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.ClientDto;
+import com.dsi.dem.dto.ClientProjectDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.service.ClientService;
 import com.dsi.dem.service.impl.ClientServiceImpl;
@@ -9,6 +10,7 @@ import com.wordnik.swagger.annotations.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Created by sabbir on 8/9/16.
@@ -29,10 +31,10 @@ public class ClientProjectResource {
             @ApiResponse(code = 500, message = "Client project create failed, unauthorized.")
     })
     public Response createProjectClient(@PathParam("client_id") String clientID,
-                                        @ApiParam(value = "Client Dto", required = true) ClientDto clientDto)
-            throws CustomException {
+                                        @ApiParam(value = "Client Dto", required = true)
+                                                List<ClientProjectDto> projectDtoList) throws CustomException {
 
-        return Response.ok().entity(clientService.createClientProjects(clientID, clientDto)).build();
+        return Response.ok().entity(clientService.createClientProjects(clientID, projectDtoList)).build();
     }
 
     @DELETE

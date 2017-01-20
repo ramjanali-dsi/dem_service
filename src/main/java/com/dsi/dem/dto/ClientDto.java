@@ -30,8 +30,6 @@ public class ClientDto {
 
     private int version;
 
-    private List<String> projectIds = new ArrayList<>();
-
     private List<ClientProjectDto> projectList = new ArrayList<>();
 
     public String getClientId() {
@@ -88,16 +86,6 @@ public class ClientDto {
 
     public void setVersion(int version) {
         this.version = version;
-    }
-
-    @JsonIgnore
-    public List<String> getProjectIds() {
-        return projectIds;
-    }
-
-    @JsonProperty
-    public void setProjectIds(List<String> projectIds) {
-        this.projectIds = projectIds;
     }
 
     public List<ClientProjectDto> getProjectList() {

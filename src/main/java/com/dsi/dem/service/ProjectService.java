@@ -23,13 +23,11 @@ public interface ProjectService {
     List<ProjectDto> searchProjects(String projectName, String status, String clientName, String teamName,
                                  String memberName, String from, String range) throws CustomException;
 
-    List<ProjectTeamDto> createProjectTeams(ProjectDto projectDto, String projectId) throws CustomException;
-    void saveProjectTeam(List<String> projectIds, Project project) throws CustomException;
+    List<ProjectTeamDto> createProjectTeams(List<ProjectTeamDto> teamDtoList, String projectId) throws CustomException;
     void deleteProjectTeam(String projectTeamID) throws CustomException;
     List<ProjectTeam> getProjectTeams(String projectID, String employeeID) throws CustomException;
 
-    List<ProjectClientDto> createProjectClients(ProjectDto projectDto, String projectId) throws CustomException;
-    void saveProjectClient(List<String> clientIds, Project project) throws CustomException;
+    List<ProjectClientDto> createProjectClients(List<ProjectClientDto> clientDtoList, String projectId) throws CustomException;
     void deleteProjectClient(String projectClientID) throws CustomException;
     List<ProjectClient> getProjectClients(String projectID) throws CustomException;
 }

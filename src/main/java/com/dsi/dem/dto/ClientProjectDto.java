@@ -1,5 +1,8 @@
 package com.dsi.dem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Created by sabbir on 8/9/16.
  */
@@ -16,6 +19,8 @@ public class ClientProjectDto {
     private String projectStatusId;
 
     private String projectStatusName;
+
+    private int activity;
 
     public String getProjectClientId() {
         return projectClientId;
@@ -63,5 +68,15 @@ public class ClientProjectDto {
 
     public void setProjectStatusName(String projectStatusName) {
         this.projectStatusName = projectStatusName;
+    }
+
+    @JsonIgnore
+    public int getActivity() {
+        return activity;
+    }
+
+    @JsonProperty
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 }

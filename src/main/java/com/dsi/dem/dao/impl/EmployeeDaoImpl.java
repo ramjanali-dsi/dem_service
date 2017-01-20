@@ -132,7 +132,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             Query query = session.createQuery("FROM TeamMember tm WHERE tm.role.roleName =:roleName AND tm.team.teamId " +
                     "IN (SELECT tm1.team.teamId FROM TeamMember tm1 WHERE tm1.employee.employeeId =:employeeId) " +
                     "AND tm.employee.employeeId not in :employeeId");
-            query.setParameter("roleName", "Lead");
+            query.setParameter("roleName", RoleName.LEAD.getValue());
             query.setParameter("employeeId", employeeId);
 
             List<TeamMember> teamMembers = query.list();
@@ -377,6 +377,61 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
         }
         logger.info("Total employee list size: " + employeeList.size());
         return employeeList;
+    }
+
+    @Override
+    public boolean checkEmployeeAsLead(String employeeId) {
+        boolean success = false;
+        Session session = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("SELECT COUNT(*) FROM TeamMember tm WHERE tm.employee.employeeId =:employeeId " +
+                    "AND tm.role.roleName =:roleName");
+            query.setParameter("employeeId", employeeId);
+            query.setParameter("roleName", RoleName.LEAD.getValue());
+
+            Long result = (Long) query.uniqueResult();
+            if(result != null){
+
+                if(result.intValue() > 0){
+                    success = true;
+                }
+            }
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public boolean checkEmployeeHasTeam(String employeeId) {
+        boolean success = false;
+        Session session = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("SELECT COUNT(*) FROM TeamMember tm WHERE tm.employee.employeeId =:employeeId");
+            query.setParameter("employeeId", employeeId);
+
+            Long result = (Long) query.uniqueResult();
+            if(result != null){
+
+                if(result.intValue() > 0){
+                    success = true;
+                }
+            }
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return success;
     }
 
     @Override

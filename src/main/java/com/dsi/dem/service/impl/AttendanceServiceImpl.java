@@ -1,13 +1,7 @@
 package com.dsi.dem.service.impl;
 
-import com.dsi.dem.dao.AttendanceDao;
-import com.dsi.dem.dao.ClientDao;
-import com.dsi.dem.dao.EmployeeDao;
-import com.dsi.dem.dao.LeaveDao;
-import com.dsi.dem.dao.impl.AttendanceDaoImpl;
-import com.dsi.dem.dao.impl.ClientDaoImpl;
-import com.dsi.dem.dao.impl.EmployeeDaoImpl;
-import com.dsi.dem.dao.impl.LeaveDaoImpl;
+import com.dsi.dem.dao.*;
+import com.dsi.dem.dao.impl.*;
 import com.dsi.dem.dto.AttendanceDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
@@ -41,6 +35,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
     private static final ClientDao clientDao = new ClientDaoImpl();
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final AttendanceDao attendanceDao = new AttendanceDaoImpl();
+    private static final WorkFromHomeDao wfhDao = new WorkFromHomeDaoImpl();
     private static final NotificationService notificationService = new NotificationServiceImpl();
 
     @Override
@@ -55,6 +50,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         Session session = getSession();
         attendanceDao.setSession(session);
         leaveDao.setSession(session);
+        wfhDao.setSession(session);
 
         int count = 0;
         for(AttendanceDto attendanceDto : attendanceDtoList){
@@ -91,23 +87,31 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             attendance.setCreatedDate(Utility.today());
             attendance.setLastModifiedDate(Utility.today());
             attendance.setVersion(1);
-            attendanceDao.saveAttendance(attendance);
-            logger.info("Save employee attendance success");
-
-            if(count % 20 == 0){
-                session.flush();
-                session.clear();
-            }
-            count++;
 
             EmployeeLeave leaveSummary;
-            if(attendance.isAbsent()){
+            WorkFromHome workFromHome = wfhDao.getWFHByEmployeeIdAndDate(attendance.getEmployee().getEmployeeId(), date);
+
+            if (attendance.isAbsent()) {
                 //TODO Approved pre & post leave request check for this date
 
-                if(!leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
-                        attendance.getEmployee().getEmployeeNo(), date)){
+                logger.info("Employee absent.");
+                if (leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
+                        attendance.getEmployee().getEmployeeNo(), date)) {
+                    logger.info("Employee has approved pre/post leave request.");
+                    attendance.setComment(Constants.LEAVE_COMMENT);
 
-                    logger.info("Employee has no pre & post leave request.");
+                } else if(workFromHome != null){
+                    logger.info("Employee has approved work form home request.");
+
+                    attendance.setAbsent(false);
+                    attendance.setCheckInTime(Constants.CHECK_IN_TIME);
+                    attendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
+                    attendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
+                            Constants.CHECK_OUT_TIME));
+                    attendance.setComment(Constants.WFH_COMMENT);
+
+                } else {
+                    logger.info("Employee has no pre/post approved leave & work from home request.");
 
                     leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
                     leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
@@ -124,10 +128,12 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             } else {
                 //TODO Approved pre & post leave request check for this date
 
+                logger.info("Employee present.");
                 LeaveRequest leaveRequest = leaveDao.getLeaveRequestByStatusAndEmployee(
                         attendance.getEmployee().getEmployeeNo(), date);
 
-                if(leaveRequest != null){
+                if (leaveRequest != null) {
+                    logger.info("Employee has approved leave request.");
                     leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
 
                     switch (leaveRequest.getLeaveType().getLeaveTypeName()) {
@@ -152,8 +158,26 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                     logger.info("Leave summary updated for present.");
 
                     presentApproveLeaveEmployeeIds.add(temporaryAttendance.getEmployee().getEmployeeId());
+
+                } else if(workFromHome != null){
+                    logger.info("Employee has approved work from home request.");
+
+                    workFromHome.setStatus(wfhDao.getWFHStatusByName(Constants.CANCELLER_WFH_REQUEST));
+                    workFromHome.setLastModifiedDate(Utility.today());
+                    workFromHome.setReason("Already present that day.");
+                    wfhDao.updateWorkFromHomeRequest(workFromHome);
+                    logger.info("Work form home request updated to cancel status.");
                 }
             }
+
+            attendanceDao.saveAttendance(attendance);
+            logger.info("Save employee attendance success");
+
+            if(count % 20 == 0){
+                session.flush();
+                session.clear();
+            }
+            count++;
         }
 
         logger.info("Delete all temporary attendances.");
@@ -553,10 +577,10 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
         AttendanceStatus attendanceStatus = null;
         if(mode.equals("1")){
-            attendanceStatus = attendanceDao.getAttendanceStatus(date, Constants.TEMPORARY_LEAVE_TYPE);
+            attendanceStatus = attendanceDao.getAttendanceStatus(date, Constants.TEMPORARY_ATTENDANCE_TYPE);
 
         } else if(mode.equals("2")){
-            attendanceStatus = attendanceDao.getAttendanceStatus(date, Constants.CONFIRM_LEAVE_TYPE);
+            attendanceStatus = attendanceDao.getAttendanceStatus(date, Constants.CONFIRM_ATTENDANCE_TYPE);
         }
 
         if(attendanceStatus == null){

@@ -12,6 +12,7 @@ import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
 import com.dsi.dem.util.NotificationConstant;
 import com.dsi.dem.util.Utility;
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -272,10 +273,42 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
     }
 
     @Override
+    public void deleteTeamMemberByUserId(String teamID, String userID) throws CustomException {
+        try {
+            Query query = session.createQuery("DELETE FROM TeamMember tm WHERE tm.team.teamId =:teamId " +
+                    "AND tm.employee.employeeId in (SELECT e.employeeId FROM Employee e WHERE e.userId =:userId)");
+            query.setParameter("teamId", teamID);
+            query.setParameter("userId", userID);
+
+            query.executeUpdate();
+
+        } catch (Exception e) {
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
+        }
+    }
+
+    @Override
     public TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID) {
         Query query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId =:teamID AND tm.employee.employeeId =:employeeID");
         query.setParameter("teamID", teamID);
         query.setParameter("employeeID", memberID);
+
+        TeamMember teamMember = (TeamMember) query.uniqueResult();
+        if(teamMember != null){
+            return teamMember;
+        }
+        return null;
+    }
+
+    @Override
+    public TeamMember getTeamMemberByTeamIDAndUserID(String teamID, String userId) {
+        Query query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId =:teamID " +
+                "AND tm.employee.userId =:userId");
+        query.setParameter("teamID", teamID);
+        query.setParameter("userId", userId);
 
         TeamMember teamMember = (TeamMember) query.uniqueResult();
         if(teamMember != null){
@@ -317,6 +350,19 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
     }
 
     @Override
+    public int getTeamMembersCount(String teamId) {
+        Long total;
+        Query query = session.createQuery("SELECT COUNT(*) FROM TeamMember tm WHERE tm.team.teamId =:teamId");
+        query.setParameter("teamId", teamId);
+
+        total = (Long) query.uniqueResult();
+        if(total != null){
+            return total.intValue();
+        }
+        return 0;
+    }
+
+    @Override
     public void saveTeamProject(ProjectTeam projectTeam) throws CustomException {
         try{
             session.save(projectTeam);
@@ -350,6 +396,37 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
                     Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0003);
             throw new CustomException(errorMessage);
         }
+    }
+
+    @Override
+    public void deleteProjectTeamByProjectId(String teamID, String projectID) throws CustomException {
+        try{
+            Query query = session.createQuery("DELETE FROM ProjectTeam pt WHERE pt.team.teamId =:teamId " +
+                    "AND pt.project.projectId =:projectId");
+            query.setParameter("teamId", teamID);
+            query.setParameter("projectId", projectID);
+
+            query.executeUpdate();
+
+        } catch (Exception e) {
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0003);
+            throw new CustomException(errorMessage);
+        }
+    }
+
+    @Override
+    public ProjectTeam getProjectTeamByTeamIdAndProjectId(String teamId, String projectId) {
+        Query query = session.createQuery("FROM ProjectTeam pm WHERE pm.team.teamId =:teamId AND pm.project.projectId =:projectId");
+        query.setParameter("teamId", teamId);
+        query.setParameter("projectId", projectId);
+
+        ProjectTeam projectTeam = (ProjectTeam) query.uniqueResult();
+        if(projectTeam != null){
+            return projectTeam;
+        }
+        return null;
     }
 
     @Override

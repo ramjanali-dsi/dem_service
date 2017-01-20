@@ -1,5 +1,7 @@
 package com.dsi.dem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.ApiModelProperty;
 
 /**
@@ -26,6 +28,8 @@ public class TeamMemberDto {
     private String roleId;
 
     private String roleName;
+
+    private int activity;
 
     private int version;
 
@@ -99,6 +103,16 @@ public class TeamMemberDto {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    @JsonIgnore
+    public int getActivity() {
+        return activity;
+    }
+
+    @JsonProperty
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 
     public int getVersion() {

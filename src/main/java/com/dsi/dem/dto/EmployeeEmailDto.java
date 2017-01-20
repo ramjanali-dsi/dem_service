@@ -73,10 +73,12 @@ public class EmployeeEmailDto {
         isPreferred = preferred;
     }
 
+    @JsonIgnore
     public int getActivity() {
         return activity;
     }
 
+    @JsonProperty
     public void setActivity(int activity) {
         this.activity = activity;
     }

@@ -63,10 +63,12 @@ public class EmployeeContactDto {
         this.version = version;
     }
 
+    @JsonIgnore
     public int getActivity() {
         return activity;
     }
 
+    @JsonProperty
     public void setActivity(int activity) {
         this.activity = activity;
     }

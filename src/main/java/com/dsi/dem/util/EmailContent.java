@@ -72,7 +72,31 @@ public class EmailContent {
         contentObj.put("ClientName", clientName);
         contentObj.put("LeadFirstName", lead.getFirstName());
         contentObj.put("LeadLastName", lead.getLastName());
-        contentObj.put("TenantName", lead);
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForProjectTeamAssignUnAssign(ProjectTeam projectTeam, String tenantName,
+                                                                    JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("TeamName", projectTeam.getTeam().getName());
+        contentObj.put("ProjectName", projectTeam.getProject().getProjectName());
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForProjectClientAssignUnAssign(ProjectClient projectClient, String tenantName,
+                                                                      JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("ClientName", projectClient.getClient().getMemberName());
+        contentObj.put("ProjectName", projectClient.getProject().getProjectName());
+        contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
@@ -94,6 +118,19 @@ public class EmailContent {
         contentObj.put("Recipient", email);
         contentObj.put("ClientName", client.getMemberName());
         contentObj.put("ProjectName", projectName);
+        contentObj.put("TenantName", tenantName);
+
+        return contentObj;
+    }
+
+    public static JSONObject getContentForWFHRequest(WorkFromHome workFromHome, String tenantName,
+                                                          JSONArray email) throws JSONException {
+
+        JSONObject contentObj = new JSONObject();
+        contentObj.put("Recipient", email);
+        contentObj.put("EmployeeFirstName", workFromHome.getEmployee().getFirstName());
+        contentObj.put("EmployeeLastName", workFromHome.getEmployee().getLastName());
+        contentObj.put("ApplyDate", workFromHome.getApplyDate());
         contentObj.put("TenantName", tenantName);
 
         return contentObj;

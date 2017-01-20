@@ -84,6 +84,21 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
     }
 
     @Override
+    public WorkFromHome getWFHByEmployeeIdAndDate(String employeeId, Date date) {
+        Query query = session.createQuery("FROM WorkFromHome wfh WHERE wfh.employee.employeeId =:employeeId " +
+                "AND wfh.applyDate =:date AND wfh.status.workFromHomeStatusName =:statusName");
+        query.setParameter("employeeId", employeeId);
+        query.setParameter("date", date);
+        query.setParameter("statusName", Constants.APPROVED_WFH_REQUEST);
+
+        WorkFromHome wfh = (WorkFromHome) query.uniqueResult();
+        if(wfh != null){
+            return wfh;
+        }
+        return null;
+    }
+
+    @Override
     public List<WorkFromHome> searchOrReadWorkFromHomeRequest(String userId, String applyDate, String reason, String statusId,
                                                               String from, String range) {
         StringBuilder queryBuilder = new StringBuilder();
@@ -179,6 +194,22 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
             success = true;
         }
         return success;
+    }
+
+    @Override
+    public boolean checkLeaveRequest(String employeeId, Date date) {
+        Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.employee.employeeId =:employeeId " +
+                "AND (lr.leaveStatus.leaveStatusName =:statusName1 OR lr.leaveStatus.leaveStatusName =:statusName2) " +
+                "AND (lr.startDate >=:date AND lr.endDate <=:date)");
+        query.setParameter("employeeId", employeeId);
+        query.setParameter("date", date);
+        query.setParameter("statusName1", Constants.APPLIED_LEAVE_REQUEST);
+        query.setParameter("statusName2", Constants.APPROVED_LEAVE_REQUEST);
+
+        if(query.list().size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     @Override

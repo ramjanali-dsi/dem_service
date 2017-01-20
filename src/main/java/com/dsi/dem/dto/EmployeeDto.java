@@ -43,6 +43,8 @@ public class EmployeeDto {
     @ApiModelProperty(required = true)
     private String roleId;
 
+    private String roleName;
+
     private String nationalId;
 
     private String etinId;
@@ -274,14 +276,20 @@ public class EmployeeDto {
         this.contactList = contactList;
     }
 
-    @JsonIgnore
     public String getRoleId() {
         return roleId;
     }
 
-    @JsonProperty
     public void setRoleId(String roleId) {
         this.roleId = roleId;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
     }
 
     public LeaveSummaryDto getLeaveSummary() {

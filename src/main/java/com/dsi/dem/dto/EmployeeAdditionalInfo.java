@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by sabbir on 9/6/16.
  */
-public class AdditionalInfo {
+public class EmployeeAdditionalInfo {
 
     private List<EmployeeEmailDto> emailList = new ArrayList<>();
 

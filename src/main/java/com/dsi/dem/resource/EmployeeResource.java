@@ -247,12 +247,12 @@ public class EmployeeResource {
     })
     public Response createEmployeesAdditionalInfo(@PathParam("employee_id") String employeeID,
                                                   @ApiParam(value = "Employees Additional Info", required = true)
-                                                          AdditionalInfo additionalInfo)
+                                                          EmployeeAdditionalInfo employeeAdditionalInfo)
             throws CustomException {
 
-        switch (additionalInfo.getAction()) {
+        switch (employeeAdditionalInfo.getAction()) {
             case "Email":
-                for(EmployeeEmailDto emailDto : additionalInfo.getEmailList()){
+                for(EmployeeEmailDto emailDto : employeeAdditionalInfo.getEmailList()){
                     EmployeeEmail employeeEmail;
                     switch (emailDto.getActivity()) {
                         case 1:
@@ -289,7 +289,7 @@ public class EmployeeResource {
                 return Response.ok().entity(emailService.getEmployeesEmailByEmployeeID(employeeID)).build();
 
             case "Contact":
-                for(EmployeeContactDto contactDto : additionalInfo.getContactList()){
+                for(EmployeeContactDto contactDto : employeeAdditionalInfo.getContactList()){
                     EmployeeContact  employeeContact;
                     switch (contactDto.getActivity()) {
                         case 1:
@@ -326,7 +326,7 @@ public class EmployeeResource {
                 return Response.ok().entity(contactService.getEmployeesContactInfoByEmployeeID(employeeID)).build();
 
             case "Designation":
-                for(EmployeeDesignationDto designationDto : additionalInfo.getDesignationList()){
+                for(EmployeeDesignationDto designationDto : employeeAdditionalInfo.getDesignationList()){
                     EmployeeDesignation employeeDesignation;
                     switch (designationDto.getActivity()) {
                         case 1:

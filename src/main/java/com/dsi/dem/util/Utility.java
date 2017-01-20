@@ -233,6 +233,21 @@ public class Utility {
         return loginObject.toString();
     }
 
+    public static String getUserObject(Employee employee, String currentUserId) throws JSONException {
+        JSONObject userObject = new JSONObject();
+        userObject.put("firstName", employee.getFirstName());
+        userObject.put("lastName", employee.getLastName());
+        userObject.put("gender", employee.getInfo().getGender());
+        userObject.put("email", employee.getEmailInfo().get(0).getEmail());
+        userObject.put("phone", employee.getContactInfo().get(0).getPhone());
+        userObject.put("roleId", employee.getRoleId());
+        userObject.put("createBy", currentUserId);
+        userObject.put("modifiedBy", currentUserId);
+        userObject.put("version", 1);
+
+        return userObject.toString();
+    }
+
     public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {
         logger.info("Uploaded File Location: " + uploadedFileLocation);
 

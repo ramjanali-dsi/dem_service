@@ -45,10 +45,12 @@ public class Constants {
     public static final String SICK_TYPE_NAME = "Sick Leave Application";
     public static final String SPECIAL_TYPE_NAME = "Miscellaneous Leave Application";
 
-    public static final String TEMPORARY_LEAVE_TYPE = "Temporary";
-    public static final String CONFIRM_LEAVE_TYPE = "Confirm";
-
-    public static final String OFFICIAL_TYPE_NAME = "Official";
+    public static final String CHECK_IN_TIME = "10:00";
+    public static final String CHECK_OUT_TIME = "18:00";
+    public static final String TEMPORARY_ATTENDANCE_TYPE = "Temporary";
+    public static final String CONFIRM_ATTENDANCE_TYPE = "Confirm";
+    public static final String LEAVE_COMMENT = "Employee has approved leave request";
+    public static final String WFH_COMMENT = "Employee has approved work from home request";
 
     //Error code
     public static final String DEM_SERVICE_0001 = "dem_service_0001";

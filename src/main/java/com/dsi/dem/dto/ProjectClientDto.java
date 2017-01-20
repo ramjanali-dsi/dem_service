@@ -1,5 +1,8 @@
 package com.dsi.dem.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Created by sabbir on 8/8/16.
  */
@@ -16,6 +19,8 @@ public class ProjectClientDto {
     private String memberEmail;
 
     private String organization;
+
+    private int activity;
 
     public String getProjectClientId() {
         return projectClientId;
@@ -63,5 +68,15 @@ public class ProjectClientDto {
 
     public void setOrganization(String organization) {
         this.organization = organization;
+    }
+
+    @JsonIgnore
+    public int getActivity() {
+        return activity;
+    }
+
+    @JsonProperty
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 }

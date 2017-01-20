@@ -3,9 +3,11 @@ package com.dsi.dem.util;
 import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.HolidayDao;
 import com.dsi.dem.dao.LeaveDao;
+import com.dsi.dem.dao.TeamDao;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.HolidayDaoImpl;
 import com.dsi.dem.dao.impl.LeaveDaoImpl;
+import com.dsi.dem.dao.impl.TeamDaoImpl;
 import com.dsi.dem.dto.*;
 import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.dto.transformer.LeaveDtoTransformer;
@@ -55,7 +57,7 @@ public class Test {
 
     //private static final HazelcastInstance instance = Hazelcast.newHazelcastInstance(new Config());
 
-    public static void main(String[] args) throws CustomException, IOException {
+    public static void main(String[] args) throws CustomException, IOException, JSONException {
 
         //TODO HR & Manager email list API
         /*logger.info("Get HR email list.");
@@ -309,8 +311,42 @@ public class Test {
 
         leaveService.approveLeaveRequest(requestDto, userId, leaveRequestId, null);*/
 
-        Date date = new Date();
-        System.out.println(Utility.getLastDay(date));
+        /*TeamDao teamDao = new TeamDaoImpl();
+        Session session = SessionUtil.getSession();
+        session.beginTransaction();
+        teamDao.setSession(session);
+        teamDao.deleteProjectTeamByProjectId("bc9fd97b-9d9a-474f-b0c8-ef43a75c0ae5", "0fafc7ec-4e80-4bb1-9ed6-5e5163acb7c2");
+
+        session.getTransaction().commit();
+        session.close();*/
+
+        JSONObject object = new JSONObject();
+        object.put("Tenant", "DSI");
+        object.put("Name", "Sabbir");
+
+        String body = "Dear {Name}, You are assigned to {Tenant} yesterday.";
+
+        int contentKeyIndex, bodyIndex;
+        String newBody = "";
+        for(bodyIndex = 0; bodyIndex < body.length(); bodyIndex++){
+
+            if(body.charAt(bodyIndex) == '{'){
+                contentKeyIndex = bodyIndex + 1;
+                String contentKey = "";
+                while(body.charAt(contentKeyIndex) != '}'){
+                    contentKey += body.charAt(contentKeyIndex);
+                    contentKeyIndex++;
+                }
+                bodyIndex = contentKeyIndex;
+
+                newBody += object.getString(contentKey);
+
+            } else {
+                newBody += body.charAt(bodyIndex);
+            }
+        }
+
+        System.out.println("New body: " + newBody);
     }
 
     private static void myLeaveRequestPatch() {

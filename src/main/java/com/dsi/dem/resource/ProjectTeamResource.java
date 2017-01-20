@@ -1,6 +1,7 @@
 package com.dsi.dem.resource;
 
 import com.dsi.dem.dto.ProjectDto;
+import com.dsi.dem.dto.ProjectTeamDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.service.impl.ProjectServiceImpl;
@@ -9,6 +10,7 @@ import com.wordnik.swagger.annotations.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Created by sabbir on 8/9/16.
@@ -29,10 +31,11 @@ public class ProjectTeamResource {
             @ApiResponse(code = 500, message = "Project team create failed, unauthorized.")
     })
     public Response createProjectTeam(@PathParam("project_id") String projectID,
-                                      @ApiParam(value = "Project Dto", required = true) ProjectDto projectDto)
+                                      @ApiParam(value = "ProjectTeam Dto", required = true)
+                                              List<ProjectTeamDto> teamDtoList)
             throws CustomException {
 
-        return Response.ok().entity(projectService.createProjectTeams(projectDto, projectID)).build();
+        return Response.ok().entity(projectService.createProjectTeams(teamDtoList, projectID)).build();
     }
 
     @DELETE

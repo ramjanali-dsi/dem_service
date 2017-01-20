@@ -3,10 +3,7 @@ package com.dsi.dem.dao.impl;
 import com.dsi.dem.dao.ProjectDao;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
-import com.dsi.dem.model.Project;
-import com.dsi.dem.model.ProjectClient;
-import com.dsi.dem.model.ProjectStatus;
-import com.dsi.dem.model.ProjectTeam;
+import com.dsi.dem.model.*;
 import com.dsi.dem.service.impl.CommonService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
@@ -199,6 +196,20 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
     }
 
     @Override
+    public List<TeamMember> getTeamMembersByProjectId(String projectId) {
+        Query query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId in (SELECT pt.team.teamId FROM ProjectTeam pt " +
+                "WHERE pt.project.projectId =:projectId)");
+        query.setParameter("projectId", projectId);
+
+        List<TeamMember> teamMembers = query.list();
+        if(teamMembers != null) {
+            return teamMembers;
+        }
+
+        return null;
+    }
+
+    @Override
     public ProjectStatus getProjectStatusById(String statusID) {
         Query query = session.createQuery("FROM ProjectStatus ps WHERE ps.projectStatusId =:statusID");
         query.setParameter("statusID", statusID);
@@ -267,6 +278,20 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
     }
 
     @Override
+    public ProjectTeam getProjectTeamByTeamIdAndProjectId(String teamId, String projectId) {
+        Query query = session.createQuery("FROM ProjectTeam pt WHERE pt.project.projectId =:projectId " +
+                "AND pt.team.teamId =:teamId");
+        query.setParameter("projectId", projectId);
+        query.setParameter("teamId", teamId);
+
+        ProjectTeam projectTeam = (ProjectTeam) query.uniqueResult();
+        if(projectTeam != null){
+            return projectTeam;
+        }
+        return null;
+    }
+
+    @Override
     public void saveProjectClient(ProjectClient projectClient) throws CustomException {
         try{
             session.save(projectClient);
@@ -302,6 +327,24 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
     }
 
     @Override
+    public void deleteProjectClientByClientId(String projectID, String clientID) throws CustomException {
+        try{
+            Query query = session.createQuery("DELETE FROM ProjectClient pc WHERE pc.project.projectId =:projectId " +
+                    "AND pc.client.clientId =:clientId");
+            query.setParameter("projectId", projectID);
+            query.setParameter("clientId", clientID);
+
+            query.executeUpdate();
+
+        } catch (Exception e) {
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0003);
+            throw new CustomException(errorMessage);
+        }
+    }
+
+    @Override
     public List<ProjectClient> getProjectClients(String projectID) {
         Query query = session.createQuery("FROM ProjectClient pc WHERE pc.project.projectId =:projectID");
         query.setParameter("projectID", projectID);
@@ -309,6 +352,20 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
         List<ProjectClient> projectClients = query.list();
         if(projectClients != null){
             return projectClients;
+        }
+        return null;
+    }
+
+    @Override
+    public ProjectClient getProjectClientByClientIdAndProjectId(String clientId, String projectId) {
+        Query query = session.createQuery("FROM ProjectClient pc WHERE pc.project.projectId =:projectId " +
+                "AND pc.client.clientId =:clientId");
+        query.setParameter("projectId", projectId);
+        query.setParameter("clientId", clientId);
+
+        ProjectClient projectClient = (ProjectClient) query.uniqueResult();
+        if(projectClient != null){
+            return projectClient;
         }
         return null;
     }

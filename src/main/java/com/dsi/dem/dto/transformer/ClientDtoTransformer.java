@@ -7,6 +7,7 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorContext;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Client;
+import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
@@ -26,9 +27,14 @@ public class ClientDtoTransformer {
         try {
             BeanUtils.copyProperties(client, clientDto);
 
+            List<ProjectClient> projectClients = new ArrayList<>();
+            for(ClientProjectDto clientProjectDto : clientDto.getProjectList()){
+                projectClients.add(getClientProject(clientProjectDto));
+            }
+            client.setProjects(projectClients);
+
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext ErrorTypeConstans = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -66,7 +72,34 @@ public class ClientDtoTransformer {
         return clientDto;
     }
 
-    public ClientProjectDto getClientProjectDto(ProjectClient projectClient) throws CustomException {
+    private ProjectClient getClientProject(ClientProjectDto clientProjectDto) throws CustomException {
+
+        ProjectClient projectClient = new ProjectClient();
+        try{
+            BeanUtils.copyProperties(projectClient, clientProjectDto);
+
+            Project project = new Project();
+            BeanUtils.copyProperties(project, clientProjectDto);
+            projectClient.setProject(project);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
+            throw new CustomException(errorMessage);
+        }
+        return projectClient;
+    }
+
+    public List<ProjectClient> getClientProjects(List<ClientProjectDto> dtoList) throws CustomException {
+        List<ProjectClient> projectClients = new ArrayList<>();
+        for(ClientProjectDto dto : dtoList){
+            projectClients.add(getClientProject(dto));
+        }
+        return projectClients;
+    }
+
+    private ClientProjectDto getClientProjectDto(ProjectClient projectClient) throws CustomException {
 
         ClientProjectDto clientProjectDto = new ClientProjectDto();
         try{

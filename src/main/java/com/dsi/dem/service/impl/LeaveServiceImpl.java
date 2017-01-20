@@ -525,21 +525,6 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     private void validateInputForCreation(LeaveRequest leaveRequest, String userId, Session session) throws CustomException {
-        Employee employee = employeeDao.getEmployeeByUserID(userId);
-
-        if(leaveDao.getLeaveCountByStatus(employee.getEmployeeId(), Constants.APPLIED_LEAVE_REQUEST) > 0){
-            close(session);
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
-                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0002);
-            throw new CustomException(errorMessage);
-        }
-
-        if(leaveDao.alreadyApprovedLeaveExist(employee.getEmployeeId(), leaveRequest.getStartDate())){
-            close(session);
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
-                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0019);
-            throw new CustomException(errorMessage);
-        }
 
         if(leaveRequest.getLeaveType().getLeaveTypeId() == null){
             close(session);
@@ -569,6 +554,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             throw new CustomException(errorMessage);
         }
 
+        //Holiday check.
         if(holidayDao.checkHolidayFromRangeAndYear(leaveRequest.getStartDate(), leaveRequest.getEndDate(),
                 Utility.getYearFromDate(leaveRequest.getStartDate()))){
             close(session);
@@ -577,10 +563,36 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             throw new CustomException(errorMessage);
         }
 
+        //Weekend check
         if(Utility.getWeekendBetweenDate(leaveRequest.getStartDate(), leaveRequest.getEndDate())){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
                     Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_HOLIDAY_ERROR_TYPE_0005);
+            throw new CustomException(errorMessage);
+        }
+
+        //Already applied/approved WFH check
+        Employee employee = employeeDao.getEmployeeByUserID(userId);
+        if(leaveDao.checkWFHRequest(employee.getEmployeeId(), leaveRequest.getStartDate(), leaveRequest.getEndDate())){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0022);
+            throw new CustomException(errorMessage);
+        }
+
+        //Applied leave request more than 0 check
+        if(leaveDao.getLeaveCountByStatus(employee.getEmployeeId(), Constants.APPLIED_LEAVE_REQUEST) > 0){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
+        }
+
+        //Approved leave request check
+        if(leaveDao.alreadyApprovedLeaveExist(employee.getEmployeeId(), leaveRequest.getStartDate())){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0019);
             throw new CustomException(errorMessage);
         }
 
@@ -685,6 +697,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         validateInputForUpdate(leaveRequest, userId, mode, session);
 
         LeaveRequest existLeaveRequest = leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null);
+        String statusName = existLeaveRequest.getLeaveStatus().getLeaveStatusName();
 
         if(mode == 1){
             logger.info("Edit mode.");
@@ -705,18 +718,22 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         leaveDao.updateLeaveRequest(existLeaveRequest);
         logger.info("Update leave request success");
 
-        if(mode == 2 && existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
+        if(mode == 2 && statusName.equals(Constants.APPROVED_LEAVE_REQUEST)){
             logger.info("Cancel approve leave request.");
             EmployeeLeave leaveSummary = leaveDao.getEmployeeLeaveSummary(existLeaveRequest.getEmployee().getEmployeeId());
 
-            if(existLeaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.CASUAL_TYPE_NAME)){
-                leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() - existLeaveRequest.getApprovedDaysCount());
+            switch (existLeaveRequest.getLeaveType().getLeaveTypeName()) {
+                case Constants.CASUAL_TYPE_NAME:
+                    leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() - existLeaveRequest.getApprovedDaysCount());
 
-            } else if(existLeaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.SICK_TYPE_NAME)){
-                leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() - existLeaveRequest.getApprovedDaysCount());
+                    break;
+                case Constants.SICK_TYPE_NAME:
+                    leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() - existLeaveRequest.getApprovedDaysCount());
 
-            } else if(existLeaveRequest.getLeaveType().getLeaveTypeName().equals(Constants.SPECIAL_TYPE_NAME)){
-                leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() - existLeaveRequest.getApprovedDaysCount());
+                    break;
+                case Constants.SPECIAL_TYPE_NAME:
+                    leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() - existLeaveRequest.getApprovedDaysCount());
+                    break;
             }
 
             leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed() +

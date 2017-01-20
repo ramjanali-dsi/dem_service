@@ -33,6 +33,13 @@ public class CallAnotherResource {
         return getResultObj(result);
     }
 
+    JSONObject getRequest(String url) throws CustomException {
+        String result = httpClient.getRequest(url, Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
+        logger.info(url + " api call result:: " + result);
+
+        return getResultObj(result);
+    }
+
     public JSONObject sendDelete(String url) throws CustomException {
         String result = httpClient.sendDelete(url, "", Constants.SYSTEM, Constants.SYSTEM_HEADER_ID);
         logger.info(url + " api call result:: " + result);

@@ -1,8 +1,10 @@
 package com.dsi.dem.service.impl;
 
 import com.dsi.dem.dao.ClientDao;
+import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.ProjectDao;
 import com.dsi.dem.dao.impl.ClientDaoImpl;
+import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.ProjectDaoImpl;
 import com.dsi.dem.dto.ClientDto;
 import com.dsi.dem.dto.ClientProjectDto;
@@ -12,6 +14,7 @@ import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Client;
 import com.dsi.dem.model.Project;
 import com.dsi.dem.model.ProjectClient;
+import com.dsi.dem.model.TeamMember;
 import com.dsi.dem.service.ClientService;
 import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.*;
@@ -34,20 +37,14 @@ public class ClientServiceImpl extends CommonService implements ClientService {
     private static final ClientDtoTransformer TRANSFORMER = new ClientDtoTransformer();
     private static final ClientDao clientDao = new ClientDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
+    private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final NotificationService notificationService = new NotificationServiceImpl();
 
     @Override
     public ClientDto saveClient(ClientDto clientDto, String tenantName) throws CustomException {
         logger.info("Client create:: Start");
-        if(Utility.isNullOrEmpty(clientDto.getProjectIds())){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
-                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
-            throw new CustomException(errorMessage);
-        }
-
         logger.info("Convert Client Dto to Client Object");
         Client client = TRANSFORMER.getClient(clientDto);
-
         validateInputForCreation(client);
 
         Session session = getSession();
@@ -60,11 +57,18 @@ public class ClientServiceImpl extends CommonService implements ClientService {
                     Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0003);
             throw new CustomException(errorMessage);
         }
-
+        client.setVersion(1);
         clientDao.saveClient(client);
         logger.info("Save client success");
 
-        saveClientProject(clientDto.getProjectIds(), client);
+        for(ProjectClient projectClient : client.getProjects()){
+            projectClient.setProject(projectDao.getProjectByID(projectClient.getProject().getProjectId()));
+            projectClient.setClient(client);
+            projectClient.setVersion(1);
+            clientDao.saveClientProject(projectClient);
+        }
+        logger.info("Save client project success");
+
         setAllClientProperty(client);
         logger.info("Client create:: End");
         close(session);
@@ -122,6 +126,12 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         if(client.getMemberPosition() == null){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0007);
+            throw new CustomException(errorMessage);
+        }
+
+        if(Utility.isNullOrEmpty(client.getProjects())){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
         }
     }
@@ -321,9 +331,10 @@ public class ClientServiceImpl extends CommonService implements ClientService {
     }
 
     @Override
-    public List<ClientProjectDto> createClientProjects(String clientId, ClientDto clientDto) throws CustomException {
-        logger.info("Client project create:: Start");
-        if(Utility.isNullOrEmpty(clientDto.getProjectIds())){
+    public List<ClientProjectDto> createClientProjects(String clientId, List<ClientProjectDto> clientProjectDtoList) throws CustomException {
+        logger.info("Convert ClientProject Dto to ProjectClient Object");
+        List<ProjectClient> projectClients = TRANSFORMER.getClientProjects(clientProjectDtoList);
+        if(Utility.isNullOrEmpty(projectClients)){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
             throw new CustomException(errorMessage);
@@ -332,31 +343,139 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         Session session = getSession();
         clientDao.setSession(session);
         projectDao.setSession(session);
+        Client client = clientDao.getClientByID(clientId);
 
-        saveClientProject(clientDto.getProjectIds(), clientDao.getClientByID(clientId));
+        List<ProjectClient> assignedProjectClient = new ArrayList<>();
+        List<ProjectClient> unassignedProjectClient = new ArrayList<>();
+
+        for(ProjectClient projectClient : projectClients){
+
+            switch (projectClient.getActivity()){
+                case 1:
+                    logger.info("Client project create:: Start");
+                    validateInput(projectClient, session);
+
+                    saveClientProject(projectClient, client);
+                    logger.info("Client project create:: End");
+
+                    assignedProjectClient.add(projectClient);
+                    break;
+
+                case 2:
+                    logger.info("Delete client project:: Start");
+                    validateInput(projectClient, session);
+
+                    projectDao.deleteProjectClientByClientId(projectClient.getProject().getProjectId(), clientId);
+                    logger.info("Delete client project:: End");
+
+                    unassignedProjectClient.add(projectClient);
+                    break;
+            }
+        }
         List<ProjectClient> clientProjects = clientDao.getClientProjects(clientId);
-        logger.info("Client project create:: End");
+
+        /*JSONArray memberEmails;
+        JSONObject contentObj;
+        try {
+
+            logger.info("Notification create:: Start");
+            JSONArray notificationList = new JSONArray();
+
+            JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
+
+            if(!Utility.isNullOrEmpty(assignedProjectClient)) {
+                for (ProjectClient assignedClient : assignedProjectClient) {
+
+                    memberEmails = new JSONArray();
+                    List<TeamMember> teamMembers = projectDao.getTeamMembersByProjectId(assignedClient.getProject().getProjectId());
+                    if(!Utility.isNullOrEmpty(teamMembers)){
+                        for(TeamMember member : teamMembers){
+                            memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
+                                    .get(0).getEmail());
+                        }
+                    }
+
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, null, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    if(memberEmails.length() > 0) {
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, null, memberEmails);
+                        notificationList.put(EmailContent.getNotificationObject(contentObj,
+                                NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
+                    }
+
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient,null,
+                            new JSONArray().put(assignedClient.getClient().getMemberEmail()));
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
+
+                }
+            }
+
+            if(!Utility.isNullOrEmpty(unassignedProjectClient)){
+                for(ProjectClient unassignedClient : unassignedProjectClient){
+
+                    memberEmails = new JSONArray();
+                    List<TeamMember> teamMembers = projectDao.getTeamMembersByProjectId(unassignedClient.getProject().getProjectId());
+                    if(!Utility.isNullOrEmpty(teamMembers)){
+                        for(TeamMember member : teamMembers){
+                            memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
+                                    .get(0).getEmail());
+                        }
+                    }
+
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient,null, hrManagerEmailList);
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
+
+                    if(memberEmails.length() > 0) {
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, null, memberEmails);
+                        notificationList.put(EmailContent.getNotificationObject(contentObj,
+                                NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
+                    }
+
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient,null,
+                            new JSONArray().put(unassignedClient.getClient().getMemberEmail()));
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
+
+                }
+            }
+
+            notificationService.createNotification(notificationList.toString());
+            logger.info("Notification create:: End");
+
+        } catch (JSONException je){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }*/
 
         close(session);
         return TRANSFORMER.getClientProjectsDto(clientProjects);
     }
 
-    @Override
-    public void saveClientProject(List<String> projectIds, Client client) throws CustomException {
-
-        clientDao.deleteClientProject(client.getClientId(), null);
-        logger.info("Delete all client projects.");
-
-        for(String projectID : projectIds){
-            Project project = projectDao.getProjectByID(projectID);
-            ProjectClient projectClient = new ProjectClient();
-            projectClient.setClient(client);
-            projectClient.setProject(project);
-            projectClient.setVersion(1);
-
-            clientDao.saveClientProject(projectClient);
+    private void validateInput(ProjectClient projectClient, Session session) throws CustomException {
+        if(projectClient.getProject().getProjectId() == null){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
+                    Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_CLIENT_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
         }
-        logger.info("Save client projects success");
+    }
+
+    private void saveClientProject(ProjectClient projectClient, Client client) throws CustomException {
+        ProjectClient existClientProject = projectDao.getProjectClientByClientIdAndProjectId(client.getClientId(),
+                projectClient.getProject().getProjectId());
+        if(existClientProject == null){
+            projectClient.setProject(projectDao.getProjectByID(projectClient.getProject().getProjectId()));
+            projectClient.setClient(client);
+            projectClient.setVersion(1);
+            clientDao.saveClientProject(projectClient);
+            logger.info("Save client projects success");
+        }
     }
 
     @Override

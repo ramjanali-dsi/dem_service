@@ -30,8 +30,6 @@ public class TeamDto {
 
     private List<TeamMemberDto> memberList = new ArrayList<>();
 
-    private List<String> projectIds = new ArrayList<>();
-
     private List<TeamProjectDto> projectList = new ArrayList<>();
 
     public String getTeamId() {
@@ -96,16 +94,6 @@ public class TeamDto {
 
     public void setMemberList(List<TeamMemberDto> memberList) {
         this.memberList = memberList;
-    }
-
-    @JsonIgnore
-    public List<String> getProjectIds() {
-        return projectIds;
-    }
-
-    @JsonProperty
-    public void setProjectIds(List<String> projectIds) {
-        this.projectIds = projectIds;
     }
 
     public List<TeamProjectDto> getProjectList() {

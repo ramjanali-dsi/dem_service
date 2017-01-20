@@ -28,11 +28,16 @@ public interface TeamDao {
 
     void saveTeamMember(TeamMember teamMember) throws CustomException;
     void deleteTeamMember(String teamID, String teamMemberID) throws CustomException;
+    void deleteTeamMemberByUserId(String teamID, String userID) throws CustomException;
     TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID);
+    TeamMember getTeamMemberByTeamIDAndUserID(String teamID, String userId);
     TeamMember getTeamLeadByTeamID(String teamID);
     List<TeamMember> getTeamMembers(String teamID, String employeeID);
+    int getTeamMembersCount(String teamId);
 
     void saveTeamProject(ProjectTeam projectTeam) throws CustomException;
     void deleteProjectTeam(String teamID, String teamProjectID) throws CustomException;
+    void deleteProjectTeamByProjectId(String teamID, String projectID) throws CustomException;
+    ProjectTeam getProjectTeamByTeamIdAndProjectId(String teamId, String projectId);
     List<ProjectTeam> getProjectTeams(String teamID);
 }

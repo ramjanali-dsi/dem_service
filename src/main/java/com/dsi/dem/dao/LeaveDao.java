@@ -21,6 +21,7 @@ public interface LeaveDao {
                                                           String employeeId, String from, String range, String userId);
 
     LeaveRequest getEmployeesLeaveDetails(String employeeID);
+    boolean checkWFHRequest(String employeeId, Date startDate, Date endDate);
     boolean alreadyApprovedLeaveExist(String employeeID, Date leaveStartDate);
     int getLeaveCountByStatus(String employeeID, String statusName);
     List<LeaveRequest> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName, String email,

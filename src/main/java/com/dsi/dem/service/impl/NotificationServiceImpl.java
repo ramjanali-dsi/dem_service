@@ -2,6 +2,7 @@ package com.dsi.dem.service.impl;
 
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
+import com.dsi.dem.model.RoleName;
 import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
@@ -35,8 +36,8 @@ public class NotificationServiceImpl implements NotificationService {
         JSONArray hrManagerEmailList = new JSONArray();
         try {
             logger.info("Get HR & Manager email list.");
-            JSONArray hrEmailList = cache.get(NotificationConstant.HR_ROLE_TYPE);
-            JSONArray managerEmailList = cache.get(NotificationConstant.MANAGER_ROLE_TYPE);
+            JSONArray hrEmailList = cache.get(RoleName.HR.getValue());
+            JSONArray managerEmailList = cache.get(RoleName.MANAGER.getValue());
 
             if (hrEmailList == null) {
                 logger.info("Read hr & manager email list from another service.");
@@ -44,12 +45,12 @@ public class NotificationServiceImpl implements NotificationService {
 
                 logger.info("API result Data :: " + result);
                 resultObj = new JSONObject(result);
-                if(resultObj.has(NotificationConstant.HR_ROLE_TYPE)){
-                    hrEmailList = resultObj.getJSONArray(NotificationConstant.HR_ROLE_TYPE);
-                    cache.put(NotificationConstant.HR_ROLE_TYPE, hrEmailList);
+                if(resultObj.has(RoleName.HR.getValue())){
+                    hrEmailList = resultObj.getJSONArray(RoleName.HR.getValue());
+                    cache.put(RoleName.HR.getValue(), hrEmailList);
 
-                    managerEmailList = resultObj.getJSONArray(NotificationConstant.MANAGER_ROLE_TYPE);
-                    cache.put(NotificationConstant.MANAGER_ROLE_TYPE, managerEmailList);
+                    managerEmailList = resultObj.getJSONArray(RoleName.MANAGER.getValue());
+                    cache.put(RoleName.MANAGER.getValue(), managerEmailList);
                 }
             }
 
@@ -71,6 +72,11 @@ public class NotificationServiceImpl implements NotificationService {
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
         }
+    }
+
+    public void updateHrManagerEmailList(String roleName, String email) {
+        JSONArray hrEmailList = cache.get(RoleName.HR.getValue());
+        JSONArray managerEmailList = cache.get(RoleName.MANAGER.getValue());
     }
 
     public void createNotification(String notificationList) throws CustomException {

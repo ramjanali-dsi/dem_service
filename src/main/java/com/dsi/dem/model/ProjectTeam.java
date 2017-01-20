@@ -28,6 +28,9 @@ public class ProjectTeam {
 
     private int version;
 
+    @Transient
+    private int activity;
+
     public String getProjectTeamId() {
         return projectTeamId;
     }
@@ -58,5 +61,13 @@ public class ProjectTeam {
 
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public int getActivity() {
+        return activity;
+    }
+
+    public void setActivity(int activity) {
+        this.activity = activity;
     }
 }

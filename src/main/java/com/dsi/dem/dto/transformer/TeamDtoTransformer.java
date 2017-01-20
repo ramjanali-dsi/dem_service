@@ -32,9 +32,14 @@ public class TeamDtoTransformer {
             }
             team.setMembers(memberList);
 
+            List<ProjectTeam> projectList = new ArrayList<>();
+            for(TeamProjectDto projectDto : teamDto.getProjectList()){
+                projectList.add(getProjectTeam(projectDto));
+            }
+            team.setProjects(projectList);
+
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -55,6 +60,8 @@ public class TeamDtoTransformer {
 
         TeamMember teamMember = new TeamMember();
         try {
+            BeanUtils.copyProperties(teamMember, memberDto);
+
             Employee employee = new Employee();
             BeanUtils.copyProperties(employee, memberDto);
             teamMember.setEmployee(employee);
@@ -65,7 +72,6 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -90,38 +96,8 @@ public class TeamDtoTransformer {
             BeanUtils.copyProperties(memberDto, teamMember.getEmployee());
             BeanUtils.copyProperties(memberDto, teamMember.getRole());
 
-            /*memberDto.setPhotoUrl(teamMember.getEmployee().getInfo().getPhotoUrl());
-
-            if(!Utility.isNullOrEmpty(teamMember.getEmployee().getDesignations())) {
-                for (EmployeeDesignation designation : teamMember.getEmployee().getDesignations()) {
-                    if (designation.isCurrent()) {
-                        memberDto.setCurrentDesignation(designation.getName());
-                        break;
-                    }
-                }
-            }
-
-            if(!Utility.isNullOrEmpty(teamMember.getEmployee().getEmailInfo())){
-                for(EmployeeEmail email : teamMember.getEmployee().getEmailInfo()){
-                    if(email.getType().getEmailTypeName().equals(Constants.OFFICIAL_TYPE_NAME)){
-                        memberDto.setEmail(email.getEmail());
-                        break;
-                    }
-                }
-            }
-
-            if(!Utility.isNullOrEmpty(teamMember.getEmployee().getContactInfo())){
-                for(EmployeeContact contact : teamMember.getEmployee().getContactInfo()){
-                    if(contact.getType().getContactTypeName().equals(Constants.OFFICIAL_TYPE_NAME)){
-                        memberDto.setPhone(contact.getPhone());
-                        break;
-                    }
-                }
-            }*/
-
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -150,7 +126,6 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
@@ -165,6 +140,14 @@ public class TeamDtoTransformer {
             dtoList.add(getTeamDto(team));
         }
         return dtoList;
+    }
+
+    public List<ProjectTeam> getProjectTeams(List<TeamProjectDto> teamProjects) throws CustomException {
+        List<ProjectTeam> projectTeams = new ArrayList<>();
+        for(TeamProjectDto projectDto : teamProjects){
+            projectTeams.add(getProjectTeam(projectDto));
+        }
+        return projectTeams;
     }
 
     public List<TeamProjectDto> getProjectTeamsDto(List<ProjectTeam> projectTeams) throws CustomException {
@@ -186,11 +169,29 @@ public class TeamDtoTransformer {
 
         } catch (Exception e) {
             e.printStackTrace();
-            //ErrorContext errorContext = new ErrorContext(null, null, e.getMessage());
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
                     Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
             throw new CustomException(errorMessage);
         }
         return teamProjectDto;
+    }
+
+    public ProjectTeam getProjectTeam(TeamProjectDto projectDto) throws CustomException {
+
+        ProjectTeam projectTeam = new ProjectTeam();
+        try{
+            BeanUtils.copyProperties(projectTeam, projectDto);
+
+            Project project = new Project();
+            BeanUtils.copyProperties(project, projectDto);
+            projectTeam.setProject(project);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
+                    Constants.DEM_SERVICE_0007_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_007);
+            throw new CustomException(errorMessage);
+        }
+        return projectTeam;
     }
 }

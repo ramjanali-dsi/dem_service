@@ -18,12 +18,14 @@ public interface WorkFromHomeDao {
     void updateWorkFromHomeRequest(WorkFromHome workFromHome) throws CustomException;
     WorkFromHome getWorkFromHomeById(String wfhId);
     WorkFromHome getWFHByIdAndUserId(String wfhId, String userId);
+    WorkFromHome getWFHByEmployeeIdAndDate(String employeeId, Date date);
     List<WorkFromHome> searchOrReadWorkFromHomeRequest(String userId, String date, String reason,
                                                        String statusId, String from, String range);
 
     int countAppliedWFH(String employeeId);
     int countApprovedWFHForMonth(String employeeId, Date startDate, Date endDate);
     boolean alreadyApprovedWFHExist(String employeeId, Date applyDate);
+    boolean checkLeaveRequest(String employeeId, Date date);
     WorkFormHomeStatus getWFHStatusById(String statusId);
     WorkFormHomeStatus getWFHStatusByName(String name);
 

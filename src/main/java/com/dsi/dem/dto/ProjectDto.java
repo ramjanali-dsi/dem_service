@@ -28,10 +28,6 @@ public class ProjectDto {
 
     private List<ProjectClientDto> clientList = new ArrayList<>();
 
-    private List<String> teamIds = new ArrayList<>();
-
-    private List<String> clientIds = new ArrayList<>();
-
     public String getProjectId() {
         return projectId;
     }
@@ -78,26 +74,6 @@ public class ProjectDto {
 
     public void setVersion(int version) {
         this.version = version;
-    }
-
-    @JsonIgnore
-    public List<String> getTeamIds() {
-        return teamIds;
-    }
-
-    @JsonProperty
-    public void setTeamIds(List<String> teamIds) {
-        this.teamIds = teamIds;
-    }
-
-    @JsonIgnore
-    public List<String> getClientIds() {
-        return clientIds;
-    }
-
-    @JsonProperty
-    public void setClientIds(List<String> clientIds) {
-        this.clientIds = clientIds;
     }
 
     public List<ProjectTeamDto> getTeamList() {

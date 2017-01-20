@@ -89,6 +89,9 @@ public class Employee {
     private String roleId;
 
     @Transient
+    private String roleName;
+
+    @Transient
     private EmployeeInfo info = new EmployeeInfo();
 
     @Transient
@@ -313,6 +316,14 @@ public class Employee {
 
     public void setRoleId(String roleId) {
         this.roleId = roleId;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
     }
 
     public EmployeeLeave getLeaveInfo() {

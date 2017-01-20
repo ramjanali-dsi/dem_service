@@ -234,6 +234,10 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
             callAnotherService.sendPut(APIProvider.API_LOGIN_SESSION_UPDATE + employee.getUserId(),
                     Utility.getLoginObject(employee, currentUserId));
+
+            callAnotherService.sendPut(APIProvider.API_USER + employee.getUserId(),
+                    Utility.getUserObject(employee, currentUserId));
+
             logger.info("Employee update:: End");
 
             /*logger.info("Notification create:: Start");
@@ -290,6 +294,27 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
             throw new CustomException(errorMessage);
         }
+
+        if(employee.getRoleId() != null){
+            logger.info("Request for employee role update to: " + employee.getRoleName());
+            if(employee.getRoleName().equals(NotificationConstant.MEMBER_ROLE_TYPE)){
+
+                if(employeeDao.checkEmployeeAsLead(employee.getEmployeeId())){
+                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                            Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0020);
+                    throw new CustomException(errorMessage);
+                }
+
+            } else if(employee.getRoleName().equals(NotificationConstant.HR_ROLE_TYPE)
+                    || employee.getRoleName().equals(NotificationConstant.MANAGER_ROLE_TYPE)){
+
+                if(employeeDao.checkEmployeeHasTeam(employee.getEmployeeId())){
+                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                            Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0021);
+                    throw new CustomException(errorMessage);
+                }
+            }
+        }
     }
 
     @Override
@@ -312,14 +337,27 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
     @Override
     public Employee getEmployeeByID(String employeeID) throws CustomException {
+        logger.info("Read an employee by ID:: " + employeeID);
 
-        Employee employee = employeeDao.getEmployeeByID(employeeID);
-        if(employee == null){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
-                    Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
+        try {
+            Employee employee = employeeDao.getEmployeeByID(employeeID);
+            if (employee == null) {
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
+                        Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
+                throw new CustomException(errorMessage);
+            }
+
+            JSONObject resultObj = callAnotherService.getRequest(APIProvider.API_USER + employee.getUserId());
+            employee.setRoleId(resultObj.getString("roleId"));
+            employee.setRoleName(resultObj.getString("roleName"));
+
+            return setEmployeesAllProperty(employeeID, employee);
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
         }
-        return setEmployeesAllProperty(employeeID ,employee);
     }
 
     @Override

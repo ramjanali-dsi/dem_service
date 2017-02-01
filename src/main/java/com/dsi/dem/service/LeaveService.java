@@ -18,14 +18,14 @@ public interface LeaveService {
     LeaveDetailsDto getEmployeesAllLeaveDetails(String employeeId, String leaveRequestId) throws CustomException;
     List<LeaveSummaryDto> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
                                                             String email, String phone, String teamName, String projectName,
-                                                            String employeeId, String from, String range, String userId) throws CustomException;
+                                                            String employeeId, String context, String from, String range) throws CustomException;
 
     LeaveRequest getEmployeesLeaveDetails(String employeeID) throws CustomException;
     List<LeaveDetailsDto> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName, String email,
                                                 String phone, String teamName, String projectName, String employeeId, String leaveType,
                                                 String requestType, String approvedStartDate, String approvedEndDate, String approvedFirstName,
                                                 String approvedLastName, String approvedNickName, String appliedStartDate, String appliedEndDate,
-                                                String leaveStatus, String from, String range, String userId) throws CustomException;
+                                                String leaveStatus, String context, String from, String range) throws CustomException;
 
     LeaveRequestDto approveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId,
                                         String leaveRequestId, String tenantName) throws CustomException;

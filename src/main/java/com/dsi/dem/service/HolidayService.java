@@ -15,9 +15,11 @@ public interface HolidayService {
     HolidayDto saveHoliday(HolidayDto holidayDto) throws CustomException;
     HolidayDto updateHoliday(HolidayDto holidayDto, String holidayId) throws CustomException;
     void deleteHoliday(String holidayId) throws CustomException;
+    void getAllHolidaysBetweenDate(Date startDate, Date endDate);
+    void getHolidaysByDate(Date date);
     List<HolidayDto> searchOrReadAllHolidays(String holidayName, String year, String holidayId,
                                              String from, String range) throws CustomException;
 
     boolean copyHoliday(List<HolidayDto> holidayDtoList) throws CustomException;
-    boolean publishHoliday(List<HolidayDto> holidayDtoList) throws CustomException;
+    boolean publishHoliday(List<HolidayDto> holidayDtoList, String tenantName) throws CustomException;
 }

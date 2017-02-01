@@ -109,8 +109,8 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
     }
 
     @Override
-    public List<Project> searchProjects(String projectName, String status, String clientName,
-                                        String teamName, String memberName, String from, String range) {
+    public List<Project> searchProjects(String projectName, String status, String clientName, String teamName, String memberName,
+                                        List<String> contextList, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;
@@ -118,10 +118,22 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
 
         queryBuilder.append("FROM Project p");
 
-        if(!Utility.isNullOrEmpty(projectName)){
-            queryBuilder.append(" WHERE p.projectName like :projectName");
-            paramValue.put("projectName", "%" + projectName + "%");
+        if(!Utility.isNullOrEmpty(contextList)){
+            queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                    "WHERE pt.team.teamId in (:teamIds))");
+            paramValue.put("teamIds", null);
             hasClause = true;
+        }
+
+        if(!Utility.isNullOrEmpty(projectName)){
+            if(hasClause){
+                queryBuilder.append(" AND p.projectName like :projectName");
+
+            } else {
+                queryBuilder.append(" WHERE p.projectName like :projectName");
+                hasClause = true;
+            }
+            paramValue.put("projectName", "%" + projectName + "%");
         }
 
         if(!Utility.isNullOrEmpty(status)){
@@ -151,14 +163,14 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
         if(!Utility.isNullOrEmpty(teamName)){
             if(hasClause){
                 queryBuilder.append(" AND p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
-                        "WHERE pt.team.name like :teamName)");
+                        "WHERE pt.team.name =:teamName)");
 
             } else {
                 queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
-                        "WHERE pt.team.name like :teamName)");
+                        "WHERE pt.team.name =:teamName)");
                 hasClause = true;
             }
-            paramValue.put("teamName", "%" + teamName + "%");
+            paramValue.put("teamName", teamName);
         }
 
         if(!Utility.isNullOrEmpty(memberName)){
@@ -182,7 +194,12 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
         Query query = session.createQuery(queryBuilder.toString());
 
         for(Map.Entry<String, String> entry : paramValue.entrySet()){
-            query.setParameter(entry.getKey(), entry.getValue());
+            if(entry.getKey().equals("teamIds")){
+                query.setParameterList(entry.getKey(), contextList);
+
+            } else {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
         }
 
         if(!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range))

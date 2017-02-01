@@ -44,8 +44,11 @@ public class WFHResource {
                                                      @QueryParam("from") String from,
                                                      @QueryParam("range") String range) throws CustomException {
 
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
+
         return Response.ok().entity(wfhService.searchOrReadEmployeesWFHRequests(date, reason, statusId, employeeNo, firstName,
-                lastName, nickName, wfhId, from, range)).build();
+                lastName, nickName, wfhId, context, from, range)).build();
     }
 
     @POST

@@ -6,7 +6,9 @@ import com.dsi.dem.service.TeamService;
 import com.dsi.dem.service.impl.TeamServiceImpl;
 import com.wordnik.swagger.annotations.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -23,6 +25,9 @@ public class TeamProjectResource {
 
     private static final TeamService teamService = new TeamServiceImpl();
 
+    @Context
+    HttpServletRequest request;
+
     @POST
     @ApiOperation(value = "Create Team Project", notes = "Create Team Project", position = 1)
     @ApiResponses(value = {
@@ -33,7 +38,10 @@ public class TeamProjectResource {
                                       @ApiParam(value = "TeamMember Dto", required = true)
                                               List<TeamProjectDto> teamProjectDtoList) throws CustomException {
 
-        return Response.ok().entity(teamService.createTeamProjects(teamID, teamProjectDtoList)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(teamService.createTeamProjects(teamID, teamProjectDtoList, tenantName)).build();
     }
 
     @DELETE

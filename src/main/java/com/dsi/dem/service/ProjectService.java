@@ -20,14 +20,16 @@ public interface ProjectService {
     String deleteProject(String projectID, String tenantName) throws CustomException;
     ProjectDto getProjectByID(String projectID) throws CustomException;
     List<Project> getAllProjects() throws CustomException;
-    List<ProjectDto> searchProjects(String projectName, String status, String clientName, String teamName,
-                                 String memberName, String from, String range) throws CustomException;
+    List<ProjectDto> searchProjects(String projectName, String status, String clientName, String teamName, String memberName,
+                                    String context, String from, String range) throws CustomException;
 
-    List<ProjectTeamDto> createProjectTeams(List<ProjectTeamDto> teamDtoList, String projectId) throws CustomException;
+    List<ProjectTeamDto> createProjectTeams(List<ProjectTeamDto> teamDtoList, String projectId,
+                                            String tenantName) throws CustomException;
     void deleteProjectTeam(String projectTeamID) throws CustomException;
     List<ProjectTeam> getProjectTeams(String projectID, String employeeID) throws CustomException;
 
-    List<ProjectClientDto> createProjectClients(List<ProjectClientDto> clientDtoList, String projectId) throws CustomException;
+    List<ProjectClientDto> createProjectClients(List<ProjectClientDto> clientDtoList, String projectId,
+                                                String tenantName) throws CustomException;
     void deleteProjectClient(String projectClientID) throws CustomException;
     List<ProjectClient> getProjectClients(String projectID) throws CustomException;
 }

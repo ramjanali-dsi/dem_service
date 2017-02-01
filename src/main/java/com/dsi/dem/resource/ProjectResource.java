@@ -100,7 +100,10 @@ public class ProjectResource {
                                                @QueryParam("from") String from,
                                                @QueryParam("range") String range) throws CustomException {
 
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
+
         return Response.ok().entity(projectService.searchProjects(projectName, status, clientName,
-                teamName, memberName, from, range)).build();
+                teamName, memberName, context, from, range)).build();
     }
 }

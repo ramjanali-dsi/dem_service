@@ -22,7 +22,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 /**
  * Created by sabbir on 7/20/16.
@@ -37,11 +36,9 @@ public class EmployeeResource {
     private static final Logger logger = Logger.getLogger(EmployeeResource.class);
 
     private static final EmployeeService employeeService = new EmployeeServiceImpl();
-    private static final TeamService teamService = new TeamServiceImpl();
     private static final EmailService emailService = new EmailServiceImpl();
     private static final ContactService contactService = new ContactServiceImpl();
     private static final DesignationService designationService = new DesignationServiceImpl();
-    private static final CallAnotherResource callAnotherService = new CallAnotherResource();
 
     private static final EmployeeDtoTransformer EMPLOYEE_DTO_TRANSFORMER = new EmployeeDtoTransformer();
 
@@ -158,24 +155,6 @@ public class EmployeeResource {
     public Response deleteEmployee(@PathParam("employee_id") String employeeID) throws CustomException {
 
         logger.info("Employee delete:: Start");
-        Employee employee = employeeService.getEmployeeByID(employeeID);
-        String userID = employee.getUserId();
-
-        List<TeamMember> memberList = teamService.getTeamMembers(null, employeeID);
-        if(!Utility.isNullOrEmpty(memberList)){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
-                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0003);
-            throw new CustomException(errorMessage);
-        }
-
-        logger.info("User info delete:: start");
-        callAnotherService.sendDelete(APIProvider.API_USER + userID);
-        logger.info("User info delete:: end");
-
-        logger.info("Login info delete:: start");
-        callAnotherService.sendDelete(APIProvider.API_LOGIN_SESSION_DELETE + userID);
-        logger.info("Login info delete:: end");
-
         employeeService.deleteEmployee(employeeID);
         logger.info("Employee delete:: End");
 
@@ -218,15 +197,17 @@ public class EmployeeResource {
                                              @QueryParam("isActive") String isActive,
                                              @QueryParam("teamName") String teamName,
                                              @QueryParam("projectName") String projectName,
-                                             @QueryParam("userId") String userID,
+                                             @QueryParam("userId") String myId,
                                              @QueryParam("from") String from,
                                              @QueryParam("range") String range) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(userID)){
-            userID = request.getAttribute("user_id") != null ?
-                    request.getAttribute("user_id").toString() : null;
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
 
-            logger.info("User id: " + userID);
+        if(!Utility.isNullOrEmpty(myId)){
+            myId = request.getAttribute("user_id") != null ?
+                    request.getAttribute("user_id").toString() : null;
+            logger.info("User id: " + myId);
 
         } else {
             logger.info("Read all employees info");
@@ -235,7 +216,7 @@ public class EmployeeResource {
         return Response.ok().entity(EMPLOYEE_DTO_TRANSFORMER.getEmployeesDto(
                 employeeService.searchEmployees(employeeNo, firstName, lastName, nickName, bankAccountId,
                         ipAddress, nationalId, tinId, phone, email, isActive, joiningDate, teamName,
-                        projectName, userID, from, range))).build();
+                        projectName, myId, context, from, range))).build();
     }
 
     @POST

@@ -21,7 +21,8 @@ public interface ClientService {
     List<ClientDto> searchClients(String clientName, String organization, String clientEmail,
                                String from, String range) throws CustomException;
 
-    List<ClientProjectDto> createClientProjects(String clientId, List<ClientProjectDto> projectDtoList) throws CustomException;
+    List<ClientProjectDto> createClientProjects(String clientId, List<ClientProjectDto> projectDtoList,
+                                                String tenantName) throws CustomException;
     void deleteClientProject(String clientProjectID) throws CustomException;
     List<ProjectClient> getClientProjects(String clientID) throws CustomException;
 }

@@ -237,9 +237,9 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
     }
 
     @Override
-    public List<WorkFromHome> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId,
-                                                                      String employeeNo, String firstName, String lastName,
-                                                                      String nickName, String wfhId, String from, String range) {
+    public List<WorkFromHome> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId, String employeeNo,
+                                                               String firstName, String lastName, String nickName, String wfhId,
+                                                               List<String> contextList, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         Map<String, String> paramValue = new HashMap<>();
@@ -247,10 +247,22 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
 
         queryBuilder.append("FROM WorkFromHome wfh ");
 
-        if(!Utility.isNullOrEmpty(employeeNo)){
-            queryBuilder.append(" WHERE wfh.employee.employeeNo like :employeeNo");
-            paramValue.put("employeeNo", "%" + employeeNo + "%");
+        if(!Utility.isNullOrEmpty(contextList)){
+            queryBuilder.append(" WHERE wfh.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+            paramValue.put("teamIds", null);
             hasClause = true;
+        }
+
+        if(!Utility.isNullOrEmpty(employeeNo)){
+            if(hasClause){
+                queryBuilder.append(" AND wfh.employee.employeeNo like :employeeNo");
+
+            } else {
+                queryBuilder.append(" WHERE wfh.employee.employeeNo like :employeeNo");
+                hasClause = true;
+            }
+            paramValue.put("employeeNo", "%" + employeeNo + "%");
         }
 
         if(!Utility.isNullOrEmpty(firstName)){
@@ -308,7 +320,7 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
             paramValue.put("reason", "%" + reason + "%");
         }
 
-        if(!Utility.isNullOrEmpty(wfhId)){
+        if(!Utility.isNullOrEmpty(statusId)){
             if(hasClause) {
                 queryBuilder.append(" AND wfh.status.workFromHomeStatusId =:statusId");
 
@@ -337,6 +349,9 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
         for(Map.Entry<String, String> entry : paramValue.entrySet()){
             if(entry.getKey().equals("applyDate")) {
                 query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));
+
+            } else if(entry.getKey().equals("teamIds")){
+                query.setParameterList(entry.getKey(), contextList);
 
             } else {
                 query.setParameter(entry.getKey(), entry.getValue());

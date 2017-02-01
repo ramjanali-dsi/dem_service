@@ -7,7 +7,9 @@ import com.dsi.dem.service.ClientService;
 import com.dsi.dem.service.impl.ClientServiceImpl;
 import com.wordnik.swagger.annotations.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -24,6 +26,9 @@ public class ClientProjectResource {
 
     private static final ClientService clientService = new ClientServiceImpl();
 
+    @Context
+    HttpServletRequest request;
+
     @POST
     @ApiOperation(value = "Create Client Project", notes = "Create Client Project", position = 1)
     @ApiResponses(value = {
@@ -34,7 +39,10 @@ public class ClientProjectResource {
                                         @ApiParam(value = "Client Dto", required = true)
                                                 List<ClientProjectDto> projectDtoList) throws CustomException {
 
-        return Response.ok().entity(clientService.createClientProjects(clientID, projectDtoList)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(clientService.createClientProjects(clientID, projectDtoList, tenantName)).build();
     }
 
     @DELETE

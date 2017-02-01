@@ -1,19 +1,29 @@
 package com.dsi.dem.service.impl;
 
+import com.dsi.dem.dao.ClientDao;
+import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.HolidayDao;
+import com.dsi.dem.dao.impl.ClientDaoImpl;
+import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.HolidayDaoImpl;
 import com.dsi.dem.dto.HolidayDto;
 import com.dsi.dem.dto.transformer.HolidayDtoTransformer;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
+import com.dsi.dem.model.Client;
+import com.dsi.dem.model.EmployeeEmail;
 import com.dsi.dem.model.Holiday;
 import com.dsi.dem.service.HolidayService;
-import com.dsi.dem.util.Constants;
-import com.dsi.dem.util.ErrorTypeConstants;
-import com.dsi.dem.util.Utility;
+import com.dsi.dem.service.NotificationService;
+import com.dsi.dem.util.*;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+import org.hibernate.Query;
 import org.hibernate.Session;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +36,10 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
     private static final Logger logger = Logger.getLogger(HolidayServiceImpl.class);
 
     private static final HolidayDtoTransformer TRANSFORMER = new HolidayDtoTransformer();
+    private static final NotificationService notificationService = new NotificationServiceImpl();
     private static final HolidayDao holidayDao = new HolidayDaoImpl();
+    private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
+    private static final ClientDao clientDao = new ClientDaoImpl();
 
     @Override
     public HolidayDto saveHoliday(HolidayDto holidayDto) throws CustomException {
@@ -132,6 +145,93 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
     }
 
     @Override
+    public void getAllHolidaysBetweenDate(Date startDate, Date endDate) {
+        logger.info("Read all holidays between date.");
+
+        Session session = getSession();
+        holidayDao.setSession(session);
+
+        List<Holiday> holidayList = holidayDao.getAllHolidaysBetweenDate(startDate, endDate);
+        if(!Utility.isNullOrEmpty(holidayList)){
+            logger.info("Holiday list size:: " + holidayList.size());
+            try {
+                logger.info("Notification create:: Start");
+                JSONArray notificationList = new JSONArray();
+
+                JSONArray emails = new JSONArray();
+                List<EmployeeEmail> emailList = employeeDao.getAllPreferredEmails();
+                for (EmployeeEmail employeeEmail : emailList) {
+                    emails.put(employeeEmail.getEmail());
+                }
+
+                List<Client> clients = clientDao.getAllNotifiedClients();
+                for (Client client : clients) {
+                    emails.put(client.getMemberEmail());
+                }
+
+                JSONObject globalContentObj = EmailContent.getContentForAutoNotifyHoliday(holidayFormat(holidayList),
+                        Constants.TENANT_NAME, emails);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.AUTO_NOTIFY_HOLIDAY_NEXT_WEEK_TEMPLATE_ID));
+
+                notificationService.createNotification(notificationList.toString());
+                logger.info("Notification create:: End");
+
+            } catch (Exception e){
+                close(session);
+                e.printStackTrace();
+            }
+
+        } else {
+            logger.info("Holiday list size is empty.");
+        }
+        close(session);
+    }
+
+    @Override
+    public void getHolidaysByDate(Date date) {
+        logger.info("Read holidays by date: " + date);
+
+        Session session = getSession();
+        holidayDao.setSession(session);
+
+        Holiday holiday = holidayDao.getHolidayByDate(date);
+        if(holiday != null){
+            logger.info("Holiday found.");
+            try {
+                logger.info("Notification create:: Start");
+                JSONArray notificationList = new JSONArray();
+
+                JSONArray emails = new JSONArray();
+                List<EmployeeEmail> emailList = employeeDao.getAllPreferredEmails();
+                for (EmployeeEmail employeeEmail : emailList) {
+                    emails.put(employeeEmail.getEmail());
+                }
+
+                List<Client> clients = clientDao.getAllNotifiedClients();
+                for (Client client : clients) {
+                    emails.put(client.getMemberEmail());
+                }
+
+                JSONObject globalContentObj = EmailContent.getContentForHoliday(holiday, Constants.TENANT_NAME, emails);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.AUTO_NOTIFY_HOLIDAY_TOMORROW_TEMPLATE_ID));
+
+                notificationService.createNotification(notificationList.toString());
+                logger.info("Notification create:: End");
+
+            } catch (Exception e){
+                close(session);
+                e.printStackTrace();
+            }
+
+        } else {
+            logger.info("Holiday not found.");
+        }
+        close(session);
+    }
+
+    @Override
     public List<HolidayDto> searchOrReadAllHolidays(String holidayName, String year, String holidayId,
                                                     String from, String range) throws CustomException {
         logger.info("Search or read all holidays");
@@ -178,35 +278,64 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
     }
 
     @Override
-    public boolean publishHoliday(List<HolidayDto> holidayDtoList) throws CustomException {
-        logger.info("Holiday publish:: Start");
+    public boolean publishHoliday(List<HolidayDto> holidayDtoList, String tenantName) throws CustomException {
 
-        if(!Utility.isNullOrEmpty(holidayDtoList)){
+        if (!Utility.isNullOrEmpty(holidayDtoList)) {
             Session session = getSession();
             holidayDao.setSession(session);
+            clientDao.setSession(session);
 
-            int count = 0;
-            for(HolidayDto holidayDto : holidayDtoList){
-                Holiday holiday = holidayDao.getHolidayById(holidayDto.getHolidayId());
-                if(holiday == null){
-                    close(session);
-                    ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                            Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_HOLIDAY_ERROR_TYPE_0001);
-                    throw new CustomException(errorMessage);
+            try {
+                logger.info("Holiday publish:: Start");
+
+                JSONArray notificationList = new JSONArray();
+                JSONObject contentObj;
+
+                JSONArray emails = new JSONArray();
+                List<EmployeeEmail> emailList = employeeDao.getAllPreferredEmails();
+                for (EmployeeEmail employeeEmail : emailList) {
+                    emails.put(employeeEmail.getEmail());
                 }
 
-                holiday.setPublish(holiday.getPublish() + 1);
-                holidayDao.updateHoliday(holiday);
-
-                if(count % 20 == 0){
-                    session.flush();
-                    session.clear();
+                List<Client> clients = clientDao.getAllNotifiedClients();
+                for (Client client : clients) {
+                    emails.put(client.getMemberEmail());
                 }
-                count++;
 
-                //TODO sent email;
+                int count = 0;
+                for (HolidayDto holidayDto : holidayDtoList) {
+                    Holiday holiday = holidayDao.getHolidayById(holidayDto.getHolidayId());
+                    if (holiday == null) {
+                        close(session);
+                        ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                                Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_HOLIDAY_ERROR_TYPE_0001);
+                        throw new CustomException(errorMessage);
+                    }
+
+                    holiday.setPublish(holiday.getPublish() + 1);
+                    holidayDao.updateHoliday(holiday);
+
+                    if (count % 20 == 0) {
+                        session.flush();
+                        session.clear();
+                    }
+                    count++;
+
+                    contentObj = EmailContent.getContentForHoliday(holiday, tenantName, emails);
+                    notificationList.put(EmailContent.getNotificationObject(contentObj,
+                            NotificationConstant.HOLIDAY_SELECTED_TEMPLATE_ID_FOR_ALL));
+                }
+                close(session);
+
+                notificationService.createNotification(notificationList.toString());
+                logger.info("Notification create:: End");
+
+            } catch (JSONException e) {
+                close(session);
+                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                        Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+                throw new CustomException(errorMessage);
             }
-            close(session);
         }
 
         logger.info("Holiday publish:: End");
@@ -242,5 +371,38 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
         newHoliday.setVersion(1);
         holidayDao.saveHoliday(newHoliday);
         logger.info("Next year holiday copy success.");
+    }
+
+    private String holidayFormat(List<Holiday> holidays){
+        int cnt = 0;
+        String holidayDetails = "";
+        for(Holiday holiday : holidays){
+            holidayDetails += "- ";
+            holidayDetails += holiday.getStartDate();
+            holidayDetails += " - ";
+            holidayDetails += holiday.getEndDate();
+            holidayDetails += " due to ";
+            holidayDetails += holiday.getHolidayName();
+            holidayDetails += ".\nThe office will resume it's regular operation on ";
+
+            Date afterEndDate = holiday.getEndDate();
+            afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+            if(Utility.checkWeekendOfDate(afterEndDate)){
+                afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+
+                if(Utility.checkWeekendOfDate(afterEndDate)){
+                    afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+                }
+            }
+
+            holidayDetails += afterEndDate;
+            holidayDetails += ".";
+
+            if(cnt != holidays.size() - 1){
+                holidayDetails += "\n";
+            }
+        }
+
+        return holidayDetails;
     }
 }

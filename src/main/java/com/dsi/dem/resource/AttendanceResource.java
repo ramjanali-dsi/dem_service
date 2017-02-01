@@ -162,10 +162,13 @@ public class AttendanceResource {
                                                    @QueryParam("range") String range,
                                                    @QueryParam("attendanceId") String attendanceID) throws CustomException {
 
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
+
         logger.info("Read or search all attendance schedule.");
         return Response.ok().entity(DTO_TRANSFORMER.getEmployeesAttendanceList(attendanceService.
-                searchOrReadAttendances(null, employeeNo, isAbsent, firstName, lastName,
-                        nickName, attendanceDate, teamName, projectName, from, range))).build();
+                searchOrReadAttendances(employeeNo, isAbsent, firstName, lastName,
+                        nickName, attendanceDate, teamName, projectName, context, from, range))).build();
     }
 
     @GET

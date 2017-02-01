@@ -30,7 +30,7 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
     private Session session;
 
     @Override
-    public void setSession(Session session) throws CustomException {
+    public void setSession(Session session) {
         this.session = session;
     }
 
@@ -141,9 +141,9 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
     }
 
     @Override
-    public List<EmployeeAttendance> searchOrReadAttendances(String userId, String employeeNo, String isAbsent, String firstName,
+    public List<EmployeeAttendance> searchOrReadAttendances(String employeeNo, String isAbsent, String firstName,
                                                             String lastName, String nickName, String attendanceDate, String teamName,
-                                                            String projectName, String from, String range) {
+                                                            String projectName, List<String> contextList, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;
@@ -151,10 +151,22 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
 
         queryBuilder.append("FROM EmployeeAttendance et");
 
-        if(!Utility.isNullOrEmpty(employeeNo)){
-            queryBuilder.append(" WHERE et.employee.employeeNo like :employeeNo");
-            paramValue.put("employeeNo", employeeNo);
+        if(!Utility.isNullOrEmpty(contextList)){
+            queryBuilder.append(" WHERE et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+            paramValue.put("teamIds", null);
             hasClause = true;
+        }
+
+        if(!Utility.isNullOrEmpty(employeeNo)){
+            if(hasClause){
+                queryBuilder.append(" AND et.employee.employeeNo like :employeeNo");
+
+            } else {
+                queryBuilder.append(" WHERE et.employee.employeeNo like :employeeNo");
+                hasClause = true;
+            }
+            paramValue.put("employeeNo", employeeNo);
         }
 
         if(!Utility.isNullOrEmpty(firstName)){
@@ -235,11 +247,6 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
             paramValue.put("attendanceDate", attendanceDate);
         }
 
-        if(!Utility.isNullOrEmpty(userId)){
-            queryBuilder.append(" WHERE et.employee.userId =:userId");
-            paramValue.put("userId", userId);
-        }
-
         queryBuilder.append(" ORDER BY et.attendanceDate DESC");
 
         logger.info("Query builder: " + queryBuilder.toString());
@@ -248,6 +255,9 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
         for(Map.Entry<String, String> entry : paramValue.entrySet()){
             if(entry.getKey().equals("absent")){
                 query.setParameter(entry.getKey(), entry.getValue().equals("true"));
+
+            } else if(entry.getKey().equals("teamIds")){
+                query.setParameterList(entry.getKey(), contextList);
 
             } else if(entry.getKey().equals("attendanceDate")){
                 query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));
@@ -476,6 +486,18 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
         Query query = session.createQuery("FROM DraftAttendance da ORDER BY da.attendanceDate DESC");
         query.setFirstResult(Integer.valueOf(from));
         query.setMaxResults(Integer.valueOf(range));
+
+        List<DraftAttendance> draftAttendances = query.list();
+        if(draftAttendances != null){
+            return draftAttendances;
+        }
+        return null;
+    }
+
+    @Override
+    public List<DraftAttendance> getAllDraftAttendanceFileByCreatedDate(Date createdDate) {
+        Query query = session.createQuery("FROM DraftAttendance da WHERE da.createdDate =:createdDate");
+        query.setParameter("createdDate", createdDate);
 
         List<DraftAttendance> draftAttendances = query.list();
         if(draftAttendances != null){

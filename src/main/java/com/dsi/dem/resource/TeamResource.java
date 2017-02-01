@@ -99,7 +99,10 @@ public class TeamResource {
                                          @QueryParam("from") String from,
                                          @QueryParam("range") String range) throws CustomException {
 
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
+
         return Response.ok().entity(teamService.searchTeams(teamName, status, floor, room, memberName,
-                projectName, clientName, from, range)).build();
+                projectName, clientName, context, from, range)).build();
     }
 }

@@ -21,8 +21,8 @@ public interface TeamDao {
     Team getTeamByID(String teamID);
     Team getTeamByName(String teamName);
     List<Team> getAllTeams();
-    List<Team> searchTeams(String teamName, String status, String floor, String room,
-                           String memberName, String projectName, String clientName, String from, String range);
+    List<Team> searchTeams(String teamName, String status, String floor, String room, String memberName, String projectName,
+                           String clientName, List<String> contextList, String from, String range);
 
     RoleType getRoleTypeByRoleId(String roleId);
 

@@ -37,6 +37,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
     private static final TeamDao teamDao = new TeamDaoImpl();
     private static final ProjectDao projectDao = new ProjectDaoImpl();
+
+    private static final CallAnotherResource callAnotherService = new CallAnotherResource();
     private static final NotificationService notificationService = new NotificationServiceImpl();
 
     @Override
@@ -48,6 +50,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         validateInputForCreation(team);
         Session session = getSession();
         teamDao.setSession(session);
+        projectDao.setSession(session);
 
         if(teamDao.getTeamByName(team.getName()) != null){
             close(session);
@@ -60,7 +63,10 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         teamDao.saveTeam(team);
         logger.info("Save team success");
 
+        String leadUserId = "";
         String leadEmail = "";
+        String leadFirstName = "";
+        String leadLastName = "";
         for(TeamMember member : team.getMembers()){
 
             RoleType roleType = teamDao.getRoleTypeByRoleId(member.getRole().getRoleId());
@@ -73,7 +79,10 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             teamDao.saveTeamMember(member);
 
             if(roleType.getRoleName().equals(RoleName.LEAD.getValue())){
+                leadUserId = employee.getUserId();
                 leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
+                leadFirstName = employee.getFirstName();
+                leadLastName = employee.getLastName();
             }
         }
         logger.info("Save team members success");
@@ -94,19 +103,21 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         logger.info("Team Create:: End");
         close(session);
 
-        /*try{
+        try{
+            logger.info("User context create/update.");
+            callAnotherService.sendPost(APIProvider.API_USER_CONTEXT, Utility.
+                    getContextObject(leadUserId, team.getTeamId(), 1));
+
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
-            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            JSONArray emailList = notificationService.getHrManagerEmailList();
+            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName, emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
-            emailList.put(leadEmail);
-            globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName,
+                    new JSONArray().put(leadEmail));
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_LEAD));
 
@@ -117,7 +128,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         return TRANSFORMER.getTeamDto(team);
     }
@@ -170,27 +181,29 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         close(session);
 
         String leadEmail = "";
+        String leadFirstName = "";
+        String leadLastName = "";
         for(TeamMember member : team.getMembers()){
 
             if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
                 leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail();
+                leadFirstName = member.getEmployee().getFirstName();
+                leadLastName = member.getEmployee().getLastName();
                 break;
             }
         }
 
-        /*try{
+        try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
-            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            JSONArray emailList = notificationService.getHrManagerEmailList();
+            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName, emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
-            emailList.put(leadEmail);
-            globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName,
+                    new JSONArray().put(leadEmail));
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_LEAD));
 
@@ -201,7 +214,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         return TRANSFORMER.getTeamDto(existTeam);
     }
@@ -220,31 +233,33 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         Session session = getSession();
         teamDao.setSession(session);
 
-        teamDao.deleteTeamMember(teamID, null);
-        teamDao.deleteProjectTeam(teamID, null);
+        if(!Utility.isNullOrEmpty(teamDao.getProjectTeams(teamID))){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0009);
+            throw new CustomException(errorMessage);
+        }
 
-        teamDao.deleteTeam(teamID);
-        logger.info("Delete team success");
-        logger.info("Team delete:: End");
-        close(session);
-
-        /*Team team = teamDao.getTeamByID(teamID);
+        Team team = teamDao.getTeamByID(teamID);
         TeamMember leadMember = teamDao.getTeamLeadByTeamID(teamID);
         String leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(leadMember.getEmployee().getEmployeeId()).get(0).getEmail();
 
         try{
+            logger.info("Remove user context.");
+            callAnotherService.sendPost(APIProvider.API_USER_CONTEXT, Utility.
+                    getContextObject(leadMember.getEmployee().getUserId(), teamID, 2));
+
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
-            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            JSONArray emailList = notificationService.getHrManagerEmailList();
+            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadMember.getEmployee().getFirstName(),
+                    leadMember.getEmployee().getLastName(), emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_MANAGER_HR));
 
-            emailList.put(leadEmail);
-            globalContentObj = EmailContent.getContentForTeam(team, tenantName, emailList);
+            globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadMember.getEmployee().getFirstName(),
+                    leadMember.getEmployee().getFirstName(), new JSONArray().put(leadEmail));
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_LEAD));
 
@@ -260,10 +275,11 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         return null;
     }
@@ -312,13 +328,16 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
     @Override
     public List<TeamDto> searchTeams(String teamName, String status, String floor, String room, String memberName,
-                                  String projectName, String clientName, String from, String range) throws CustomException {
+                                     String projectName, String clientName, String context, String from, String range)
+            throws CustomException {
 
         logger.info("Read all teams:: Start");
         Session session = getSession();
         teamDao.setSession(session);
 
-        List<Team> teamList = teamDao.searchTeams(teamName, status, floor, room, memberName, projectName, clientName, from, range);
+        List<String> contextList = Utility.getContextObj(context);
+        List<Team> teamList = teamDao.searchTeams(teamName, status, floor, room, memberName, projectName, clientName,
+                contextList, from, range);
         if(teamList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -355,17 +374,37 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         List<TeamMember> assignedTeamMembers = new ArrayList<>();
         List<TeamMember> unassignedTeamMembers = new ArrayList<>();
 
+        TeamMember leadMember = teamDao.getTeamLeadByTeamID(teamId);
+
+        String leadAssignId = null;
+        String leadUnAssignId = null;
         for(TeamMember teamMember : teamMemberList){
 
+            TeamMember existMember = teamDao.getTeamMemberByTeamIDAndUserID(team.getTeamId(),
+                    teamMember.getEmployee().getUserId());
+            RoleType roleType = teamDao.getRoleTypeByRoleId(teamMember.getRole().getRoleId());
             switch (teamMember.getActivity()){
                 case 1:
                     logger.info("Create Team members:: Start");
                     validateInputForMemberCreation(teamMember, session);
 
-                    saveTeamMember(teamMember, team);
-                    logger.info("Create Team members:: End");
+                    if(existMember == null){
+                        teamMember.setVersion(team.getVersion());
+                        teamMember.setTeam(team);
+                        teamMember.setRole(teamDao.getRoleTypeByRoleId(teamMember.getRole().getRoleId()));
+                        teamMember.setEmployee(employeeDao.getEmployeeByUserID(teamMember.getEmployee().getUserId()));
+                        teamDao.saveTeamMember(teamMember);
+                        logger.info("Save team members success.");
 
-                    assignedTeamMembers.add(teamMember);
+                        assignedTeamMembers.add(teamMember);
+                    }
+
+                    if(roleType.getRoleName().equals(RoleName.LEAD.getValue()) && existMember == null){
+                        logger.info("Change team lead.");
+                        leadAssignId = teamMember.getEmployee().getUserId();
+                    }
+
+                    logger.info("Create Team members:: End");
                     break;
 
                 case 2:
@@ -377,28 +416,46 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                         throw new CustomException(errorMessage);
                     }
 
-                    teamDao.deleteTeamMemberByUserId(teamId, teamMember.getEmployee().getUserId());
-                    logger.info("Delete Team members:: End");
+                    if(existMember != null) {
+                        unassignedTeamMembers.add(existMember);
+                        teamDao.deleteTeamMemberByUserId(teamId, teamMember.getEmployee().getUserId());
+                    }
 
-                    unassignedTeamMembers.add(teamMember);
+                    logger.info("Delete Team members:: End");
                     break;
             }
         }
+
+        if(leadAssignId != null){
+            unassignedTeamMembers.add(leadMember);
+
+            leadUnAssignId = leadMember.getEmployee().getUserId();
+            teamDao.deleteTeamMemberByUserId(teamId, leadMember.getEmployee().getUserId());
+            logger.info("Delete previous team lead.");
+        }
+
         team.setMemberCount(teamDao.getTeamMembersCount(teamId));
         teamDao.updateTeam(team);
         logger.info("Team (member count) update success.");
 
-        session.flush();
-        session.clear();
         List<TeamMember> teamMembersList = teamDao.getTeamMembers(teamId, null);
+        close(session);
 
-        /*JSONObject contentObj;
+        JSONObject contentObj;
         try {
+            if(leadAssignId != null && leadUnAssignId != null){
+                logger.info("User context updating.");
+                callAnotherService.sendPost(APIProvider.API_USER_CONTEXT, Utility.getContextObjectForUpdate
+                        (leadAssignId, leadUnAssignId, teamId));
+            }
 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
+
+            session = getSession();
+            teamDao.setSession(session);
 
             JSONArray clientEmails = new JSONArray();
             List<ProjectTeam> teamProjects = teamDao.getProjectTeams(teamId);
@@ -414,25 +471,25 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                 for (TeamMember assignMember : assignedTeamMembers) {
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(),
-                            team.getName(), null, null, teamLeadMember.getEmployee(),
+                            team.getName(), teamLeadMember.getEmployee(),
                             tenantName, hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), team.getName(),
-                            null, null, teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_LEAD));
 
                     memberEmail = employeeDao.getEmployeeEmailsByEmployeeID(assignMember.getEmployee().getEmployeeId()).get(0).getEmail();
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), team.getName(),
-                                null, null, teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail));
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_EMPLOYEE));
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), team.getName(),
-                                null, null, teamLeadMember.getEmployee(), tenantName, clientEmails);
+                                teamLeadMember.getEmployee(), tenantName, clientEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -443,25 +500,25 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                 for(TeamMember unassignedMember : unassignedTeamMembers){
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(),
-                            team.getName(), null, null, teamLeadMember.getEmployee(),
+                            team.getName(), teamLeadMember.getEmployee(),
                             tenantName, hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), team.getName(),
-                            null, null, teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_LEAD));
 
-                    memberEmail = employeeDao.getEmployeeEmailsByEmployeeID(unassignedMember.getEmployee().getEmployeeId()).get(0).getEmail();
+                    memberEmail = employeeDao.getEmployeeEmailsByUserID(unassignedMember.getEmployee().getUserId()).get(0).getEmail();
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), team.getName(),
-                            null, null, teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail));
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_EMPLOYEE));
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), team.getName(),
-                                null, null, teamLeadMember.getEmployee(), tenantName, clientEmails);
+                                teamLeadMember.getEmployee(), tenantName, clientEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -476,7 +533,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         close(session);
         return TRANSFORMER.getTeamMembersDto(teamMembersList);
@@ -495,19 +552,6 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0007);
             throw new CustomException(errorMessage);
-        }
-    }
-
-    private void saveTeamMember(TeamMember teamMember, Team team) throws CustomException {
-        TeamMember existMember = teamDao.getTeamMemberByTeamIDAndUserID(team.getTeamId(),
-                teamMember.getEmployee().getUserId());
-        if(existMember == null){
-            teamMember.setVersion(team.getVersion());
-            teamMember.setTeam(team);
-            teamMember.setRole(teamDao.getRoleTypeByRoleId(teamMember.getRole().getRoleId()));
-            teamMember.setEmployee(employeeDao.getEmployeeByUserID(teamMember.getEmployee().getUserId()));
-            teamDao.saveTeamMember(teamMember);
-            logger.info("Save team members success.");
         }
     }
 
@@ -559,7 +603,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
     }
 
     @Override
-    public List<TeamProjectDto> createTeamProjects(String teamId, List<TeamProjectDto> teamProjects) throws CustomException {
+    public List<TeamProjectDto> createTeamProjects(String teamId, List<TeamProjectDto> teamProjects,
+                                                   String tenantName) throws CustomException {
         logger.info("Convert TeamProject Dto to ProjectTeam Object");
 
         List<ProjectTeam> projectTeams = TRANSFORMER.getProjectTeams(teamProjects);
@@ -613,7 +658,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         }
         List<ProjectTeam> teamProjectList = teamDao.getProjectTeams(teamId);
 
-        /*JSONObject contentObj;
+        JSONObject contentObj;
         JSONArray memberEmails = new JSONArray();
         try {
 
@@ -621,11 +666,16 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             JSONArray notificationList = new JSONArray();
             JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
 
+            Employee leadMember = null;
             List<TeamMember> teamMembersList = teamDao.getTeamMembers(teamId, null);
             if(!Utility.isNullOrEmpty(teamMembersList)) {
                 for (TeamMember member : teamMembersList) {
                     memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
                             .get(0).getEmail());
+
+                    if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
+                        leadMember = member.getEmployee();
+                    }
                 }
             }
 
@@ -637,18 +687,21 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             if(!Utility.isNullOrEmpty(assignedProjectTeam)) {
                 for (ProjectTeam assignProject : assignedProjectTeam) {
 
-                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject,null, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
+                            teamMembersList.size(), hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject,null, memberEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
+                                teamMembersList.size(), memberEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject,null, clientEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
+                                teamMembersList.size(), clientEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -658,18 +711,21 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             if(!Utility.isNullOrEmpty(unassignedProjectTeam)){
                 for(ProjectTeam unAssignProject : unassignedProjectTeam){
 
-                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject,null, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
+                            teamMembersList.size(), hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject,null, memberEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
+                                teamMembersList.size(), memberEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject,null, clientEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
+                                teamMembersList.size(), clientEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -684,7 +740,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         close(session);
         return TRANSFORMER.getProjectTeamsDto(teamProjectList);

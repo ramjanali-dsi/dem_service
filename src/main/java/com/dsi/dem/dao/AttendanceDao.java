@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface AttendanceDao {
 
-    void setSession(Session session) throws CustomException;
+    void setSession(Session session);
     void saveAttendance(EmployeeAttendance attendance) throws CustomException;
     void updateAttendance(EmployeeAttendance attendance) throws CustomException;
     void deleteAttendance(String attendanceId, String employeeId) throws CustomException;
@@ -23,9 +23,9 @@ public interface AttendanceDao {
     int getAttendanceCountByIdAndDate(String employeeId, Date startDate, Date endDate);
     List<EmployeeAttendance> getEmployeesAllAttendances(String employeeId);
     List<EmployeeAttendance> getAllAttendancesByDate(Date attendanceDate);
-    List<EmployeeAttendance> searchOrReadAttendances(String userId, String employeeNo, String isAbsent, String firstName,
-                                                       String lastName, String nickName, String attendanceDate, String teamName,
-                                                       String projectName, String from, String range);
+    List<EmployeeAttendance> searchOrReadAttendances(String employeeNo, String isAbsent, String firstName,
+                                                     String lastName, String nickName, String attendanceDate, String teamName,
+                                                     String projectName, List<String> contextList, String from, String range);
 
     boolean isAvailableEmployeeOrTempAttendanceSheet(Date attendanceDate);
 
@@ -45,4 +45,5 @@ public interface AttendanceDao {
     void deleteAttendanceDraftFromCron(Date createdDate) throws CustomException;
     DraftAttendance getDraftAttendanceFileByDate(Date attendanceDate) throws CustomException;
     List<DraftAttendance> getAllDraftAttendanceFileDetails(String from, String range);
+    List<DraftAttendance> getAllDraftAttendanceFileByCreatedDate(Date createdDate);
 }

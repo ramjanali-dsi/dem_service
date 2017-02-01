@@ -320,7 +320,7 @@ public class Test {
         session.getTransaction().commit();
         session.close();*/
 
-        JSONObject object = new JSONObject();
+        /*JSONObject object = new JSONObject();
         object.put("Tenant", "DSI");
         object.put("Name", "Sabbir");
 
@@ -346,7 +346,19 @@ public class Test {
             }
         }
 
-        System.out.println("New body: " + newBody);
+        System.out.println("New body: " + newBody);*/
+
+
+        Date date = new Date();
+
+        date.setTime(date.getTime() + 86400000 + 86400000 + 86400000 + 86400000);
+        System.out.println("Current date: " + date);
+        if(Utility.checkWeekendOfDate(date)){
+            System.out.println("Weekend.");
+
+        } else {
+            System.out.println("Not weekend.");
+        }
     }
 
     private static void myLeaveRequestPatch() {
@@ -494,17 +506,6 @@ public class Test {
         }catch (Exception e){
             e.printStackTrace();
         }*/
-    }
-
-    private static void searchEmployeeTest() {
-
-        try {
-            System.out.println(new Gson().toJson(dtoTransformer.getEmployeesDto(employeeService.searchEmployees(null, null, null, null, null,
-                    null, null, null, null, null, "true", null, null, null, "mine", "0", "10"))));
-
-        } catch (CustomException e) {
-            e.printStackTrace();
-        }
     }
 
     private static void createEmployeeTest(){

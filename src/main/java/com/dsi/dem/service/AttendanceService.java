@@ -8,6 +8,7 @@ import com.dsi.dem.model.EmployeeAttendance;
 import com.dsi.dem.model.TemporaryAttendance;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -22,9 +23,9 @@ public interface AttendanceService {
     EmployeeAttendance getAttendanceByID(String attendanceId, String employeeId) throws CustomException;
     List<EmployeeAttendance> getEmployeesAllAttendances(String employeeId) throws CustomException;
     List<EmployeeAttendance> getAllAttendancesByDate(String attendanceDate) throws CustomException;
-    List<EmployeeAttendance> searchOrReadAttendances(String userId, String employeeNo, String isAbsent, String firstName,
+    List<EmployeeAttendance> searchOrReadAttendances(String employeeNo, String isAbsent, String firstName,
                                                      String lastName, String nickName, String attendanceDate, String teamName,
-                                                     String projectName, String from, String range) throws CustomException;
+                                                     String projectName, String context, String from, String range) throws CustomException;
 
     boolean isAvailableEmployeeOrTempAttendanceSheet(String attendanceDate) throws CustomException;
     boolean getAttendanceStatus(String attendanceDate, String mode) throws CustomException;
@@ -37,4 +38,5 @@ public interface AttendanceService {
     TemporaryAttendance getTemporaryAttendance(String tempAttendanceId) throws CustomException;
 
     List<DraftAttendance> getDraftAttendanceFileDetails(String from, String range) throws CustomException;
+    void getDraftAttendanceFileDetailsByDate(Date createDate);
 }

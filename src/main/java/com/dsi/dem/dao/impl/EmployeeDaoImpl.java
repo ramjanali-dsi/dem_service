@@ -177,7 +177,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                           String accountID, String ipAddress, String nationalID, String tinID, String phone,
                                           String email, String active, String joiningDate, String teamName, String projectName,
-                                          String userID, String from, String range) {
+                                          String myId, List<String> contextList, String from, String range) {
 
         Session session = null;
         List<Employee> employeeList = null;
@@ -317,31 +317,44 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
 
             if(!Utility.isNullOrEmpty(teamName)){
                 if(hasClause){
-                    queryBuilder.append(" AND e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                    queryBuilder.append(" AND e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm " +
+                            "WHERE tm.team.name =:teamName)");
 
                 } else {
-                    queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                    queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm " +
+                            "WHERE tm.team.name =:teamName)");
                     hasClause = true;
                 }
-                paramValue.put("teamName", "%" + teamName + "%");
+                paramValue.put("teamName", teamName);
             }
 
             if(!Utility.isNullOrEmpty(projectName)){
                 if(hasClause){
                     queryBuilder.append(" AND e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                            "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                            "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
 
                 } else {
                     queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                            "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
-                    //hasClause = true;
+                            "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
+                    hasClause = true;
                 }
-                paramValue.put("projectName", "%" + projectName + "%");
+                paramValue.put("projectName", projectName);
             }
 
-            if(!Utility.isNullOrEmpty(userID)){
+            if(!Utility.isNullOrEmpty(myId)){
                 queryBuilder.append(" WHERE e.userId =:userID");
-                paramValue.put("userID", userID);
+                paramValue.put("userID", myId);
+
+            } else if(!Utility.isNullOrEmpty(contextList)){
+                if(hasClause){
+                    queryBuilder.append(" AND e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                            "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+
+                } else {
+                    queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                            "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+                }
+                paramValue.put("teamIds", null);
             }
 
             queryBuilder.append(" ORDER BY e.createdDate DESC");
@@ -352,6 +365,9 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             for(Map.Entry<String, String> entry : paramValue.entrySet()){
                 if(entry.getKey().equals("active")){
                     query.setParameter(entry.getKey(), entry.getValue().equals("true"));
+
+                } else if(entry.getKey().equals("teamIds")){
+                    query.setParameterList(entry.getKey(), contextList);
 
                 } else if(entry.getKey().equals("joiningDate")){
                     query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));
@@ -377,6 +393,61 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
         }
         logger.info("Total employee list size: " + employeeList.size());
         return employeeList;
+    }
+
+    @Override
+    public boolean isEmployeeLinkWithTeamOrLeaveOrAttendance(String employeeId) {
+        Session session = null;
+        Query query;
+        try{
+            session = getSession();
+            query = session.createQuery("FROM TeamMember tm WHERE tm.employee.employeeId =:employeeId");
+            query.setParameter("employeeId", employeeId);
+
+            if(query.list().size() > 0){
+                return true;
+
+            } else {
+                query = session.createQuery("FROM LeaveRequest lr WHERE lr.employee.employeeId =:employeeId");
+                query.setParameter("employeeId", employeeId);
+
+                if (query.list().size() > 0) {
+                    return true;
+
+                } else {
+                    query = session.createQuery("FROM EmployeeAttendance et WHERE et.employee.employeeId =:employeeId");
+                    query.setParameter("employeeId", employeeId);
+
+                    if(query.list().size() > 0){
+                        return true;
+
+                    } else {
+                        query = session.createQuery("FROM TemporaryAttendance ta WHERE ta.employee.employeeId =:employeeId");
+                        query.setParameter("employeeId", employeeId);
+
+                        if(query.list().size() > 0){
+                            return true;
+
+                        } else {
+                            query = session.createQuery("FROM WorkFromHome wfh WHERE wfh.employee.employeeId =:employeeId");
+                            query.setParameter("employeeId", employeeId);
+
+                            if(query.list().size() > 0){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return false;
     }
 
     @Override
@@ -732,6 +803,48 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             }
         }
         return employeeEmailList;
+    }
+
+    @Override
+    public List<EmployeeEmail> getEmployeeEmailsByUserID(String userId) {
+        Session session = null;
+        List<EmployeeEmail> employeeEmailList = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.employee.userId =:userID");
+            query.setParameter("userID", userId);
+
+            employeeEmailList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeEmailList;
+    }
+
+    @Override
+    public List<EmployeeEmail> getAllPreferredEmails() {
+        Session session = null;
+        List<EmployeeEmail> employeeEmails = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.isPreferred =:preferred");
+            query.setParameter("preferred", true);
+
+            employeeEmails = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeEmails;
     }
 
     @Override

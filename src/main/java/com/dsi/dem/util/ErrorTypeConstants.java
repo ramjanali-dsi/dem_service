@@ -20,7 +20,7 @@ public class ErrorTypeConstants {
     //Employee
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0001 = "employee";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0002 = "hasEmployee";
-    public static final String DEM_EMPLOYEE_ERROR_TYPE_0003 = "hasAssignTeam";
+    public static final String DEM_EMPLOYEE_ERROR_TYPE_0003 = "hasLinkToOthers";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0004 = "firstName";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0005 = "lastName";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0006 = "presentAddress";
@@ -48,6 +48,7 @@ public class ErrorTypeConstants {
     public static final String DEM_PROJECT_ERROR_TYPE_0004 = "hasProject";
     public static final String DEM_PROJECT_ERROR_TYPE_0005 = "projectName";
     public static final String DEM_PROJECT_ERROR_TYPE_0006 = "projectStatus";
+    public static final String DEM_PROJECT_ERROR_TYPE_0007 = "hasAssignToClient";
 
     //Team
     public static final String DEM_TEAM_ERROR_TYPE_0001 = "team";
@@ -58,6 +59,7 @@ public class ErrorTypeConstants {
     public static final String DEM_TEAM_ERROR_TYPE_0006 = "teamMemberInfo";
     public static final String DEM_TEAM_ERROR_TYPE_0007 = "teamRoleInfo";
     public static final String DEM_TEAM_ERROR_TYPE_0008 = "teamMemberId";
+    public static final String DEM_TEAM_ERROR_TYPE_0009 = "hasAssignToProject";
 
 
     //Client

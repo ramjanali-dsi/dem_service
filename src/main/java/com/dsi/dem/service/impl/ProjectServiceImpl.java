@@ -62,11 +62,21 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         projectDao.saveProject(project);
         logger.info("Save project success");
 
+        int cnt = 0;
+        String teamName = "";
         for(ProjectTeam projectTeam : project.getTeams()){
-            projectTeam.setTeam(teamDao.getTeamByID(projectTeam.getTeam().getTeamId()));
+            Team team = teamDao.getTeamByID(projectTeam.getTeam().getTeamId());
+
+            projectTeam.setTeam(team);
             projectTeam.setProject(project);
             projectTeam.setVersion(1);
             projectDao.saveProjectTeam(projectTeam);
+
+            teamName += team.getName();
+            if(cnt != project.getTeams().size() - 1){
+                teamName += ",";
+            }
+            cnt++;
         }
         logger.info("Save project teams success");
 
@@ -86,14 +96,12 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         setProjectAllProperty(project);
         close(session);
 
-        /*try{
+        try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
-            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, emailList);
+            JSONArray emailList = notificationService.getHrManagerEmailList();
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, teamName, emailList);
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_CREATE_TEMPLATE_ID));
 
@@ -104,7 +112,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         return TRANSFORMER.getProjectDto(project);
     }
@@ -160,14 +168,22 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         logger.info("Project Update:: End");
         close(session);
 
-        /*try{
+        int cnt = 0;
+        String teamName = "";
+        for(ProjectTeam projectTeam : project.getTeams()){
+            teamName += projectTeam.getTeam().getName();
+            if(cnt != project.getTeams().size()){
+                teamName += ",";
+            }
+            cnt++;
+        }
+
+        try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
-            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, emailList);
+            JSONArray emailList = notificationService.getHrManagerEmailList();
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, teamName, emailList);
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_UPDATE_TEMPLATE_ID));
 
@@ -178,7 +194,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         return TRANSFORMER.getProjectDto(existProject);
     }
@@ -197,23 +213,28 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         Session session = getSession();
         projectDao.setSession(session);
 
-        projectDao.deleteProjectTeam(projectID, null);
+        /*projectDao.deleteProjectTeam(projectID, null);
         projectDao.deleteProjectClient(projectID, null);
 
         projectDao.deleteProject(projectID);
         logger.info("Delete project success");
         logger.info("Project delete:: End");
-        close(session);
+        close(session);*/
 
-        /*Project project = projectDao.getProjectByID(projectID);
+        if(!Utility.isNullOrEmpty(projectDao.getProjectClients(projectID))){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_PROJECT_ERROR_TYPE_0007);
+            throw new CustomException(errorMessage);
+        }
+
+        Project project = projectDao.getProjectByID(projectID);
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
-            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, emailList);
+            JSONArray emailList = notificationService.getHrManagerEmailList();
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, null, emailList);
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_DELETE_TEMPLATE_ID));
 
@@ -229,10 +250,11 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         return null;
     }
@@ -281,14 +303,16 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
     }
 
     @Override
-    public List<ProjectDto> searchProjects(String projectName, String status, String clientName,
-                                        String teamName, String memberName, String from, String range) throws CustomException {
+    public List<ProjectDto> searchProjects(String projectName, String status, String clientName, String teamName, String memberName,
+                                           String context, String from, String range) throws CustomException {
 
         logger.info("Read all projects :: Start");
         Session session = getSession();
         projectDao.setSession(session);
 
-        List<Project> projectList = projectDao.searchProjects(projectName, status, clientName, teamName, memberName, from, range);
+        List<String> contextList = Utility.getContextObj(context);
+        List<Project> projectList = projectDao.searchProjects(projectName, status, clientName, teamName, memberName, contextList,
+                from, range);
         if(projectList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -308,7 +332,8 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
     }
 
     @Override
-    public List<ProjectTeamDto> createProjectTeams(List<ProjectTeamDto> teamDtoList, String projectId) throws CustomException {
+    public List<ProjectTeamDto> createProjectTeams(List<ProjectTeamDto> teamDtoList, String projectId,
+                                                   String tenantName) throws CustomException {
         logger.info("Convert ProjectTeam Dto to ProjectTeam Object");
         List<ProjectTeam> projectTeams = TRANSFORMER.getProjectTeams(teamDtoList);
         if(Utility.isNullOrEmpty(projectTeams)) {
@@ -351,7 +376,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         }
         List<ProjectTeam> projectTeamList = projectDao.getProjectTeams(projectId, null);
 
-        /*JSONObject contentObj;
+        JSONObject contentObj;
         JSONArray memberEmails;
         try {
 
@@ -370,6 +395,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             }
 
             if(!Utility.isNullOrEmpty(assignedProjectTeam)) {
+                Employee leadMember = null;
                 for (ProjectTeam assignProject : assignedProjectTeam) {
 
                     memberEmails = new JSONArray();
@@ -378,21 +404,28 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                         for (TeamMember member : teamMembersList) {
                             memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
                                     .get(0).getEmail());
+
+                            if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
+                                leadMember = member.getEmployee();
+                            }
                         }
                     }
 
-                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject,null, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
+                            teamMembersList.size(), hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject,null, memberEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
+                                teamMembersList.size(), memberEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject,null, clientEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
+                                teamMembersList.size(), clientEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -400,6 +433,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             }
 
             if(!Utility.isNullOrEmpty(unassignedProjectTeam)){
+                Employee leadMember = null;
                 for(ProjectTeam unAssignProject : unassignedProjectTeam){
 
                     memberEmails = new JSONArray();
@@ -408,21 +442,28 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                         for (TeamMember member : teamMembersList) {
                             memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
                                     .get(0).getEmail());
+
+                            if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
+                                leadMember = member.getEmployee();
+                            }
                         }
                     }
 
-                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject,null, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
+                            teamMembersList.size(),  hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject,null, memberEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
+                                teamMembersList.size(), memberEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
-                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject,null, clientEmails);
+                        contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
+                                teamMembersList.size(), clientEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -437,7 +478,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         close(session);
         return TRANSFORMER.getProjectTeamsDto(projectTeamList);
@@ -495,8 +536,8 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
     }
 
     @Override
-    public List<ProjectClientDto> createProjectClients(List<ProjectClientDto> clientDtoList,
-                                                       String projectId) throws CustomException {
+    public List<ProjectClientDto> createProjectClients(List<ProjectClientDto> clientDtoList, String projectId,
+                                                       String tenantName) throws CustomException {
         logger.info("Convert ProjectClient Dto to ProjectClient Object");
         List<ProjectClient> projectClients = TRANSFORMER.getProjectClients(clientDtoList);
         if(Utility.isNullOrEmpty(projectClients)){
@@ -539,7 +580,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         }
         List<ProjectClient> projectClientList = projectDao.getProjectClients(projectId);
 
-        /*JSONObject contentObj;
+        JSONObject contentObj;
         try {
 
             logger.info("Notification create:: Start");
@@ -559,17 +600,17 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             if(!Utility.isNullOrEmpty(assignedProjectClient)) {
                 for (ProjectClient assignedClient : assignedProjectClient) {
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, null, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, null, memberEmails);
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, memberEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient,null,
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName,
                             new JSONArray().put(assignedClient.getClient().getMemberEmail()));
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
@@ -580,20 +621,20 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             if(!Utility.isNullOrEmpty(unassignedProjectClient)){
                 for(ProjectClient unassignedClient : unassignedProjectClient){
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient,null, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, hrManagerEmailList);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, null, memberEmails);
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, memberEmails);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient,null,
+                    /*contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName,
                             new JSONArray().put(unassignedClient.getClient().getMemberEmail()));
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
-                            NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
+                            NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));*/
 
                 }
             }
@@ -606,7 +647,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         close(session);
         return TRANSFORMER.getProjectClientsDto(projectClientList);

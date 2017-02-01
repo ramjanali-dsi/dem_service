@@ -20,6 +20,7 @@ public interface ClientDao {
     Client getClientByName(String name);
     List<Client> getAllClientsByEmployeeId(String employeeId);
     List<Client> getAllClients();
+    List<Client> getAllNotifiedClients();
     List<Client> searchClients(String clientName, String organization, String clientEmail,
                                String from, String range);
 

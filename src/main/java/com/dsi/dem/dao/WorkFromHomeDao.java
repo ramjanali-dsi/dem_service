@@ -30,6 +30,6 @@ public interface WorkFromHomeDao {
     WorkFormHomeStatus getWFHStatusByName(String name);
 
     List<WorkFromHome> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId, String employeeNo,
-                                                               String firstName, String lastName, String nickName, String wfhId,
-                                                               String from, String range);
+                                                        String firstName, String lastName, String nickName, String wfhId,
+                                                        List<String> contextList, String from, String range);
 }

@@ -4,6 +4,7 @@ import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Employee;
 import org.apache.log4j.Logger;
+import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.DateTime;
@@ -246,6 +247,58 @@ public class Utility {
         userObject.put("version", 1);
 
         return userObject.toString();
+    }
+
+    public static String getContextObject(String leadUserId, String teamId, int activity) throws JSONException {
+        JSONArray contextArray = new JSONArray();
+        JSONObject contextObj = new JSONObject();
+        contextObj.put("teamId", teamId);
+        contextObj.put("userId", leadUserId);
+        contextObj.put("activity", activity);
+
+        contextArray.put(contextObj);
+        return contextArray.toString();
+    }
+
+    public static String getContextObjectForUpdate(String leadAssignId, String leadUnAssignId,
+                                                   String teamId) throws JSONException {
+        JSONArray contextArray = new JSONArray();
+        JSONObject contextObj = new JSONObject();
+        contextObj.put("teamId", teamId);
+        contextObj.put("userId", leadAssignId);
+        contextObj.put("activity", 1);
+        contextArray.put(contextObj);
+
+        contextObj = new JSONObject();
+        contextObj.put("teamId", teamId);
+        contextObj.put("userId", leadUnAssignId);
+        contextObj.put("activity", 2);
+        contextArray.put(contextObj);
+
+        return contextArray.toString();
+    }
+
+    public static List<String> getContextObj(String context) throws CustomException {
+        List<String> contextList;
+        JSONObject contextObj;
+        try{
+            if(context != null) {
+                contextList = new ArrayList<>();
+                contextObj = new JSONObject(context);
+                JSONArray contextArray = contextObj.getJSONArray("team");
+
+                for (int i = 0; i < contextArray.length(); i++) {
+                    contextList.add(contextArray.getString(i));
+                }
+                return contextList;
+            }
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }
+        return null;
     }
 
     public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {

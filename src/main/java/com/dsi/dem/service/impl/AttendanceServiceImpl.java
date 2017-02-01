@@ -42,7 +42,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
     public void saveAttendance(List<AttendanceDto> attendanceDtoList, String userID,
                                String attendanceDate, String tenantName) throws CustomException {
 
-        logger.info("Employees attendance schedule create: start");
+        /*logger.info("Employees attendance schedule create: start");
         Date date = attendanceDateValidation(attendanceDate);
 
         List<String> unNotifiedEmployeeIds = new ArrayList<>();
@@ -187,25 +187,25 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         attendanceDao.deleteAttendanceDraft(Utility.getDateFromString(attendanceDate));
 
         logger.info("Employees attendance schedule create: End");
-        close(session);
+        close(session);*/
 
-        /*try {
+        Session session = getSession();
+        try {
             logger.info("Employees attendance schedule create: start");
             Date date = attendanceDateValidation(attendanceDate);
 
             JSONArray notificationList = new JSONArray();
 
-            Session session = getSession();
             attendanceDao.setSession(session);
             leaveDao.setSession(session);
+            wfhDao.setSession(session);
 
-            JSONArray hrManagerEmailList = new JSONArray();
-            //TODO Manager & HR email config
-
+            JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
             JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, hrManagerEmailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.ATTENDANCE_CONFIRM_TEMPLATE_ID_FOR_MANAGER_HR));
 
+            int count = 0;
             for (AttendanceDto attendanceDto : attendanceDtoList) {
 
                 JSONArray hrManagerLeadEmailList = new JSONArray();
@@ -234,19 +234,33 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 attendance.setCreatedDate(Utility.today());
                 attendance.setLastModifiedDate(Utility.today());
                 attendance.setVersion(1);
-                attendanceDao.saveAttendance(attendance);
-                logger.info("Save employee attendance success");
 
                 String email;
                 JSONArray leadEmails = new JSONArray();
                 EmployeeLeave leaveSummary;
+                WorkFromHome workFromHome = wfhDao.getWFHByEmployeeIdAndDate(attendance.getEmployee().getEmployeeId(), date);
+
                 if (attendance.isAbsent()) {
                     //TODO Approved pre & post leave request check for this date
 
-                    if (!leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
+                    logger.info("Employee absent.");
+                    if (leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
                             attendance.getEmployee().getEmployeeNo(), date)) {
+                        logger.info("Employee has approved pre/post leave request.");
+                        attendance.setComment(Constants.LEAVE_COMMENT);
 
-                        logger.info("Employee has no pre & post leave request.");
+                    } else if(workFromHome != null){
+                        logger.info("Employee has approved work form home request.");
+
+                        attendance.setAbsent(false);
+                        attendance.setCheckInTime(Constants.CHECK_IN_TIME);
+                        attendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
+                        attendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
+                                Constants.CHECK_OUT_TIME));
+                        attendance.setComment(Constants.WFH_COMMENT);
+
+                    } else {
+                        logger.info("Employee has no pre/post approved leave & work from home request.");
 
                         leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
                         leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
@@ -290,10 +304,12 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 } else {
                     //TODO Approved pre & post leave request check for this date
 
+                    logger.info("Employee present.");
                     LeaveRequest leaveRequest = leaveDao.getLeaveRequestByStatusAndEmployee(
                             attendance.getEmployee().getEmployeeNo(), date);
 
                     if (leaveRequest != null) {
+                        logger.info("Employee has approved leave request.");
                         leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
 
                         switch (leaveRequest.getLeaveType().getLeaveTypeName()) {
@@ -359,8 +375,41 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                     NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_CLIENT));
                         }
+
+                    } else if(workFromHome != null){
+                        logger.info("Employee has approved work from home request.");
+
+                        workFromHome.setStatus(wfhDao.getWFHStatusByName(Constants.CANCELLER_WFH_REQUEST));
+                        workFromHome.setLastModifiedDate(Utility.today());
+                        workFromHome.setReason("Already present that day.");
+                        wfhDao.updateWorkFromHomeRequest(workFromHome);
+                        logger.info("Work form home request updated to cancel status.");
+
+                        hrManagerLeadEmailList.put(hrManagerEmailList);
+                        hrManagerLeadEmailList.put(leadEmails);
+
+                        globalContentObj = EmailContent.getContentForAttendanceApproveWFH(workFromHome, attendanceDate,
+                                tenantName, hrManagerLeadEmailList);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.WFH_APPROVED_PRESENT_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+
+                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
+                                .get(0).getEmail();
+                        globalContentObj = EmailContent.getContentForAttendanceApproveWFH(workFromHome, attendanceDate, tenantName,
+                                new JSONArray().put(email));
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.WFH_APPROVED_PRESENT_TEMPLATE_ID_FOR_EMPLOYEE));
                     }
                 }
+
+                attendanceDao.saveAttendance(attendance);
+                logger.info("Save employee attendance success");
+
+                if(count % 20 == 0){
+                    session.flush();
+                    session.clear();
+                }
+                count++;
             }
 
             logger.info("Delete all temporary attendances.");
@@ -376,10 +425,11 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             logger.info("Notification create:: End");
 
         } catch (JSONException je) {
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
     }
 
     private void validationForAttendance(Session session, AttendanceDto attendanceDto) throws CustomException {
@@ -440,20 +490,18 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         Session session = getSession();
         attendanceDao.setSession(session);
 
-        attendanceDao.deleteTempAttendance(Utility.getDateFromString(attendanceDate));
+        /*attendanceDao.deleteTempAttendance(Utility.getDateFromString(attendanceDate));
         attendanceDao.deleteAttendanceDraft(Utility.getDateFromString(attendanceDate));
 
         logger.info("Delete temporary attendances & draft file success");
         logger.info("Delete all attendances:: End");
-        close(session);
+        close(session);*/
 
-        /*try{
+        try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            JSONArray emailList = new JSONArray();
-            //TODO Manager & HR email config
-
+            JSONArray emailList = notificationService.getHrManagerEmailList();
             JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.ATTENDANCE_DELETE_TEMPLATE_ID_FOR_MANAGER_HR));
@@ -469,10 +517,11 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
     }
 
     @Override
@@ -530,9 +579,9 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
     }
 
     @Override
-    public List<EmployeeAttendance> searchOrReadAttendances(String userId, String employeeNo, String isAbsent, String firstName,
+    public List<EmployeeAttendance> searchOrReadAttendances(String employeeNo, String isAbsent, String firstName,
                                                             String lastName, String nickName, String attendanceDate, String teamName,
-                                                            String projectName, String from, String range) throws CustomException {
+                                                            String projectName, String context, String from, String range) throws CustomException {
         if(!Utility.isNullOrEmpty(attendanceDate)){
             attendanceDateValidation(attendanceDate);
         }
@@ -540,8 +589,9 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         Session session = getSession();
         attendanceDao.setSession(session);
 
-        List<EmployeeAttendance> attendanceList = attendanceDao.searchOrReadAttendances(userId, employeeNo, isAbsent, firstName,
-                lastName, nickName, attendanceDate, teamName, projectName, from, range);
+        List<String> contextList = Utility.getContextObj(context);
+        List<EmployeeAttendance> attendanceList = attendanceDao.searchOrReadAttendances(employeeNo, isAbsent, firstName,
+                lastName, nickName, attendanceDate, teamName, projectName, contextList, from, range);
         if(attendanceList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -805,14 +855,12 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         logger.info("Attendance sheet upload:: End");
         close(session);
 
-        /*try{
+        try{
             if(draftAttendance != null) {
                 logger.info("Notification create:: Start");
                 JSONArray notificationList = new JSONArray();
 
-                JSONArray emailList = new JSONArray();
-                //TODO Manager & HR email config
-
+                JSONArray emailList = notificationService.getHrManagerEmailList();
                 JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDateTime,
                         tenantName, emailList);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
@@ -826,7 +874,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
 
         return draftAttendances;
     }
@@ -896,7 +944,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         logger.info("Update employees temporary attendance: End");
         close(session);
 
-        /*try{
+        try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
@@ -912,7 +960,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);
-        }*/
+        }
     }
 
     @Override
@@ -991,5 +1039,51 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
         close(session);
         return draftAttendances;
+    }
+
+    @Override
+    public void getDraftAttendanceFileDetailsByDate(Date createDate) {
+        logger.info("Read all draft attendance files for this date: " + createDate);
+
+        Session session = getSession();
+        attendanceDao.setSession(session);
+
+        List<DraftAttendance> draftAttendances = attendanceDao.getAllDraftAttendanceFileByCreatedDate(createDate);
+        if(!Utility.isNullOrEmpty(draftAttendances)){
+            logger.info("Draft attendance file list size: " + draftAttendances.size());
+            try {
+                logger.info("Notification create:: Start");
+                JSONArray notificationList = new JSONArray();
+
+                JSONArray emailList = notificationService.getHrManagerEmailList();
+                JSONObject globalContentObj;
+
+                int cnt = 0;
+                String draftAttendanceFile = "";
+                for (DraftAttendance draftAttendance : draftAttendances) {
+                    draftAttendanceFile += draftAttendance.getAttendanceDate();
+
+                    if(cnt != draftAttendances.size() - 1){
+                        draftAttendanceFile += ", ";
+                    }
+                    cnt++;
+                }
+
+                globalContentObj = EmailContent.getContentForDraftAttendance(draftAttendanceFile, Constants.TENANT_NAME, emailList);
+                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                        NotificationConstant.AUTO_NOTIFY_DRAFT_ATTENDANCE_EXPIRY_TEMPLATE_ID));
+
+                notificationService.createNotification(notificationList.toString());
+                logger.info("Notification create:: End");
+
+            } catch (Exception e){
+                close(session);
+                e.printStackTrace();
+            }
+
+        } else {
+            logger.info("Draft attendance file list is empty.");
+        }
+        close(session);
     }
 }

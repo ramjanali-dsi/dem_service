@@ -19,9 +19,11 @@ public interface HolidayDao {
     void deleteHoliday(String holidayId) throws CustomException;
     boolean checkHolidayFromRangeAndYear(Date startDate, Date endDate, int year);
     boolean checkHolidayForDate(Date date);
+    Holiday getHolidayByDate(Date date);
     Holiday getHolidayById(String holidayId);
     Holiday getHolidayByNameAndYear(String holidayName, int year);
     List<Holiday> getHolidayByYear(int year);
+    List<Holiday> getAllHolidaysBetweenDate(Date startDate, Date endDate);
     List<Holiday> searchOrReadHolidays(String holidayName, String year, String holidayId,
                                        String from, String range);
 

@@ -20,8 +20,8 @@ public interface TeamService {
     String deleteTeam(String teamID, String tenantName) throws CustomException;
     TeamDto getTeamByID(String teamID) throws CustomException;
     List<Team> getAllTeams() throws CustomException;
-    List<TeamDto> searchTeams(String teamName, String status, String floor, String room, String memberName,
-                              String projectName, String clientName, String from, String range) throws CustomException;
+    List<TeamDto> searchTeams(String teamName, String status, String floor, String room, String memberName, String projectName,
+                              String clientName, String context, String from, String range) throws CustomException;
 
     List<TeamMemberDto> createTeamMembers(String teamId, List<TeamMemberDto> teamMembers,
                                           String tenantName) throws CustomException;
@@ -29,8 +29,8 @@ public interface TeamService {
     TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID) throws CustomException;
     List<TeamMember> getTeamMembers(String teamID, String employeeID) throws CustomException;
 
-    List<TeamProjectDto> createTeamProjects(String teamId,
-                                            List<TeamProjectDto> teamProjects) throws CustomException;
+    List<TeamProjectDto> createTeamProjects(String teamId, List<TeamProjectDto> teamProjects,
+                                            String tenantName) throws CustomException;
     void deleteTeamProject(String teamProjectID) throws CustomException;
     List<ProjectTeam> getTeamProjects(String teamID) throws CustomException;
 }

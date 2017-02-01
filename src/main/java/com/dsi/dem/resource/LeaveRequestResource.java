@@ -46,11 +46,11 @@ public class LeaveRequestResource {
                                                @QueryParam("from") String from,
                                                @QueryParam("range") String range) throws CustomException {
 
-        String userID = request.getAttribute("user_id") != null ?
-                request.getAttribute("user_id").toString() : null;
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
 
         return Response.ok().entity(leaveService.searchOrReadEmployeesLeaveSummary(employeeNo, firstName, lastName, nickName,
-                email, phone, teamName, projectName, employeeId, from, range, userID)).build();
+                email, phone, teamName, projectName, employeeId, context, from, range)).build();
     }
 
     @GET
@@ -82,13 +82,13 @@ public class LeaveRequestResource {
                                              @QueryParam("from") String from,
                                              @QueryParam("range") String range) throws CustomException {
 
-        String userID = request.getAttribute("user_id") != null ?
-                request.getAttribute("user_id").toString() : null;
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
 
         return Response.ok().entity(leaveService.searchOrReadLeaveDetails(employeeNo, firstName, lastName, nickName, email,
                 phone, teamName, projectName, employeeId, leaveType, requestType, approvedStartDate, approvedEndDate,
                 approvedFirstName, approvedLastName, approvedNickName, appliedStartDate, appliedEndDate, leaveStatus,
-                from, range, userID)).build();
+                context, from, range)).build();
     }
 
     @POST

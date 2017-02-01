@@ -140,7 +140,15 @@ VALUES ('88ea7da2-36a1-454a-a735-5ca1ce60dda4', 'Pending Leave Applications', b'
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('6ffc2994-6993-4334-a69f-996b438dd212', 'My Leave Applications', b'1', 'My Leave', '4', 'd24a40a9-aada-4c7b-b50b-e053a4fbe03d', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('99c33c8c-d404-44fb-933f-7293fef2c485', 'Attendance Management', b'1', 'Attendance History', '6', NULL, '1');
+VALUES ('99c33c8c-d404-44fb-933f-7293fef2c485', 'Attendance Management', b'1', 'Attendance', '6', NULL, '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('6a0a5d7c-7903-46f1-9a3d-fd44373fa85c', 'Attendance History', b'1', 'History', '1', '99c33c8c-d404-44fb-933f-7293fef2c485', '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('2581c180-e8f6-426d-9b4f-22b9bd7ad96e', 'Work From Home', b'1', 'WFH', '2', '99c33c8c-d404-44fb-933f-7293fef2c485', '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('3c1b925b-0356-4d0b-832d-81047ceaaf30', 'Pending Work From Home Applications', b'1', 'Pending WFH', '1', '2581c180-e8f6-426d-9b4f-22b9bd7ad96e', '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('7f2738c3-917e-42f4-900d-8d8b58c302a4', 'My Work From Home Applications', b'1', 'My WFH', '2', '2581c180-e8f6-426d-9b4f-22b9bd7ad96e', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('9ff595ee-cf01-4475-b89a-9678c25e80d0', 'Holiday Management', b'1', 'Holiday', '7', NULL, '1');
 
@@ -159,7 +167,13 @@ VALUES ('017c4814-2f06-423c-b162-6f4e914c740b', 'Leave Summary History', b'1', '
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('334ac8ae-25fb-47af-ae29-7cf11577af88', 'My Leave Applications', b'1', 'My Leave', '2', '5e41eb25-73c8-445b-b4bb-d6b0eb13b8be', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('c0cbe425-fe5f-47c1-932a-f8bcd702a869', 'Attendance Management', b'1', 'Attendance History', '6', NULL, '1');
+VALUES ('c0cbe425-fe5f-47c1-932a-f8bcd702a869', 'Attendance Management', b'1', 'Attendance', '6', NULL, '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('d46c0f38-8910-43af-b644-b8133adb8aa2', 'Attendance History', b'1', 'History', '1', 'c0cbe425-fe5f-47c1-932a-f8bcd702a869', '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('631c01cf-45a3-4ec8-9f84-20ca3f1500ad', 'Work From Home', b'1', 'WFH', '2', 'c0cbe425-fe5f-47c1-932a-f8bcd702a869', '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('c6a1c81e-fc91-4492-a569-517dffe68840', 'My Work From Home Applications', b'1', 'My WFH', '1', '631c01cf-45a3-4ec8-9f84-20ca3f1500ad', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('0bf7fac0-1b1e-428f-96ef-175f9eeb656c', 'Holiday Management', b'1', 'Holiday', '7', NULL, '1');
 
@@ -260,11 +274,40 @@ VALUES ('eaa05313-90bd-4ba7-8fe6-857975443673', b'1', '1', '6ffc2994-6993-4334-a
 INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
 VALUES ('13d3f18a-2aa7-418c-89a6-2053c4d01724', b'1', '1', '99c33c8c-d404-44fb-933f-7293fef2c485', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('2b1ac28d-5c15-4acd-97ec-c09e06e2608f', b'1', '1', '6a0a5d7c-7903-46f1-9a3d-fd44373fa85c', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('e7330c86-05f8-4f4e-81eb-1fc54fb4e8a9', b'1', '1', '2581c180-e8f6-426d-9b4f-22b9bd7ad96e', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('89026cbd-1153-4fb0-853b-d1b8d5293cba', b'1', '1', '3c1b925b-0356-4d0b-832d-81047ceaaf30', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('b4efae92-b3ed-4b28-bfc7-220f2d8cc3b1', b'1', '1', '7f2738c3-917e-42f4-900d-8d8b58c302a4', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
 VALUES ('fb6e62ac-1c42-4e9c-b224-d589cd04ecd7', b'1', '1', '9ff595ee-cf01-4475-b89a-9678c25e80d0', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 
 -----Member Role
-
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('6773faf9-b983-46ff-93fc-8f23f23506c7', b'1', '1', '2d96b168-7334-46fa-9776-65438cb719eb', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('ac4c4bbe-511c-4696-b8f9-f5511ec7b760', b'1', '1', 'c5e3e9c8-bcfb-40dc-b9ae-10c809786599', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('2117488e-8c45-4f20-9f7a-438145e889cf', b'1', '1', '806f4f41-e767-486f-897e-f53609351491', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('667bd203-04a3-445c-81f3-8834153e0ce0', b'1', '1', '5e41eb25-73c8-445b-b4bb-d6b0eb13b8be', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('1ab46ddf-7357-4781-8039-17fa2edec8c3', b'1', '1', '017c4814-2f06-423c-b162-6f4e914c740b', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('777e2434-0ea4-4d51-92a9-85dc51fcc22d', b'1', '1', '334ac8ae-25fb-47af-ae29-7cf11577af88', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('7165e3b5-aeb6-48b6-81f2-7a1867211d72', b'1', '1', 'c0cbe425-fe5f-47c1-932a-f8bcd702a869', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('6a0a54a5-f15d-4712-be95-f956dac5a2d7', b'1', '1', 'd46c0f38-8910-43af-b644-b8133adb8aa2', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('6d5aa37d-5757-4ec8-8b4b-75be55d98127', b'1', '1', '631c01cf-45a3-4ec8-9f84-20ca3f1500ad', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('064ef460-18ab-4e43-986b-c0e438e96d4a', b'1', '1', 'c6a1c81e-fc91-4492-a569-517dffe68840', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('8cad44f4-f333-4e15-93ec-a708b15b3f35', b'1', '1', '0bf7fac0-1b1e-428f-96ef-175f9eeb656c', '9183166d-2356-42df-a045-416748260106', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
@@ -278,6 +321,11 @@ INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `me
 VALUES ('50e8bd15-2f28-4328-b509-112f1ee1063c', b'1', 'v1/user', 'PUT', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
 VALUES ('29ad3715-bdf4-451b-8fc1-de5e7e763c19', b'1', 'v1/user/role', 'GET', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('a0c2f5ce-c329-422a-8c80-cc0b2ab3b80e', b'1', 'v1/user/context', 'POST', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
+VALUES ('0547c687-13f4-427c-b8ab-40624d89cb10', b'1', 'v1/user/context', 'GET', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 INSERT INTO `service_authorization`.`dsi_api` (`api_id`, `is_active`, `url`, `method`, `version`, `system_id`)
 VALUES ('78fcd436-259a-4641-ada6-334a8b289c73', b'1', 'v1/employee', 'POST', '1', '425744ba-6c10-47c0-91cf-5a4c05265b56');
@@ -432,6 +480,10 @@ VALUES ('ba4c0274-35c5-4bee-9242-8918793fc87b', b'1', 'v1/notification_template'
 
 
 INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
+VALUES ('2d6e2046-4eb8-4094-bbdd-fb1a2b481988', 'System', '1', 'a0c2f5ce-c329-422a-8c80-cc0b2ab3b80e');
+INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
+VALUES ('260703bc-11f6-4faf-a901-3335b4af7adc', 'System', '1', '0547c687-13f4-427c-b8ab-40624d89cb10');
+INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
 VALUES ('4e26290b-0b16-4b23-a606-d4d8d9045d8a', 'Authenticated', '1', '0d09576d-a013-46ee-88b0-8366007a7bf7');
 INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
 VALUES ('b5868acc-e42d-4115-ac75-b706a2441c2b', 'Authenticated', '1', '500c3daa-3e05-40f9-8d34-bc43c5d610d5');
@@ -461,8 +513,11 @@ INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_
 VALUES ('a3cd7eaa-7aa1-4caa-af7e-5b9dc70844af', 'System', '1', '50e8bd15-2f28-4328-b509-112f1ee1063c');
 INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
 VALUES ('b44da690-c986-4ef6-98d8-190bc77df4b0', 'System', '1', 'ec76a4ca-9198-4e8d-bf23-fc2d521b676d');
+INSERT INTO `service_authorization`.`dsi_default_api` (`default_api_id`, `allow_type`, `version`, `api_id`)
+VALUES ('6bf12e86-1824-4722-8fb2-9813aa2fa3d4', 'Authenticated', '1', '3349ac71-c9de-4638-bcdf-285743809f23');
 
 
+------- HR & Manager Menu API --------
 INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
 VALUES ('4c6830cb-011b-412b-844d-137899316f23', b'1', '1', '78fcd436-259a-4641-ada6-334a8b289c73', '79d53582-ed8c-47a3-b734-f41651f688ad', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
@@ -585,22 +640,48 @@ INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, 
 VALUES ('9d867499-b307-40f3-85e9-4cff52682bd2', b'1', '1', '3ee8c84d-e981-4b30-aea8-ac7de2622704', '1ab0176c-ad4d-4cce-bda4-dd1b9001150e', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 
-INSERT INTO `dem_service`.`dsi_employee` (`employee_id`, `bank_ac_no`, `created_date`, `date_of_confirmation`, `e_tin_id`, `employee_no`, `first_name`, `github_id`, `ip_address`, `is_active`, `joining_date`, `last_modified_date`, `last_name`, `mac_address`, `national_id`, `nick_name`, `user_id`, `resign_date`, `skype_id`, `version`)
-VALUES ('e64412db-01e2-4691-bd52-76dac012b1be', '1234RT', '2016-10-04 00:00:00', '2016-09-01 00:00:00', 'RTG234', '121', 'Sabbir', 'sabbir.dsi', '127.0.0.184', NULL, '2016-09-01 00:00:00', '2016-10-04 00:00:00', 'Ahmed', NULL, NULL, NULL, 'f9e9a19f-4859-4e8c-a8f4-dc134629a57b', NULL, 'sabbir.dsi', '1');
+----------- Lead Menu API ---------------
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('3ce7917f-bdbd-4db8-8954-adb486bb947d', b'1', '1', 'e917ae09-4fd4-4926-b7a0-3a51b103ad04', '7141dd5e-1998-4975-90ae-74d6a24fa7cf', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('41bf833a-bc2d-4ff4-bd0b-c63ea6b430f2', b'1', '1', 'cfbc3788-b45b-41ba-8775-2e91aac6059f', 'b60399fd-dc74-4b81-8bcd-f14c7d38a040', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('85d55037-9ff6-4944-b72f-00ffa18a20c6', b'1', '1', '5929e88e-4f54-4668-bb89-c87ef9d8edde', 'c2a9db50-cc20-4a74-a82b-3fe565d577d5', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('1dc6d4cd-2e68-452e-a7db-eae2e5f4bc58', b'1', '1', '981b0f41-295b-4f56-bb2d-16afd62be6d8', 'da11dd0c-5bc7-42f8-bd1b-62cd7207fee0', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('e9eda4ae-aa9f-438e-8072-04b1fefe82fe', b'1', '1', 'c555b2a3-1d28-4846-afd2-d9acaa409c1f', 'da11dd0c-5bc7-42f8-bd1b-62cd7207fee0', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('39ccb407-199d-4d2e-9bca-79424671c7e3', b'1', '1', '4b2fc151-9a9f-4825-9cb4-e1d2da6b1272', '77a75531-89d3-4c05-99ff-8a29b2f935e6', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('66849403-8941-44b1-9658-037761facbaa', b'1', '1', 'f0bb4bd8-2455-48ca-8f35-a6ed15fbb2e0', '77a75531-89d3-4c05-99ff-8a29b2f935e6', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('95ee6672-bcf8-48d8-89e4-d30bf87152bf', b'1', '1', 'c8162a0c-a97b-4fc3-9976-c764e9511856', '88ea7da2-36a1-454a-a735-5ca1ce60dda4', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('289389f9-5a8b-40de-86df-545746f494c7', b'1', '1', '89a99177-7e3c-43f4-93b4-2ac2238eaa4a', '6a0a5d7c-7903-46f1-9a3d-fd44373fa85c', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('468ac42b-fc6a-459c-ae46-9e1f1892f820', b'1', '1', '3ee8c84d-e981-4b30-aea8-ac7de2622704', '3c1b925b-0356-4d0b-832d-81047ceaaf30', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('ad3f720a-a8e3-45c7-8d7b-9331ed079e04', b'1', '1', '45f037f7-806d-4576-b7a0-d4981d017486', '3c1b925b-0356-4d0b-832d-81047ceaaf30', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('47b328f8-e8d6-4a48-87ad-5883096e2e33', b'1', '1', '3543cc8a-6d4f-4bf8-82ca-991be243c72d', '9ff595ee-cf01-4475-b89a-9678c25e80d0', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
-INSERT INTO `dem_service`.`dsi_employee_info` (`employee_info_id`, `blood_group`, `date_of_birth`, `father_name`, `gender`, `mother_name`, `permanent_address`, `photo_url`, `present_address`, `spouse_name`, `employee_id`, `version`)
-VALUES ('dce8d5e6-9a78-4c58-aaab-f3fc1f31be79', 'A+', '1991-05-04 00:00:00', NULL, 'Male', NULL, 'Mirpur', NULL, 'Mirpur', NULL, 'e64412db-01e2-4691-bd52-76dac012b1be', '1');
 
-INSERT INTO `dem_service`.`dsi_employee_contact_number` (`employee_contact_number_id`, `phone`, `employee_id`, `type_id`, `version`)
-VALUES ('6c875966-50f4-4a52-8dd2-bb9bbfdb8a78', '01676661557', 'e64412db-01e2-4691-bd52-76dac012b1be', '807c9237-7173-4a5e-a45e-384137b7fab2', '1');
-
-INSERT INTO `dem_service`.`dsi_employee_designation` (`employee_designation_id`, `designation_date`, `name`, `employee_id`, `is_current`, `version`)
-VALUES ('a0302b09-c242-4640-90e2-f27602739415', '2016-10-01 00:00:00', 'Software Engineer', 'e64412db-01e2-4691-bd52-76dac012b1be', NULL, '1');
-
-INSERT INTO `dem_service`.`dsi_employee_email` (`employee_email_id`, `email`, `employee_id`, `type_id`, `is_preferred`, `version`)
-VALUES ('2c300dbd-adb5-4743-9f0a-5e412cf82ab1', 'sabbir@gmail.com', 'e64412db-01e2-4691-bd52-76dac012b1be', '78b5c3c5-5470-49f7-aafe-b016a33b3883', NULL, '1');
-
-INSERT INTO `dem_service`.`dsi_employee_leave` (`employee_leave_id`, `total_casual`, `total_leave`, `total_not_notify`, `total_sick`, `total_special_leave`, `employee_id`, `version`)
-VALUES ('5778ba72-5937-4185-b00e-feff98ff8756', '0', '0', '0', '0', '0', 'e64412db-01e2-4691-bd52-76dac012b1be', '1');
-
+----------- Member Menu API -------------
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('57d704a4-142f-4a2b-86ec-d5040c4a9827', b'1', '1', 'e917ae09-4fd4-4926-b7a0-3a51b103ad04', '2d96b168-7334-46fa-9776-65438cb719eb', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('e491e8ad-8064-40d4-ba90-6ce8ba249553', b'1', '1', 'cfbc3788-b45b-41ba-8775-2e91aac6059f', 'c5e3e9c8-bcfb-40dc-b9ae-10c809786599', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('7f8bacd7-c4d5-4a3a-b24e-e523f1e91c22', b'1', '1', '5929e88e-4f54-4668-bb89-c87ef9d8edde', '806f4f41-e767-486f-897e-f53609351491', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('7e0b6e43-15a1-4242-b066-28d7256a13f8', b'1', '1', '981b0f41-295b-4f56-bb2d-16afd62be6d8', '017c4814-2f06-423c-b162-6f4e914c740b', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('cb8e59c6-98a2-4dda-8e44-3cbfe18de29b', b'1', '1', 'c555b2a3-1d28-4846-afd2-d9acaa409c1f', '017c4814-2f06-423c-b162-6f4e914c740b', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('5f2f5e19-9a0b-4dc2-a222-bd9b5f22209d', b'1', '1', '89a99177-7e3c-43f4-93b4-2ac2238eaa4a', 'd46c0f38-8910-43af-b644-b8133adb8aa2', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('1463656f-c196-45b5-942a-4b1a280e3e14', b'1', '1', '3543cc8a-6d4f-4bf8-82ca-991be243c72d', '0bf7fac0-1b1e-428f-96ef-175f9eeb656c', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_menu_api` (`menu_api_id`, `is_active`, `version`, `api_id`, `menu_id`, `system_id`)
+VALUES ('9c38629b-c068-42bd-86a9-cd6e7ef877d3', b'1', '1', 'f0bb4bd8-2455-48ca-8f35-a6ed15fbb2e0', '017c4814-2f06-423c-b162-6f4e914c740b', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 

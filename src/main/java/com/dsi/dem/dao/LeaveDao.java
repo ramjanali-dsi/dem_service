@@ -18,7 +18,7 @@ public interface LeaveDao {
     void updateEmployeeLeaveSummary(EmployeeLeave leaveSummary) throws CustomException;
     List<EmployeeLeave> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
                                                           String email, String phone, String teamName, String projectName,
-                                                          String employeeId, String from, String range, String userId);
+                                                          String employeeId, List<String> contextList, String from, String range);
 
     LeaveRequest getEmployeesLeaveDetails(String employeeID);
     boolean checkWFHRequest(String employeeId, Date startDate, Date endDate);
@@ -28,7 +28,7 @@ public interface LeaveDao {
                                                 String phone, String teamName, String projectName, String employeeId, String leaveType,
                                                 String requestType, String approvedStartDate, String approvedEndDate, String approvedFirstName,
                                                 String approvedLastName, String approvedNickName, String appliedStartDate, String appliedEndDate,
-                                                String leaveStatus, String from, String range, String userId);
+                                                String leaveStatus, List<String> contextList, String from, String range);
 
     LeaveType getLeaveTypeByID(String leaveTypeId);
     LeaveRequestType getLeaveRequestTypeByID(String leaveRequestTypeId);

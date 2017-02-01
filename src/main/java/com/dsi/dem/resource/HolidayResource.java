@@ -7,7 +7,9 @@ import com.dsi.dem.service.impl.HolidayServiceImpl;
 import com.wordnik.swagger.annotations.*;
 import com.wordnik.swagger.jaxrs.PATCH;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -22,6 +24,9 @@ import java.util.List;
 public class HolidayResource {
 
     private static final HolidayService holidayService = new HolidayServiceImpl();
+
+    @Context
+    HttpServletRequest request;
 
     @POST
     @ApiOperation(value = "Create Holiday", notes = "Create Holiday", position = 1)
@@ -102,6 +107,9 @@ public class HolidayResource {
     public Response publishHoliday(@ApiParam(value = "HolidayList", required = true)
                                                List<HolidayDto> holidayDtoList) throws CustomException {
 
-        return Response.ok().entity(holidayService.publishHoliday(holidayDtoList)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(holidayService.publishHoliday(holidayDtoList, tenantName)).build();
     }
 }

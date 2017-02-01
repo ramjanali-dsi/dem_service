@@ -101,6 +101,18 @@ public class HolidayDaoImpl extends CommonService implements HolidayDao {
     }
 
     @Override
+    public Holiday getHolidayByDate(Date date) {
+        Query query = session.createQuery("FROM Holiday h WHERE h.startDate =:date AND h.endDate =:date");
+        query.setParameter("date", date);
+
+        Holiday holiday = (Holiday) query.uniqueResult();
+        if(holiday != null){
+            return holiday;
+        }
+        return null;
+    }
+
+    @Override
     public Holiday getHolidayById(String holidayId) {
         Query query = session.createQuery("FROM Holiday h WHERE h.holidayId =:holidayId");
         query.setParameter("holidayId", holidayId);
@@ -129,6 +141,20 @@ public class HolidayDaoImpl extends CommonService implements HolidayDao {
     public List<Holiday> getHolidayByYear(int year) {
         Query query = session.createQuery("FROM Holiday h WHERE h.year =:year");
         query.setParameter("year", year);
+
+        List<Holiday> holidayList = query.list();
+        if(holidayList != null){
+            return holidayList;
+        }
+        return null;
+    }
+
+    @Override
+    public List<Holiday> getAllHolidaysBetweenDate(Date startDate, Date endDate) {
+        Query query = session.createQuery("FROM Holiday h WHERE (h.startDate BETWEEN :startDate AND :endDate) " +
+                "AND (h.endDate BETWEEN :startDate AND :endDate)");
+        query.setParameter("startDate", startDate);
+        query.setParameter("endDate", endDate);
 
         List<Holiday> holidayList = query.list();
         if(holidayList != null){

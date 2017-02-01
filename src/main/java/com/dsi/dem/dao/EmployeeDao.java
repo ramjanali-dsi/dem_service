@@ -22,8 +22,9 @@ public interface EmployeeDao {
     List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                    String accountID, String ipAddress, String nationalID, String tinID,
                                    String phone, String email, String active, String joiningDate, String teamName,
-                                   String projectName, String userID, String from, String range);
+                                   String projectName, String myId, List<String> contextList, String from, String range);
 
+    boolean isEmployeeLinkWithTeamOrLeaveOrAttendance(String employeeId);
     boolean checkEmployeeAsLead(String employeeId);
     boolean checkEmployeeHasTeam(String employeeId);
     List<Employee> getTeamLeadsProfileOfAnEmployee(String employeeId);
@@ -50,6 +51,8 @@ public interface EmployeeDao {
     boolean updateEmployeeEmail(EmployeeEmail employeeEmail);
     boolean deleteEmployeeEmail(String employeeID, String emailID);
     List<EmployeeEmail> getEmployeeEmailsByEmployeeID(String employeeID);
+    List<EmployeeEmail> getEmployeeEmailsByUserID(String userId);
+    List<EmployeeEmail> getAllPreferredEmails();
     EmployeeEmail getEmployeeEmailByEmailName(String email);
     EmployeeEmail getEmployeeEmailByEmailIDAndEmployeeID(String emailID, String employeeID);
     EmployeeEmail getEmployeeEmailByEmployeeIDAndTypeID(String employeeID, String typeID);

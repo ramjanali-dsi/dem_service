@@ -1,7 +1,9 @@
 package com.dsi.dem.service.impl;
 
 import com.dsi.dem.dao.EmployeeDao;
+import com.dsi.dem.dao.TeamDao;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
+import com.dsi.dem.dao.impl.TeamDaoImpl;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
@@ -12,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.hibernate.Session;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +78,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
             logger.info("Employee Create:: End");
 
-            /*logger.info("Notification create:: Start");
+            logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             String email = employeeEmailList.get(0).getEmail();
@@ -92,7 +95,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             notificationService.createNotification(notificationList.toString());
-            logger.info("Notification create:: End");*/
+            logger.info("Notification create:: End");
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 
@@ -240,7 +243,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
             logger.info("Employee update:: End");
 
-            /*logger.info("Notification create:: Start");
+            logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
             String email = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
@@ -277,7 +280,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                 }
             }
             notificationService.createNotification(notificationList.toString());
-            logger.info("Notification create:: End");*/
+            logger.info("Notification create:: End");
 
             return setEmployeesAllProperty(employee.getEmployeeId(), employee);
 
@@ -320,6 +323,24 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
     @Override
     public void deleteEmployee(String employeeID) throws CustomException {
         logger.info("Employees Info delete start.");
+
+        Employee employee = employeeDao.getEmployeeByID(employeeID);
+        String userID = employee.getUserId();
+
+        if(employeeDao.isEmployeeLinkWithTeamOrLeaveOrAttendance(employeeID)){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0003);
+            throw new CustomException(errorMessage);
+        }
+
+        logger.info("User info delete:: start");
+        callAnotherService.sendDelete(APIProvider.API_USER + userID);
+        logger.info("User info delete:: end");
+
+        logger.info("Login info delete:: start");
+        callAnotherService.sendDelete(APIProvider.API_LOGIN_SESSION_DELETE + userID);
+        logger.info("Login info delete:: end");
+
         employeeDao.deleteEmployeeInfo(employeeID);
         employeeDao.deleteEmployeeLeaveSummary(employeeID);
         employeeDao.deleteEmployeeEmail(employeeID, null);
@@ -424,7 +445,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
     public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                           String accountID, String ipAddress, String nationalID, String tinID, String phone,
                                           String email, String active, String joiningDate, String teamName, String projectName,
-                                          String userID, String from, String range) throws CustomException {
+                                          String myId, String context, String from, String range) throws CustomException {
 
         if(!Utility.isNullOrEmpty(joiningDate)){
             if(Utility.getDateFromString(joiningDate) == null){
@@ -433,9 +454,9 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                 throw new CustomException(errorMessage);
             }
         }
-
-        List<Employee> employeeList = employeeDao.searchEmployees(employeeNo, firstName, lastName, nickName, accountID,
-                ipAddress, nationalID, tinID, phone, email, active, joiningDate, teamName, projectName, userID, from, range);
+        List<String> contextList = Utility.getContextObj(context);
+        List<Employee> employeeList = employeeDao.searchEmployees(employeeNo, firstName, lastName, nickName, accountID, ipAddress,
+                nationalID, tinID, phone, email, active, joiningDate, teamName, projectName, myId, contextList, from, range);
         if(employeeList == null){
 
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,

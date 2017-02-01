@@ -22,5 +22,5 @@ public interface WorkFromHomeService {
     WorkFromHomeDetails approveWFHRequest(WorkFromHomeDto wfhDto, String userId, String tenantName) throws CustomException;
     List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId, String employeeNo,
                                                                String firstName, String lastName, String nickName, String wfhId,
-                                                               String from, String range) throws CustomException;
+                                                               String context, String from, String range) throws CustomException;
 }

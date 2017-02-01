@@ -123,6 +123,18 @@ public class ClientDaoImpl extends CommonService implements ClientDao {
     }
 
     @Override
+    public List<Client> getAllNotifiedClients() {
+        Query query = session.createQuery("FROM Client c WHERE c.isNotify =:notify");
+        query.setParameter("notify", true);
+
+        List<Client> clients = query.list();
+        if(clients != null){
+            return clients;
+        }
+        return null;
+    }
+
+    @Override
     public List<Client> searchClients(String clientName, String organization, String clientEmail, String from, String range) {
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;

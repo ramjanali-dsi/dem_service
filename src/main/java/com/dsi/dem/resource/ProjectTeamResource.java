@@ -7,7 +7,9 @@ import com.dsi.dem.service.ProjectService;
 import com.dsi.dem.service.impl.ProjectServiceImpl;
 import com.wordnik.swagger.annotations.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -24,6 +26,9 @@ public class ProjectTeamResource {
 
     private static final ProjectService projectService = new ProjectServiceImpl();
 
+    @Context
+    HttpServletRequest request;
+
     @POST
     @ApiOperation(value = "Create Project Team", notes = "Create Project Team", position = 1)
     @ApiResponses(value = {
@@ -32,10 +37,12 @@ public class ProjectTeamResource {
     })
     public Response createProjectTeam(@PathParam("project_id") String projectID,
                                       @ApiParam(value = "ProjectTeam Dto", required = true)
-                                              List<ProjectTeamDto> teamDtoList)
-            throws CustomException {
+                                              List<ProjectTeamDto> teamDtoList) throws CustomException {
 
-        return Response.ok().entity(projectService.createProjectTeams(teamDtoList, projectID)).build();
+        String tenantName = request.getAttribute("tenant_name") != null ?
+                request.getAttribute("tenant_name").toString() : null;
+
+        return Response.ok().entity(projectService.createProjectTeams(teamDtoList, projectID, tenantName)).build();
     }
 
     @DELETE

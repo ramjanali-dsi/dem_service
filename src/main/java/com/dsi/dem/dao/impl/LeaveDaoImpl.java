@@ -74,7 +74,7 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
     @Override
     public void updateEmployeeLeaveSummary(EmployeeLeave leaveSummary) throws CustomException {
         try{
-            session.save(leaveSummary);
+            session.update(leaveSummary);
 
         } catch (Exception e){
             close(session);
@@ -87,7 +87,7 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
     @Override
     public List<EmployeeLeave> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
                                                                  String email, String phone, String teamName, String projectName,
-                                                                 String employeeId, String from, String range, String userId) {
+                                                                 String employeeId, List<String> contextList, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         Map<String, String> paramValue = new HashMap<>();
@@ -95,10 +95,22 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         queryBuilder.append("FROM EmployeeLeave el ");
 
-        if (!Utility.isNullOrEmpty(employeeNo)) {
-            queryBuilder.append(" WHERE el.employee.employeeNo like :employeeNo");
-            paramValue.put("employeeNo", "%" + employeeNo + "%");
+        if(!Utility.isNullOrEmpty(contextList)){
+            queryBuilder.append(" WHERE el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+            paramValue.put("teamIds", null);
             hasClause = true;
+        }
+
+        if (!Utility.isNullOrEmpty(employeeNo)) {
+            if(hasClause){
+                queryBuilder.append(" AND el.employee.employeeNo like :employeeNo");
+
+            } else {
+                queryBuilder.append(" WHERE el.employee.employeeNo like :employeeNo");
+                hasClause = true;
+            }
+            paramValue.put("employeeNo", "%" + employeeNo + "%");
         }
 
         if (!Utility.isNullOrEmpty(firstName)) {
@@ -136,10 +148,12 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         if (!Utility.isNullOrEmpty(email)) {
             if (hasClause) {
-                queryBuilder.append(" AND el.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
+                queryBuilder.append(" AND el.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee " +
+                        "WHERE ee.email like :email)");
 
             } else {
-                queryBuilder.append(" WHERE el.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
+                queryBuilder.append(" WHERE el.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee " +
+                        "WHERE ee.email like :email)");
                 hasClause = true;
             }
             paramValue.put("email", "%" + email + "%");
@@ -147,10 +161,12 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         if (!Utility.isNullOrEmpty(phone)) {
             if (hasClause) {
-                queryBuilder.append(" AND el.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
+                queryBuilder.append(" AND el.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec " +
+                        "WHERE ec.phone like :phone)");
 
             } else {
-                queryBuilder.append(" WHERE el.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
+                queryBuilder.append(" WHERE el.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec " +
+                        "WHERE ec.phone like :phone)");
                 hasClause = true;
             }
             paramValue.put("phone", "%" + phone + "%");
@@ -158,26 +174,28 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         if (!Utility.isNullOrEmpty(teamName)) {
             if (hasClause) {
-                queryBuilder.append(" AND el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                queryBuilder.append(" AND el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm " +
+                        "WHERE tm.team.name =:teamName)");
 
             } else {
-                queryBuilder.append(" WHERE el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                queryBuilder.append(" WHERE el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm " +
+                        "WHERE tm.team.name =:teamName)");
                 hasClause = true;
             }
-            paramValue.put("teamName", "%" + teamName + "%");
+            paramValue.put("teamName", teamName);
         }
 
         if (!Utility.isNullOrEmpty(projectName)) {
             if (hasClause) {
                 queryBuilder.append(" AND el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
 
             } else {
                 queryBuilder.append(" WHERE el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
                 hasClause = true;
             }
-            paramValue.put("projectName", "%" + projectName + "%");
+            paramValue.put("projectName", projectName);
         }
 
         if (!Utility.isNullOrEmpty(employeeId)) {
@@ -196,7 +214,12 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
         Query query = session.createQuery(queryBuilder.toString());
 
         for (Map.Entry<String, String> entry : paramValue.entrySet()) {
-            query.setParameter(entry.getKey(), entry.getValue());
+            if(entry.getKey().equals("teamIds")){
+                query.setParameterList(entry.getKey(), contextList);
+
+            } else {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
         }
 
         if (!Utility.isNullOrEmpty(from) && !Utility.isNullOrEmpty(range)) {
@@ -275,7 +298,7 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
                                                        String email, String phone, String teamName, String projectName, String employeeId,
                                                        String leaveType, String requestType, String approvedStartDate, String approvedEndDate,
                                                        String approvedFirstName, String approvedLastName, String approvedNickName, String appliedStartDate,
-                                                       String appliedEndDate, String leaveStatus, String from, String range, String userId) {
+                                                       String appliedEndDate, String leaveStatus, List<String> contextList, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         Map<String, String> paramValue = new HashMap<>();
@@ -283,10 +306,22 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         queryBuilder.append("FROM LeaveRequest lr ");
 
-        if(!Utility.isNullOrEmpty(employeeNo)){
-            queryBuilder.append(" WHERE lr.employee.employeeNo like :employeeNo");
-            paramValue.put("employeeNo", "%" + employeeNo + "%");
+        if(!Utility.isNullOrEmpty(contextList)){
+            queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+            paramValue.put("teamIds", null);
             hasClause = true;
+        }
+
+        if(!Utility.isNullOrEmpty(employeeNo)){
+            if(hasClause){
+                queryBuilder.append(" AND lr.employee.employeeNo like :employeeNo");
+
+            } else {
+                queryBuilder.append(" WHERE lr.employee.employeeNo like :employeeNo");
+                hasClause = true;
+            }
+            paramValue.put("employeeNo", "%" + employeeNo + "%");
         }
 
         if(!Utility.isNullOrEmpty(firstName)){
@@ -324,10 +359,12 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         if(!Utility.isNullOrEmpty(email)){
             if(hasClause) {
-                queryBuilder.append(" AND lr.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
+                queryBuilder.append(" AND lr.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee " +
+                        "WHERE ee.email like :email)");
 
             } else {
-                queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee WHERE ee.email like :email)");
+                queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT ee.employee.employeeId FROM EmployeeEmail ee " +
+                        "WHERE ee.email like :email)");
                 hasClause = true;
             }
             paramValue.put("email", "%" + email + "%");
@@ -335,10 +372,12 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         if(!Utility.isNullOrEmpty(phone)){
             if(hasClause) {
-                queryBuilder.append(" AND lr.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
+                queryBuilder.append(" AND lr.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec " +
+                        "WHERE ec.phone like :phone)");
 
             } else {
-                queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec WHERE ec.phone like :phone)");
+                queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT ec.employee.employeeId FROM EmployeeContact ec " +
+                        "WHERE ec.phone like :phone)");
                 hasClause = true;
             }
             paramValue.put("phone", "%" + phone + "%");
@@ -346,26 +385,28 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         if(!Utility.isNullOrEmpty(teamName)){
             if(hasClause) {
-                queryBuilder.append(" AND lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                queryBuilder.append(" AND lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm " +
+                        "WHERE tm.team.name =:teamName)");
 
             } else {
-                queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm " +
+                        "WHERE tm.team.name =:teamName)");
                 hasClause = true;
             }
-            paramValue.put("teamName", "%" + teamName + "%");
+            paramValue.put("teamName", teamName);
         }
 
         if(!Utility.isNullOrEmpty(projectName)){
             if(hasClause){
                 queryBuilder.append(" AND lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
 
             } else {
                 queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
                 hasClause = true;
             }
-            paramValue.put("projectName", "%" + projectName + "%");
+            paramValue.put("projectName", projectName);
         }
 
         if(!Utility.isNullOrEmpty(leaveType)){
@@ -503,6 +544,9 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
             if(entry.getKey().equals("appliedStartDate") || entry.getKey().equals("appliedEndDate")
                     || entry.getKey().equals("approvedStartDate") || entry.getKey().equals("approvedEndDate")){
                 query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));
+
+            } else if(entry.getKey().equals("teamIds")){
+                query.setParameterList(entry.getKey(), contextList);
 
             } else {
                 query.setParameter(entry.getKey(), entry.getValue());
@@ -657,14 +701,15 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
         paramValue.put("userId", userId);
 
         if(!Utility.isNullOrEmpty(teamName)){
-            queryBuilder.append(" AND lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
-            paramValue.put("teamName", "%" + teamName + "%");
+            queryBuilder.append(" AND lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm " +
+                    "WHERE tm.team.name =:teamName)");
+            paramValue.put("teamName", teamName);
         }
 
         if(!Utility.isNullOrEmpty(projectName)){
             queryBuilder.append(" AND lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
-            paramValue.put("projectName", "%" + projectName + "%");
+                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
+            paramValue.put("projectName", projectName);
         }
 
         if(!Utility.isNullOrEmpty(leaveCnt)){

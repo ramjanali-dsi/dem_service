@@ -47,7 +47,10 @@ public class WFHResource {
         String context = request.getAttribute("context") != null ?
                 request.getAttribute("context").toString() : null;
 
-        return Response.ok().entity(wfhService.searchOrReadEmployeesWFHRequests(date, reason, statusId, employeeNo, firstName,
+        String userID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+
+        return Response.ok().entity(wfhService.searchOrReadEmployeesWFHRequests(userID, date, reason, statusId, employeeNo, firstName,
                 lastName, nickName, wfhId, context, from, range)).build();
     }
 

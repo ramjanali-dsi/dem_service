@@ -36,7 +36,7 @@ public class MyWFHResource {
     })
     public Response searchOrReadEmployeesWFHRequests(@QueryParam("date") String date,
                                                      @QueryParam("reason") String reason,
-                                                     @QueryParam("statusId") String statusId,
+                                                     @QueryParam("workFromHomeStatusName") String statusName,
                                                      @QueryParam("from") String from,
                                                      @QueryParam("range") String range) throws CustomException {
 
@@ -44,7 +44,7 @@ public class MyWFHResource {
                 request.getAttribute("user_id").toString() : null;
 
         return Response.ok().entity(wfhService.searchOrReadWorkFormHomeRequests
-                (userID, date, reason, statusId, from, range)).build();
+                (userID, date, reason, statusName, from, range)).build();
     }
 
     @PATCH

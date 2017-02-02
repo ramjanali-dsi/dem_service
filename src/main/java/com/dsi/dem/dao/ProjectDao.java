@@ -1,5 +1,6 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.*;
 import org.hibernate.Session;
@@ -19,7 +20,7 @@ public interface ProjectDao {
     Project getProjectByName(String name);
     List<Project> getAllProjects();
     List<Project> searchProjects(String projectName, String status, String clientName, String teamName,
-                                 String memberName, List<String> contextList, String from, String range);
+                                 String memberName, ContextDto contextDto, String from, String range);
 
     List<TeamMember> getTeamMembersByProjectId(String projectId);
     ProjectStatus getProjectStatusById(String statusID);

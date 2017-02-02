@@ -349,7 +349,7 @@ public class Test {
         System.out.println("New body: " + newBody);*/
 
 
-        Date date = new Date();
+        /*Date date = new Date();
 
         date.setTime(date.getTime() + 86400000 + 86400000 + 86400000 + 86400000);
         System.out.println("Current date: " + date);
@@ -358,7 +358,8 @@ public class Test {
 
         } else {
             System.out.println("Not weekend.");
-        }
+        }*/
+
     }
 
     private static void myLeaveRequestPatch() {

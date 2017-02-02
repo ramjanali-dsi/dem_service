@@ -85,7 +85,10 @@ public class LeaveRequestResource {
         String context = request.getAttribute("context") != null ?
                 request.getAttribute("context").toString() : null;
 
-        return Response.ok().entity(leaveService.searchOrReadLeaveDetails(employeeNo, firstName, lastName, nickName, email,
+        String userID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+
+        return Response.ok().entity(leaveService.searchOrReadLeaveDetails(userID, employeeNo, firstName, lastName, nickName, email,
                 phone, teamName, projectName, employeeId, leaveType, requestType, approvedStartDate, approvedEndDate,
                 approvedFirstName, approvedLastName, approvedNickName, appliedStartDate, appliedEndDate, leaveStatus,
                 context, from, range)).build();

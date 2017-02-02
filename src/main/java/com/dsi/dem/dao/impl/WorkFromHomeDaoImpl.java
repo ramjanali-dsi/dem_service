@@ -1,6 +1,7 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.WorkFromHomeDao;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.WorkFormHomeStatus;
@@ -99,7 +100,7 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
     }
 
     @Override
-    public List<WorkFromHome> searchOrReadWorkFromHomeRequest(String userId, String applyDate, String reason, String statusId,
+    public List<WorkFromHome> searchOrReadWorkFromHomeRequest(String userId, String applyDate, String reason, String statusName,
                                                               String from, String range) {
         StringBuilder queryBuilder = new StringBuilder();
         Map<String, String> paramValue = new HashMap<>();
@@ -112,9 +113,9 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
             paramValue.put("reason", "%" + reason + "%");
         }
 
-        if(!Utility.isNullOrEmpty(statusId)){
-            queryBuilder.append(" AND wfh.status.workFromHomeStatusId =:statusId");
-            paramValue.put("statusId", statusId);
+        if(!Utility.isNullOrEmpty(statusName)){
+            queryBuilder.append(" AND wfh.status.workFromHomeStatusName =:statusName");
+            paramValue.put("statusName", statusName);
         }
 
         if(!Utility.isNullOrEmpty(applyDate)){
@@ -237,9 +238,9 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
     }
 
     @Override
-    public List<WorkFromHome> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId, String employeeNo,
+    public List<WorkFromHome> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusId, String employeeNo,
                                                                String firstName, String lastName, String nickName, String wfhId,
-                                                               List<String> contextList, String from, String range) {
+                                                               ContextDto contextDto, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         Map<String, String> paramValue = new HashMap<>();
@@ -247,11 +248,29 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
 
         queryBuilder.append("FROM WorkFromHome wfh ");
 
-        if(!Utility.isNullOrEmpty(contextList)){
-            queryBuilder.append(" WHERE wfh.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
-                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
-            paramValue.put("teamIds", null);
-            hasClause = true;
+        if(contextDto != null) {
+            if (!Utility.isNullOrEmpty(contextDto.getTeamId())) {
+                queryBuilder.append(" WHERE wfh.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                        "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+                paramValue.put("teamIds", null);
+                hasClause = true;
+
+            } else if (!Utility.isNullOrEmpty(contextDto.getEmployeeId())) {
+                queryBuilder.append(" WHERE wfh.employee.employeeId =:employeeId)");
+                paramValue.put("employeeId", contextDto.getEmployeeId());
+                hasClause = true;
+            }
+        }
+
+        if(!Utility.isNullOrEmpty(userId)) {
+            if (hasClause) {
+                queryBuilder.append(" AND wfh.employee.userId !=:userId");
+
+            } else {
+                queryBuilder.append(" WHERE wfh.employee.userId !=:userId");
+                hasClause = true;
+            }
+            paramValue.put("userId", userId);
         }
 
         if(!Utility.isNullOrEmpty(employeeNo)){
@@ -350,8 +369,8 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
             if(entry.getKey().equals("applyDate")) {
                 query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));
 
-            } else if(entry.getKey().equals("teamIds")){
-                query.setParameterList(entry.getKey(), contextList);
+            } else if(entry.getKey().equals("teamIds") && contextDto != null){
+                query.setParameterList(entry.getKey(), contextDto.getTeamId());
 
             } else {
                 query.setParameter(entry.getKey(), entry.getValue());

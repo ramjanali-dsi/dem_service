@@ -1,5 +1,6 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.AttendanceStatus;
 import com.dsi.dem.model.DraftAttendance;
@@ -25,7 +26,7 @@ public interface AttendanceDao {
     List<EmployeeAttendance> getAllAttendancesByDate(Date attendanceDate);
     List<EmployeeAttendance> searchOrReadAttendances(String employeeNo, String isAbsent, String firstName,
                                                      String lastName, String nickName, String attendanceDate, String teamName,
-                                                     String projectName, List<String> contextList, String from, String range);
+                                                     String projectName, ContextDto contextDto, String from, String range);
 
     boolean isAvailableEmployeeOrTempAttendanceSheet(Date attendanceDate);
 

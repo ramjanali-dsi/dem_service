@@ -1,5 +1,6 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.model.*;
 import org.hibernate.Session;
 
@@ -22,7 +23,7 @@ public interface EmployeeDao {
     List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                    String accountID, String ipAddress, String nationalID, String tinID,
                                    String phone, String email, String active, String joiningDate, String teamName,
-                                   String projectName, String myId, List<String> contextList, String from, String range);
+                                   String projectName, String myId, ContextDto contextDto, String from, String range);
 
     boolean isEmployeeLinkWithTeamOrLeaveOrAttendance(String employeeId);
     boolean checkEmployeeAsLead(String employeeId);

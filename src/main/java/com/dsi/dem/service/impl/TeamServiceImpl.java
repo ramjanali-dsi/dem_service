@@ -7,6 +7,7 @@ import com.dsi.dem.dao.TeamDao;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.ProjectDaoImpl;
 import com.dsi.dem.dao.impl.TeamDaoImpl;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.dto.TeamDto;
 import com.dsi.dem.dto.TeamMemberDto;
 import com.dsi.dem.dto.TeamProjectDto;
@@ -106,7 +107,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         try{
             logger.info("User context create/update.");
             callAnotherService.sendPost(APIProvider.API_USER_CONTEXT, Utility.
-                    getContextObject(leadUserId, team.getTeamId(), 1));
+                    getContextObject(null, leadUserId, team.getTeamId(), 1));
 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
@@ -247,7 +248,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         try{
             logger.info("Remove user context.");
             callAnotherService.sendPost(APIProvider.API_USER_CONTEXT, Utility.
-                    getContextObject(leadMember.getEmployee().getUserId(), teamID, 2));
+                    getContextObject(null, leadMember.getEmployee().getUserId(), teamID, 2));
 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
@@ -335,9 +336,10 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         Session session = getSession();
         teamDao.setSession(session);
 
-        List<String> contextList = Utility.getContextObj(context);
+        ContextDto contextDto = Utility.getContextDtoObj(context);
+        //List<String> contextList = Utility.getContextObj(context);
         List<Team> teamList = teamDao.searchTeams(teamName, status, floor, room, memberName, projectName, clientName,
-                contextList, from, range);
+                contextDto, from, range);
         if(teamList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,

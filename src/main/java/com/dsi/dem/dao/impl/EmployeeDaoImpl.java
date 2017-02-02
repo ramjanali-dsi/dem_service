@@ -1,6 +1,7 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.EmployeeDao;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.model.*;
 import com.dsi.dem.util.NotificationConstant;
 import com.dsi.dem.util.Utility;
@@ -177,7 +178,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     public List<Employee> searchEmployees(String employeeNo, String firstName, String lastName, String nickName,
                                           String accountID, String ipAddress, String nationalID, String tinID, String phone,
                                           String email, String active, String joiningDate, String teamName, String projectName,
-                                          String myId, List<String> contextList, String from, String range) {
+                                          String myId, ContextDto contextDto, String from, String range) {
 
         Session session = null;
         List<Employee> employeeList = null;
@@ -345,16 +346,28 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 queryBuilder.append(" WHERE e.userId =:userID");
                 paramValue.put("userID", myId);
 
-            } else if(!Utility.isNullOrEmpty(contextList)){
-                if(hasClause){
-                    queryBuilder.append(" AND e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
-                            "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+            } else if(contextDto != null){
 
-                } else {
-                    queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
-                            "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+                if(!Utility.isNullOrEmpty(contextDto.getTeamId())) {
+                    if (hasClause) {
+                        queryBuilder.append(" AND e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                                "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+
+                    } else {
+                        queryBuilder.append(" WHERE e.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                                "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+                    }
+                    paramValue.put("teamIds", null);
+
+                } else if(!Utility.isNullOrEmpty(contextDto.getEmployeeId())){
+                    if (hasClause) {
+                        queryBuilder.append(" AND e.employeeId =:employeeId");
+
+                    } else {
+                        queryBuilder.append(" WHERE e.employeeId =:employeeId");
+                    }
+                    paramValue.put("employeeId", contextDto.getEmployeeId());
                 }
-                paramValue.put("teamIds", null);
             }
 
             queryBuilder.append(" ORDER BY e.createdDate DESC");
@@ -366,8 +379,8 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 if(entry.getKey().equals("active")){
                     query.setParameter(entry.getKey(), entry.getValue().equals("true"));
 
-                } else if(entry.getKey().equals("teamIds")){
-                    query.setParameterList(entry.getKey(), contextList);
+                } else if(entry.getKey().equals("teamIds") && contextDto != null){
+                    query.setParameterList(entry.getKey(), contextDto.getTeamId());
 
                 } else if(entry.getKey().equals("joiningDate")){
                     query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));

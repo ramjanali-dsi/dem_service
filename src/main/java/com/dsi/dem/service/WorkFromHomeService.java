@@ -16,11 +16,11 @@ public interface WorkFromHomeService {
     WorkFromHomeDto updateWorkFromHomeRequest(WorkFromHomeDto workFromHomeDto, String userId,
                                               String tenantName) throws CustomException;
     WorkFromHomeDto getWorkFromHomeRequestById(String wfhId) throws CustomException;
-    List<WorkFromHomeDto> searchOrReadWorkFormHomeRequests(String userId, String date, String reason, String statusId,
+    List<WorkFromHomeDto> searchOrReadWorkFormHomeRequests(String userId, String date, String reason, String statusName,
                                                            String from, String range) throws CustomException;
 
     WorkFromHomeDetails approveWFHRequest(WorkFromHomeDto wfhDto, String userId, String tenantName) throws CustomException;
-    List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId, String employeeNo,
+    List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusId, String employeeNo,
                                                                String firstName, String lastName, String nickName, String wfhId,
                                                                String context, String from, String range) throws CustomException;
 }

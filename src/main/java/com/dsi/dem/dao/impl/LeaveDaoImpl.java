@@ -1,6 +1,7 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.LeaveDao;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
@@ -87,7 +88,7 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
     @Override
     public List<EmployeeLeave> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
                                                                  String email, String phone, String teamName, String projectName,
-                                                                 String employeeId, List<String> contextList, String from, String range) {
+                                                                 String employeeId, ContextDto contextDto, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         Map<String, String> paramValue = new HashMap<>();
@@ -95,11 +96,18 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         queryBuilder.append("FROM EmployeeLeave el ");
 
-        if(!Utility.isNullOrEmpty(contextList)){
-            queryBuilder.append(" WHERE el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
-                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
-            paramValue.put("teamIds", null);
-            hasClause = true;
+        if(contextDto != null) {
+            if (!Utility.isNullOrEmpty(contextDto.getTeamId())) {
+                queryBuilder.append(" WHERE el.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                        "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+                paramValue.put("teamIds", null);
+                hasClause = true;
+
+            } else if (!Utility.isNullOrEmpty(contextDto.getEmployeeId())) {
+                queryBuilder.append(" WHERE el.employee.employeeId =:employeeId");
+                paramValue.put("employeeId", contextDto.getEmployeeId());
+                hasClause = true;
+            }
         }
 
         if (!Utility.isNullOrEmpty(employeeNo)) {
@@ -214,8 +222,8 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
         Query query = session.createQuery(queryBuilder.toString());
 
         for (Map.Entry<String, String> entry : paramValue.entrySet()) {
-            if(entry.getKey().equals("teamIds")){
-                query.setParameterList(entry.getKey(), contextList);
+            if(entry.getKey().equals("teamIds") && contextDto != null){
+                query.setParameterList(entry.getKey(), contextDto.getTeamId());
 
             } else {
                 query.setParameter(entry.getKey(), entry.getValue());
@@ -294,11 +302,11 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
     }
 
     @Override
-    public List<LeaveRequest> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName,
+    public List<LeaveRequest> searchOrReadLeaveDetails(String userId, String employeeNo, String firstName, String lastName, String nickName,
                                                        String email, String phone, String teamName, String projectName, String employeeId,
                                                        String leaveType, String requestType, String approvedStartDate, String approvedEndDate,
                                                        String approvedFirstName, String approvedLastName, String approvedNickName, String appliedStartDate,
-                                                       String appliedEndDate, String leaveStatus, List<String> contextList, String from, String range) {
+                                                       String appliedEndDate, String leaveStatus, ContextDto contextDto, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         Map<String, String> paramValue = new HashMap<>();
@@ -306,11 +314,29 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
 
         queryBuilder.append("FROM LeaveRequest lr ");
 
-        if(!Utility.isNullOrEmpty(contextList)){
-            queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
-                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
-            paramValue.put("teamIds", null);
-            hasClause = true;
+        if(contextDto != null) {
+            if (!Utility.isNullOrEmpty(contextDto.getTeamId())) {
+                queryBuilder.append(" WHERE lr.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                        "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+                paramValue.put("teamIds", null);
+                hasClause = true;
+
+            } else if (!Utility.isNullOrEmpty(contextDto.getEmployeeId())) {
+                queryBuilder.append(" WHERE lr.employee.employeeId =:employeeId");
+                paramValue.put("employeeId", contextDto.getEmployeeId());
+                hasClause = true;
+            }
+        }
+
+        if(!Utility.isNullOrEmpty(userId)) {
+            if (hasClause) {
+                queryBuilder.append(" AND lr.employee.userId !=:userId");
+
+            } else {
+                queryBuilder.append(" WHERE lr.employee.userId !=:userId");
+                hasClause = true;
+            }
+            paramValue.put("userId", userId);
         }
 
         if(!Utility.isNullOrEmpty(employeeNo)){
@@ -545,8 +571,8 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
                     || entry.getKey().equals("approvedStartDate") || entry.getKey().equals("approvedEndDate")){
                 query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));
 
-            } else if(entry.getKey().equals("teamIds")){
-                query.setParameterList(entry.getKey(), contextList);
+            } else if(entry.getKey().equals("teamIds") && contextDto != null){
+                query.setParameterList(entry.getKey(), contextDto.getTeamId());
 
             } else {
                 query.setParameter(entry.getKey(), entry.getValue());

@@ -4,6 +4,7 @@ import com.dsi.dem.dao.EmployeeDao;
 import com.dsi.dem.dao.TeamDao;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.TeamDaoImpl;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
@@ -75,8 +76,11 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             saveEmployeesDesignation(employeeDesignationList, employee);
             saveEmployeesEmails(employeeEmailList, employee);
             saveEmployeesContacts(employeeContactList, employee);
-
             logger.info("Employee Create:: End");
+
+            logger.info("User context create.");
+            callAnotherService.sendPost(APIProvider.API_USER_CONTEXT, Utility.
+                    getContextObject(employee, employee.getUserId(), null, 1));
 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
@@ -454,9 +458,10 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                 throw new CustomException(errorMessage);
             }
         }
-        List<String> contextList = Utility.getContextObj(context);
+
+        ContextDto contextDto = Utility.getContextDtoObj(context);
         List<Employee> employeeList = employeeDao.searchEmployees(employeeNo, firstName, lastName, nickName, accountID, ipAddress,
-                nationalID, tinID, phone, email, active, joiningDate, teamName, projectName, myId, contextList, from, range);
+                nationalID, tinID, phone, email, active, joiningDate, teamName, projectName, myId, contextDto, from, range);
         if(employeeList == null){
 
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,

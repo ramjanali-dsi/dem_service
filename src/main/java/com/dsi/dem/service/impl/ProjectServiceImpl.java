@@ -8,6 +8,7 @@ import com.dsi.dem.dao.impl.ClientDaoImpl;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.ProjectDaoImpl;
 import com.dsi.dem.dao.impl.TeamDaoImpl;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.dto.ProjectClientDto;
 import com.dsi.dem.dto.ProjectDto;
 import com.dsi.dem.dto.ProjectTeamDto;
@@ -310,8 +311,9 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         Session session = getSession();
         projectDao.setSession(session);
 
-        List<String> contextList = Utility.getContextObj(context);
-        List<Project> projectList = projectDao.searchProjects(projectName, status, clientName, teamName, memberName, contextList,
+        ContextDto contextDto = Utility.getContextDtoObj(context);
+        //List<String> contextList = Utility.getContextObj(context);
+        List<Project> projectList = projectDao.searchProjects(projectName, status, clientName, teamName, memberName, contextDto,
                 from, range);
         if(projectList == null){
             close(session);

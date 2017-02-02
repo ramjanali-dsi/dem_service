@@ -1,6 +1,7 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.AttendanceDao;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.AttendanceStatus;
@@ -143,7 +144,7 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
     @Override
     public List<EmployeeAttendance> searchOrReadAttendances(String employeeNo, String isAbsent, String firstName,
                                                             String lastName, String nickName, String attendanceDate, String teamName,
-                                                            String projectName, List<String> contextList, String from, String range) {
+                                                            String projectName, ContextDto contextDto, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;
@@ -151,11 +152,18 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
 
         queryBuilder.append("FROM EmployeeAttendance et");
 
-        if(!Utility.isNullOrEmpty(contextList)){
-            queryBuilder.append(" WHERE et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
-                    "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
-            paramValue.put("teamIds", null);
-            hasClause = true;
+        if(contextDto != null) {
+            if (!Utility.isNullOrEmpty(contextDto.getTeamId())) {
+                queryBuilder.append(" WHERE et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember " +
+                        "tm WHERE tm.team.teamId in (:teamIds) GROUP BY tm.employee.employeeId)");
+                paramValue.put("teamIds", null);
+                hasClause = true;
+
+            } else if (!Utility.isNullOrEmpty(contextDto.getEmployeeId())) {
+                queryBuilder.append(" WHERE et.employee.employeeId =:employeeId");
+                paramValue.put("employeeId", contextDto.getEmployeeId());
+                hasClause = true;
+            }
         }
 
         if(!Utility.isNullOrEmpty(employeeNo)){
@@ -256,8 +264,8 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
             if(entry.getKey().equals("absent")){
                 query.setParameter(entry.getKey(), entry.getValue().equals("true"));
 
-            } else if(entry.getKey().equals("teamIds")){
-                query.setParameterList(entry.getKey(), contextList);
+            } else if(entry.getKey().equals("teamIds") && contextDto != null){
+                query.setParameterList(entry.getKey(), contextDto.getTeamId());
 
             } else if(entry.getKey().equals("attendanceDate")){
                 query.setParameter(entry.getKey(), Utility.getDateFromString(entry.getValue()));

@@ -3,6 +3,7 @@ package com.dsi.dem.service.impl;
 import com.dsi.dem.dao.*;
 import com.dsi.dem.dao.impl.*;
 import com.dsi.dem.dto.AttendanceDto;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
@@ -589,9 +590,10 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         Session session = getSession();
         attendanceDao.setSession(session);
 
-        List<String> contextList = Utility.getContextObj(context);
+        ContextDto contextDto = Utility.getContextDtoObj(context);
+        //List<String> contextList = Utility.getContextObj(context);
         List<EmployeeAttendance> attendanceList = attendanceDao.searchOrReadAttendances(employeeNo, isAbsent, firstName,
-                lastName, nickName, attendanceDate, teamName, projectName, contextList, from, range);
+                lastName, nickName, attendanceDate, teamName, projectName, contextDto, from, range);
         if(attendanceList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,

@@ -2,6 +2,7 @@ package com.dsi.dem.service.impl;
 
 import com.dsi.dem.dao.*;
 import com.dsi.dem.dao.impl.*;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.dto.LeaveDetailsDto;
 import com.dsi.dem.dto.LeaveRequestDto;
 import com.dsi.dem.dto.LeaveSummaryDto;
@@ -104,9 +105,10 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         Session session = getSession();
         leaveDao.setSession(session);
 
-        List<String> contextList = Utility.getContextObj(context);
+        ContextDto contextDto = Utility.getContextDtoObj(context);
+        //List<String> contextList = Utility.getContextObj(context);
         List<EmployeeLeave> employeeLeaveList = leaveDao.searchOrReadEmployeesLeaveSummary(employeeNo, firstName, lastName,
-                nickName, email, phone, teamName, projectName, employeeId, contextList, from, range);
+                nickName, email, phone, teamName, projectName, employeeId, contextDto, from, range);
         if(employeeLeaveList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -138,11 +140,14 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     @Override
-    public List<LeaveDetailsDto> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName,
-                                                       String email, String phone, String teamName, String projectName, String employeeId,
-                                                       String leaveType, String requestType, String approvedStartDate, String approvedEndDate,
-                                                       String approvedFirstName, String approvedLastName, String approvedNickName, String appliedStartDate,
-                                                       String appliedEndDate, String leaveStatus, String context, String from, String range) throws CustomException {
+    public List<LeaveDetailsDto> searchOrReadLeaveDetails(String userId, String employeeNo, String firstName, String lastName,
+                                                          String nickName, String email, String phone, String teamName,
+                                                          String projectName, String employeeId, String leaveType, String requestType,
+                                                          String approvedStartDate, String approvedEndDate, String approvedFirstName,
+                                                          String approvedLastName, String approvedNickName, String appliedStartDate,
+                                                          String appliedEndDate, String leaveStatus, String context, String from,
+                                                          String range) throws CustomException {
+
         logger.info("Search or read employees leave details");
         validationDate(appliedStartDate, appliedEndDate, approvedStartDate, approvedEndDate);
 
@@ -150,10 +155,12 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         leaveDao.setSession(session);
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
-        List<String> contextList = Utility.getContextObj(context);
-        List<LeaveRequest> leaveRequestList = leaveDao.searchOrReadLeaveDetails(employeeNo, firstName, lastName, nickName, email, phone,
-                teamName, projectName, employeeId, leaveType, requestType, approvedStartDate, approvedEndDate, approvedFirstName,
-                approvedLastName, approvedNickName, appliedStartDate, appliedEndDate, leaveStatus, contextList, from, range);
+        ContextDto contextDto = Utility.getContextDtoObj(context);
+        List<LeaveRequest> leaveRequestList = leaveDao.searchOrReadLeaveDetails(userId, employeeNo, firstName, lastName, nickName,
+                email, phone, teamName, projectName, employeeId, leaveType, requestType, approvedStartDate, approvedEndDate,
+                approvedFirstName, approvedLastName, approvedNickName, appliedStartDate, appliedEndDate, leaveStatus,
+                contextDto, from, range);
+
         if(leaveRequestList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,

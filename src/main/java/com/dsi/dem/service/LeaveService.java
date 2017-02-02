@@ -16,16 +16,19 @@ public interface LeaveService {
     boolean isAvailableLeaveTypes(String leaveType, String userId) throws CustomException;
     LeaveSummaryDto getEmployeeLeaveSummary(String employeeID) throws CustomException;
     LeaveDetailsDto getEmployeesAllLeaveDetails(String employeeId, String leaveRequestId) throws CustomException;
-    List<LeaveSummaryDto> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
-                                                            String email, String phone, String teamName, String projectName,
-                                                            String employeeId, String context, String from, String range) throws CustomException;
+    List<LeaveSummaryDto> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName,
+                                                            String nickName, String email, String phone, String teamName,
+                                                            String projectName, String employeeId, String context, String from,
+                                                            String range) throws CustomException;
 
     LeaveRequest getEmployeesLeaveDetails(String employeeID) throws CustomException;
-    List<LeaveDetailsDto> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName, String email,
-                                                String phone, String teamName, String projectName, String employeeId, String leaveType,
-                                                String requestType, String approvedStartDate, String approvedEndDate, String approvedFirstName,
-                                                String approvedLastName, String approvedNickName, String appliedStartDate, String appliedEndDate,
-                                                String leaveStatus, String context, String from, String range) throws CustomException;
+    List<LeaveDetailsDto> searchOrReadLeaveDetails(String userId, String employeeNo, String firstName, String lastName,
+                                                   String nickName, String email, String phone, String teamName,
+                                                   String projectName, String employeeId, String leaveType, String requestType,
+                                                   String approvedStartDate, String approvedEndDate, String approvedFirstName,
+                                                   String approvedLastName, String approvedNickName, String appliedStartDate,
+                                                   String appliedEndDate, String leaveStatus, String context, String from,
+                                                   String range) throws CustomException;
 
     LeaveRequestDto approveLeaveRequest(LeaveRequestDto leaveRequestDto, String userId,
                                         String leaveRequestId, String tenantName) throws CustomException;
@@ -37,10 +40,11 @@ public interface LeaveService {
     LeaveRequest getLeaveRequestById(String leaveRequestID, String employeeID) throws CustomException;
     List<LeaveRequest> getLeaveRequestByEmployeeID(String employeeID) throws CustomException;
     List<LeaveRequest> getAllLeaveRequest() throws CustomException;
-    List<LeaveRequestDto> searchOrReadLeaveRequests(String userId, String teamName, String projectName, String leaveCnt, String leaveReason,
-                                                    String leaveType, String leaveStatus, String requestType, String appliedStartDate,
-                                                    String appliedEndDate, String deniedReason, String deniedBy, String leaveRequestId,
-                                                    String from, String range) throws CustomException;
+    List<LeaveRequestDto> searchOrReadLeaveRequests(String userId, String teamName, String projectName, String leaveCnt,
+                                                    String leaveReason, String leaveType, String leaveStatus, String requestType,
+                                                    String appliedStartDate, String appliedEndDate, String deniedReason,
+                                                    String deniedBy, String leaveRequestId, String from,
+                                                    String range) throws CustomException;
 
     LeaveRequestDto saveSpecialLeave(LeaveRequestDto specialLeaveDto, String tenantName) throws CustomException;
     LeaveRequestDto updateSpecialLeave(LeaveRequestDto specialLeaveDto, String leaveRequestId, String tenantName) throws CustomException;

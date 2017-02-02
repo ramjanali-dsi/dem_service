@@ -1,5 +1,6 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.WorkFormHomeStatus;
 import com.dsi.dem.model.WorkFromHome;
@@ -20,7 +21,7 @@ public interface WorkFromHomeDao {
     WorkFromHome getWFHByIdAndUserId(String wfhId, String userId);
     WorkFromHome getWFHByEmployeeIdAndDate(String employeeId, Date date);
     List<WorkFromHome> searchOrReadWorkFromHomeRequest(String userId, String date, String reason,
-                                                       String statusId, String from, String range);
+                                                       String statusName, String from, String range);
 
     int countAppliedWFH(String employeeId);
     int countApprovedWFHForMonth(String employeeId, Date startDate, Date endDate);
@@ -29,7 +30,7 @@ public interface WorkFromHomeDao {
     WorkFormHomeStatus getWFHStatusById(String statusId);
     WorkFormHomeStatus getWFHStatusByName(String name);
 
-    List<WorkFromHome> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId, String employeeNo,
+    List<WorkFromHome> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusId, String employeeNo,
                                                         String firstName, String lastName, String nickName, String wfhId,
-                                                        List<String> contextList, String from, String range);
+                                                        ContextDto contextDto, String from, String range);
 }

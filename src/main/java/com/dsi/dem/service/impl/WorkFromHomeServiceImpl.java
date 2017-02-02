@@ -6,6 +6,7 @@ import com.dsi.dem.dao.WorkFromHomeDao;
 import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.dao.impl.HolidayDaoImpl;
 import com.dsi.dem.dao.impl.WorkFromHomeDaoImpl;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.dto.WorkFromHomeDetails;
 import com.dsi.dem.dto.WorkFromHomeDto;
 import com.dsi.dem.dto.transformer.WFHDtoTransformer;
@@ -211,6 +212,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
 
         } else if(mode == 2){
             logger.info("Cancel mode.");
+            existWFH.setStatus(dao.getWFHStatusByName(Constants.CANCELLER_WFH_REQUEST));
             existWFH.setDeniedReason(workFromHome.getReason());
         }
         existWFH.setLastModifiedDate(Utility.today());
@@ -226,10 +228,10 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
             JSONArray notificationList = new JSONArray();
 
             hrEmailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, hrEmailList);
+            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, hrEmailList);
 
             leadEmails = new JSONArray();
-            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(workFromHome.getEmployee().getEmployeeId());
+            List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(existWFH.getEmployee().getEmployeeId());
             if (!Utility.isNullOrEmpty(teamLeads)) {
                 for (Employee teamLead : teamLeads) {
                     leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
@@ -241,7 +243,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                         NotificationConstant.WFH_PENDING_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if (leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.WFH_PENDING_TEMPLATE_ID_FOR_LEAD));
                 }
@@ -251,7 +253,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                         NotificationConstant.WFH_PENDING_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if (leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.WFH_PENDING_CANCEL_TEMPLATE_ID_FOR_LEAD));
                 }
@@ -261,7 +263,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                         NotificationConstant.WFH_APPROVED_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if (leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.WFH_APPROVED_CANCEL_TEMPLATE_ID_FOR_LEAD));
                 }
@@ -327,7 +329,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
     }
 
     @Override
-    public List<WorkFromHomeDto> searchOrReadWorkFormHomeRequests(String userId, String date, String reason, String statusId,
+    public List<WorkFromHomeDto> searchOrReadWorkFormHomeRequests(String userId, String date, String reason, String statusName,
                                                                   String from, String range) throws CustomException {
 
         logger.info("Search or read employees work from home requests by user id: " + userId);
@@ -340,7 +342,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
         Session session = getSession();
         dao.setSession(session);
 
-        List<WorkFromHome> workFromHomeList = dao.searchOrReadWorkFromHomeRequest(userId, date, reason, statusId, from, range);
+        List<WorkFromHome> workFromHomeList = dao.searchOrReadWorkFromHomeRequest(userId, date, reason, statusName, from, range);
         if(workFromHomeList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
@@ -378,7 +380,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
             throw new CustomException(errorMessage);
         }
 
-        WorkFormHomeStatus status = dao.getWFHStatusById(wfhDto.getWorkFromHomeStatusId());
+        WorkFormHomeStatus status = dao.getWFHStatusByName(wfhDto.getWorkFromHomeStatusName());
         existWFH.setApprovedDate(Utility.today());
         existWFH.setLastModifiedDate(Utility.today());
         existWFH.setApprovedBy(userId);
@@ -455,7 +457,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
     }
 
     @Override
-    public List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String date, String reason, String statusId, String employeeNo,
+    public List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusId, String employeeNo,
                                                                       String firstName, String lastName, String nickName, String wfhId,
                                                                       String context, String from, String range) throws CustomException {
 
@@ -470,9 +472,10 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
         dao.setSession(session);
         TRANSFORMER.setSession(session);
 
-        List<String> contextList = Utility.getContextObj(context);
-        List<WorkFromHome> workFromHomeList = dao.searchOrReadEmployeesWFHRequests(date, reason, statusId, employeeNo, firstName,
-                lastName, nickName, wfhId, contextList, from, range);
+        ContextDto contextDto = Utility.getContextDtoObj(context);
+        //List<String> contextList = Utility.getContextObj(context);
+        List<WorkFromHome> workFromHomeList = dao.searchOrReadEmployeesWFHRequests(userId, date, reason, statusId, employeeNo, firstName,
+                lastName, nickName, wfhId, contextDto, from, range);
         if(workFromHomeList == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,

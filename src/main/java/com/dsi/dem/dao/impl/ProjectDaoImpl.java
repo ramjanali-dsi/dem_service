@@ -1,6 +1,7 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.ProjectDao;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.*;
@@ -110,7 +111,7 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
 
     @Override
     public List<Project> searchProjects(String projectName, String status, String clientName, String teamName, String memberName,
-                                        List<String> contextList, String from, String range) {
+                                        ContextDto contextDto, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;
@@ -118,11 +119,19 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
 
         queryBuilder.append("FROM Project p");
 
-        if(!Utility.isNullOrEmpty(contextList)){
-            queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
-                    "WHERE pt.team.teamId in (:teamIds))");
-            paramValue.put("teamIds", null);
-            hasClause = true;
+        if(contextDto != null) {
+            if (!Utility.isNullOrEmpty(contextDto.getTeamId())) {
+                queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                        "WHERE pt.team.teamId in (:teamIds))");
+                paramValue.put("teamIds", null);
+                hasClause = true;
+
+            } else if (!Utility.isNullOrEmpty(contextDto.getEmployeeId())) {
+                queryBuilder.append(" WHERE p.projectId in (SELECT pt.project.projectId FROM ProjectTeam pt " +
+                        "WHERE pt.team.teamId in (SELECT tm.team.teamId FROm TeamMember tm WHERE tm.employee.employeeId =:employeeId))");
+                paramValue.put("employeeId", contextDto.getEmployeeId());
+                hasClause = true;
+            }
         }
 
         if(!Utility.isNullOrEmpty(projectName)){
@@ -194,8 +203,8 @@ public class ProjectDaoImpl extends CommonService implements ProjectDao {
         Query query = session.createQuery(queryBuilder.toString());
 
         for(Map.Entry<String, String> entry : paramValue.entrySet()){
-            if(entry.getKey().equals("teamIds")){
-                query.setParameterList(entry.getKey(), contextList);
+            if(entry.getKey().equals("teamIds") && contextDto != null){
+                query.setParameterList(entry.getKey(), contextDto.getTeamId());
 
             } else {
                 query.setParameter(entry.getKey(), entry.getValue());

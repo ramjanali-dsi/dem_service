@@ -1,5 +1,6 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.*;
 import org.hibernate.Session;
@@ -18,17 +19,18 @@ public interface LeaveDao {
     void updateEmployeeLeaveSummary(EmployeeLeave leaveSummary) throws CustomException;
     List<EmployeeLeave> searchOrReadEmployeesLeaveSummary(String employeeNo, String firstName, String lastName, String nickName,
                                                           String email, String phone, String teamName, String projectName,
-                                                          String employeeId, List<String> contextList, String from, String range);
+                                                          String employeeId, ContextDto contextDto, String from, String range);
 
     LeaveRequest getEmployeesLeaveDetails(String employeeID);
     boolean checkWFHRequest(String employeeId, Date startDate, Date endDate);
     boolean alreadyApprovedLeaveExist(String employeeID, Date leaveStartDate);
     int getLeaveCountByStatus(String employeeID, String statusName);
-    List<LeaveRequest> searchOrReadLeaveDetails(String employeeNo, String firstName, String lastName, String nickName, String email,
-                                                String phone, String teamName, String projectName, String employeeId, String leaveType,
-                                                String requestType, String approvedStartDate, String approvedEndDate, String approvedFirstName,
-                                                String approvedLastName, String approvedNickName, String appliedStartDate, String appliedEndDate,
-                                                String leaveStatus, List<String> contextList, String from, String range);
+    List<LeaveRequest> searchOrReadLeaveDetails(String userId, String employeeNo, String firstName, String lastName, String nickName,
+                                                String email, String phone, String teamName, String projectName, String employeeId,
+                                                String leaveType, String requestType, String approvedStartDate, String approvedEndDate,
+                                                String approvedFirstName, String approvedLastName, String approvedNickName,
+                                                String appliedStartDate, String appliedEndDate, String leaveStatus, ContextDto contextDto,
+                                                String from, String range);
 
     LeaveType getLeaveTypeByID(String leaveTypeId);
     LeaveRequestType getLeaveRequestTypeByID(String leaveRequestTypeId);

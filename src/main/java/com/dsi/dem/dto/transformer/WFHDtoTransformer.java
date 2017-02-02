@@ -63,7 +63,7 @@ public class WFHDtoTransformer extends CommonService {
             BeanUtils.copyProperties(wfhDto, workFromHome.getEmployee());
 
             if(workFromHome.getApprovedBy() != null){
-                Employee approvedBy = employeeDao.getEmployeeByID(workFromHome.getApprovedBy());
+                Employee approvedBy = employeeDao.getEmployeeByUserID(workFromHome.getApprovedBy());
                 String name = approvedBy.getFirstName();
                 if (approvedBy.getLastName() != null) {
                     name += " " + approvedBy.getLastName();

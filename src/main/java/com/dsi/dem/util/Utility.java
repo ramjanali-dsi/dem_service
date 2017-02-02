@@ -1,5 +1,6 @@
 package com.dsi.dem.util;
 
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Employee;
@@ -249,11 +250,20 @@ public class Utility {
         return userObject.toString();
     }
 
-    public static String getContextObject(String leadUserId, String teamId, int activity) throws JSONException {
+    public static String getContextObject(Employee employee, String userId,
+                                          String teamId, int activity) throws JSONException {
         JSONArray contextArray = new JSONArray();
         JSONObject contextObj = new JSONObject();
-        contextObj.put("teamId", teamId);
-        contextObj.put("userId", leadUserId);
+
+        if(employee != null){
+            contextObj.put("employeeId", employee.getEmployeeId());
+        }
+
+        if(teamId != null) {
+            contextObj.put("teamId", teamId);
+        }
+
+        contextObj.put("userId", userId);
         contextObj.put("activity", activity);
 
         contextArray.put(contextObj);
@@ -278,19 +288,56 @@ public class Utility {
         return contextArray.toString();
     }
 
-    public static List<String> getContextObj(String context) throws CustomException {
+    public static ContextDto getContextDtoObj(String context) throws CustomException {
+        ContextDto contextDto = new ContextDto();
         List<String> contextList;
         JSONObject contextObj;
+        JSONArray contextArray;
         try{
             if(context != null) {
                 contextList = new ArrayList<>();
                 contextObj = new JSONObject(context);
-                JSONArray contextArray = contextObj.getJSONArray("team");
+                if(contextObj.has("teamId")) {
+                    contextArray = contextObj.getJSONArray("teamId");
 
-                for (int i = 0; i < contextArray.length(); i++) {
-                    contextList.add(contextArray.getString(i));
+                    for (int i = 0; i < contextArray.length(); i++) {
+                        contextList.add(contextArray.getString(i));
+                    }
+                    contextDto.setTeamId(contextList);
                 }
-                return contextList;
+
+                if(contextObj.has("employeeId")){
+                    contextArray = contextObj.getJSONArray("employeeId");
+                    contextDto.setEmployeeId(contextArray.getString(0));
+                }
+                return contextDto;
+            }
+
+        } catch (JSONException je){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
+                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
+            throw new CustomException(errorMessage);
+        }
+        return null;
+    }
+
+    public static List<String> getContextObj(String context) throws CustomException {
+        List<String> contextList;
+        JSONObject contextObj;
+        JSONArray contextArray;
+        try{
+            if(context != null) {
+                contextList = new ArrayList<>();
+                contextObj = new JSONObject(context);
+                if(contextObj.has("teamId")) {
+                    contextArray = contextObj.getJSONArray("teamId");
+
+                    for (int i = 0; i < contextArray.length(); i++) {
+                        contextList.add(contextArray.getString(i));
+                    }
+
+                    return contextList;
+                }
             }
 
         } catch (JSONException je){

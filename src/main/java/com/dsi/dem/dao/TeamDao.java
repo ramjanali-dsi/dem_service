@@ -1,5 +1,6 @@
 package com.dsi.dem.dao;
 
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.ProjectTeam;
 import com.dsi.dem.model.RoleType;
@@ -22,7 +23,7 @@ public interface TeamDao {
     Team getTeamByName(String teamName);
     List<Team> getAllTeams();
     List<Team> searchTeams(String teamName, String status, String floor, String room, String memberName, String projectName,
-                           String clientName, List<String> contextList, String from, String range);
+                           String clientName, ContextDto contextDto, String from, String range);
 
     RoleType getRoleTypeByRoleId(String roleId);
 

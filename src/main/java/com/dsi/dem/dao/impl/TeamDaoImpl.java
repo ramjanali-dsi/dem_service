@@ -1,6 +1,7 @@
 package com.dsi.dem.dao.impl;
 
 import com.dsi.dem.dao.TeamDao;
+import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.ProjectTeam;
@@ -114,7 +115,7 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
 
     @Override
     public List<Team> searchTeams(String teamName, String status, String floor, String room, String memberName,
-                                  String projectName, String clientName, List<String> contextList, String from, String range) {
+                                  String projectName, String clientName, ContextDto contextDto, String from, String range) {
 
         StringBuilder queryBuilder = new StringBuilder();
         boolean hasClause = false;
@@ -122,10 +123,18 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
 
         queryBuilder.append("FROM Team t");
 
-        if(!Utility.isNullOrEmpty(contextList)){
-            queryBuilder.append(" WHERE t.teamId in (:teamIds)");
-            paramValue.put("teamIds", null);
-            hasClause = true;
+        if(contextDto != null) {
+            if (!Utility.isNullOrEmpty(contextDto.getTeamId())) {
+                queryBuilder.append(" WHERE t.teamId in (:teamIds)");
+                paramValue.put("teamIds", null);
+                hasClause = true;
+
+            } else if (!Utility.isNullOrEmpty(contextDto.getEmployeeId())) {
+                queryBuilder.append(" WHERE t.teamId in (SELECT tm.team.teamId FROM TeamMember tm " +
+                        "WHERE tm.employee.employeeId =:employeeId)");
+                paramValue.put("employeeId", contextDto.getEmployeeId());
+                hasClause = true;
+            }
         }
 
         if(!Utility.isNullOrEmpty(teamName)){
@@ -220,8 +229,8 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
             if(entry.getKey().equals("active")){
                 query.setParameter(entry.getKey(), entry.getValue().equals("true"));
 
-            } else if(entry.getKey().equals("teamIds")){
-                query.setParameterList(entry.getKey(), contextList);
+            } else if(entry.getKey().equals("teamIds") && contextDto != null){
+                query.setParameterList(entry.getKey(), contextDto.getTeamId());
 
             } else {
                 query.setParameter(entry.getKey(), entry.getValue());

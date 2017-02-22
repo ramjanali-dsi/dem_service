@@ -749,9 +749,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             logger.info("Employee leave summary updated.");
         }
         logger.info("Employees leave request update:: End");
-
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(existLeaveRequest);
-        close(session);
 
         logger.info("Notification create:: Start");
         JSONObject globalContentObj;
@@ -762,12 +760,11 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             leadEmails = new JSONArray();
             memberEmails = new JSONArray();
             hrManagerEmailList = notificationService.getHrManagerEmailList();
-            globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+            globalContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
 
-            session = getSession();
             teamDao.setSession(session);
             clientDao.setSession(session);
-            List<TeamMember> teamMemberList = teamDao.getTeamMembers(null, leaveRequest.getEmployee().getEmployeeId());
+            List<TeamMember> teamMemberList = teamDao.getTeamMembers(null, existLeaveRequest.getEmployee().getEmployeeId());
 
             if(!Utility.isNullOrEmpty(teamMemberList)){
 
@@ -782,7 +779,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 }
             }
 
-            JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, leadEmails);
+            JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, leadEmails);
 
             if(mode == 1) {
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
@@ -803,24 +800,24 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 }
 
             } else if(mode == 2 && existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
-                globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, hrManagerEmailList);
+                globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if(leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, leadEmails);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_LEAD));
                 }
 
                 if(memberEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, memberEmails);
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, memberEmails);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MEMBERS));
                 }
 
                 if(leaveRequest.isClientNotify()){
-                    List<Client> clientList = clientDao.getAllClientsByEmployeeId(leaveRequest.getEmployee().getEmployeeId());
+                    List<Client> clientList = clientDao.getAllClientsByEmployeeId(existLeaveRequest.getEmployee().getEmployeeId());
 
                     if(!Utility.isNullOrEmpty(clientList)){
                         JSONArray emailList = new JSONArray();
@@ -830,18 +827,18 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                             }
                         }
 
-                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest, tenantName, emailList);
+                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, emailList);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_CLIENT));
                     }
                 }
             }
             close(session);
-
             notificationService.createNotification(notificationList.toString());
             logger.info("Notification create:: End");
 
         } catch (JSONException je){
+            close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
             throw new CustomException(errorMessage);

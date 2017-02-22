@@ -225,8 +225,14 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 attendance.setAbsent(attendanceDto.isAbsent());
                 attendance.setCheckInTime(attendanceDto.getCheckInTime());
                 attendance.setCheckOutTime(attendanceDto.getCheckOutTime());
-                attendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
-                        attendanceDto.getCheckOutTime()));
+
+                if(attendanceDto.isAbsent()){
+                    attendance.setTotalHour(attendanceDto.getTotalHour());
+
+                } else {
+                    attendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
+                            attendanceDto.getCheckOutTime()));
+                }
 
                 attendance.setEmployee(temporaryAttendance.getEmployee());
                 attendance.setAttendanceDate(temporaryAttendance.getAttendanceDate());

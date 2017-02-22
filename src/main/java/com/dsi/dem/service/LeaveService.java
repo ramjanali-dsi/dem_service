@@ -6,6 +6,7 @@ import com.dsi.dem.dto.LeaveSummaryDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.model.LeaveRequest;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -52,4 +53,6 @@ public interface LeaveService {
     List<LeaveDetailsDto> searchOrReadAllSpecialLeave(String employeeNo, String firstName, String lastName,
                                                       String nickName, String leaveStatus, String leaveType, String requestType,
                                                       String leaveRequestId, String from, String range) throws CustomException;
+
+    void getPendingLeaveApplication(Date date);
 }

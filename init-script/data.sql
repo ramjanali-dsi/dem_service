@@ -83,19 +83,17 @@ VALUES ('bc524e71-a785-40b3-9f5c-81e610dd994a', '', '2016-08-10 00:00:00', b'1',
 
 ------ HR & Manager Menu
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('8176dae9-c6c0-4d7b-8112-4e2875e42a6b', 'Home Panel', b'1', 'Home', '1', NULL, '1');
+VALUES ('79d53582-ed8c-47a3-b734-f41651f688ad', 'Employee Management', b'1', 'Employee', '1', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('79d53582-ed8c-47a3-b734-f41651f688ad', 'Employee Management', b'1', 'Employee', '2', NULL, '1');
+VALUES ('136e5d70-c4bf-4d63-832e-afe51a2b8606', 'Team Management', b'1', 'Team', '2', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('136e5d70-c4bf-4d63-832e-afe51a2b8606', 'Team Management', b'1', 'Team', '3', NULL, '1');
+VALUES ('3809289a-ba52-42d2-8b5e-a54d5e5a51b8', 'Project Management', b'1', 'Project', '3', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('3809289a-ba52-42d2-8b5e-a54d5e5a51b8', 'Project Management', b'1', 'Project', '4', NULL, '1');
+VALUES ('adccaaab-6b78-438b-a8e2-32bb41cac366', 'Client Management', b'1', 'Client', '4', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('adccaaab-6b78-438b-a8e2-32bb41cac366', 'Client Management', b'1', 'Client', '5', NULL, '1');
+VALUES ('108be377-64bc-4877-92fd-00fca650eedb', 'Leave Management', b'1', 'Leave', '5', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('108be377-64bc-4877-92fd-00fca650eedb', 'Leave Management', b'1', 'Leave', '6', NULL, '1');
-INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('bf29b1c9-ef67-4475-9364-d4c044b26925', 'Attendance Management', b'1', 'Attendance', '7', NULL, '1');
+VALUES ('bf29b1c9-ef67-4475-9364-d4c044b26925', 'Attendance Management', b'1', 'Attendance', '6', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('25037cc4-21ad-48f2-bee8-cc39151b9c79', 'Attendance History', b'1', 'History', '2', 'bf29b1c9-ef67-4475-9364-d4c044b26925', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
@@ -105,7 +103,9 @@ VALUES ('b40bbe0c-52b6-4a83-a7a8-a5cdb32d909f', 'Work From Home', b'1', 'WFH', '
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('1ab0176c-ad4d-4cce-bda4-dd1b9001150e', 'Pending Work From Home Applications', b'1', 'Pending WFH', '1', 'b40bbe0c-52b6-4a83-a7a8-a5cdb32d909f', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('5c4a7a90-145b-43a5-a68f-35195bc4dd25', 'My Work From Home Applications', b'1', 'My WFH', '2', 'b40bbe0c-52b6-4a83-a7a8-a5cdb32d909f', '1');
+VALUES ('7f68cf98-635e-4ced-98ab-b26c6e4fbd0c', 'Work From Home Details', b'1', 'WFH Details', '2', 'b40bbe0c-52b6-4a83-a7a8-a5cdb32d909f', '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('5c4a7a90-145b-43a5-a68f-35195bc4dd25', 'My Work From Home Applications', b'1', 'My WFH', '3', 'b40bbe0c-52b6-4a83-a7a8-a5cdb32d909f', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('d4465b72-2bc0-4db9-950a-9d22885f6f47', 'Leave Summary History', b'1', 'Leave Summary', '1', '108be377-64bc-4877-92fd-00fca650eedb', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
@@ -117,20 +117,20 @@ VALUES ('6da57037-88af-43db-a871-fd4be7b675be', 'My Leave Applications', b'1', '
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('096e7e16-8439-4cf2-b6c7-0ddb8c749cec', 'Special Leave', b'1', 'Special Leave', '5', '108be377-64bc-4877-92fd-00fca650eedb', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('83ffac93-1403-4eeb-b070-078b768efb5d', 'Holiday Management', b'1', 'Holiday', '8', NULL, '1');
+VALUES ('83ffac93-1403-4eeb-b070-078b768efb5d', 'Holiday Management', b'1', 'Holiday', '7', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('da368c3d-760d-4efc-8864-e845b28e0183', 'Notification Management', b'1', 'Notification', '9', NULL, '1');
+VALUES ('da368c3d-760d-4efc-8864-e845b28e0183', 'Notification Management', b'1', 'Notification', '8', NULL, '1');
 
 
 ---- Lead Menu
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('7141dd5e-1998-4975-90ae-74d6a24fa7cf', 'Employee Management', b'1', 'Employee', '2', NULL, '1');
+VALUES ('7141dd5e-1998-4975-90ae-74d6a24fa7cf', 'Employee Management', b'1', 'Employee', '1', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('b60399fd-dc74-4b81-8bcd-f14c7d38a040', 'Team Management', b'1', 'Team', '3', NULL, '1');
+VALUES ('b60399fd-dc74-4b81-8bcd-f14c7d38a040', 'Team Management', b'1', 'Team', '2', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('c2a9db50-cc20-4a74-a82b-3fe565d577d5', 'Project Management', b'1', 'Project', '4', NULL, '1');
+VALUES ('c2a9db50-cc20-4a74-a82b-3fe565d577d5', 'Project Management', b'1', 'Project', '3', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('d24a40a9-aada-4c7b-b50b-e053a4fbe03d', 'Leave Management', b'1', 'Leave', '5', NULL, '1');
+VALUES ('d24a40a9-aada-4c7b-b50b-e053a4fbe03d', 'Leave Management', b'1', 'Leave', '4', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('da11dd0c-5bc7-42f8-bd1b-62cd7207fee0', 'Leave Summary History', b'1', 'Leave Summary', '1', 'd24a40a9-aada-4c7b-b50b-e053a4fbe03d', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
@@ -140,7 +140,7 @@ VALUES ('88ea7da2-36a1-454a-a735-5ca1ce60dda4', 'Pending Leave Applications', b'
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('6ffc2994-6993-4334-a69f-996b438dd212', 'My Leave Applications', b'1', 'My Leave', '4', 'd24a40a9-aada-4c7b-b50b-e053a4fbe03d', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('99c33c8c-d404-44fb-933f-7293fef2c485', 'Attendance Management', b'1', 'Attendance', '6', NULL, '1');
+VALUES ('99c33c8c-d404-44fb-933f-7293fef2c485', 'Attendance Management', b'1', 'Attendance', '5', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('6a0a5d7c-7903-46f1-9a3d-fd44373fa85c', 'Attendance History', b'1', 'History', '1', '99c33c8c-d404-44fb-933f-7293fef2c485', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
@@ -148,26 +148,28 @@ VALUES ('2581c180-e8f6-426d-9b4f-22b9bd7ad96e', 'Work From Home', b'1', 'WFH', '
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('3c1b925b-0356-4d0b-832d-81047ceaaf30', 'Pending Work From Home Applications', b'1', 'Pending WFH', '1', '2581c180-e8f6-426d-9b4f-22b9bd7ad96e', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('7f2738c3-917e-42f4-900d-8d8b58c302a4', 'My Work From Home Applications', b'1', 'My WFH', '2', '2581c180-e8f6-426d-9b4f-22b9bd7ad96e', '1');
+VALUES ('c10699f6-b19e-42f9-b459-976108a2cccb', 'Work From Home Details', b'1', 'WFH Details', '2', '2581c180-e8f6-426d-9b4f-22b9bd7ad96e', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('9ff595ee-cf01-4475-b89a-9678c25e80d0', 'Holiday Management', b'1', 'Holiday', '7', NULL, '1');
+VALUES ('7f2738c3-917e-42f4-900d-8d8b58c302a4', 'My Work From Home Applications', b'1', 'My WFH', '3', '2581c180-e8f6-426d-9b4f-22b9bd7ad96e', '1');
+INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
+VALUES ('9ff595ee-cf01-4475-b89a-9678c25e80d0', 'Holiday Management', b'1', 'Holiday', '6', NULL, '1');
 
 
 ---- Member Menu
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('2d96b168-7334-46fa-9776-65438cb719eb', 'My Profile', b'1', 'My Profile', '2', NULL, '1');
+VALUES ('2d96b168-7334-46fa-9776-65438cb719eb', 'My Profile', b'1', 'My Profile', '1', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('c5e3e9c8-bcfb-40dc-b9ae-10c809786599', 'My Teams', b'1', 'My Teams', '3', NULL, '1');
+VALUES ('c5e3e9c8-bcfb-40dc-b9ae-10c809786599', 'My Teams', b'1', 'My Teams', '2', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('806f4f41-e767-486f-897e-f53609351491', 'My Projects', b'1', 'My Projects', '4', NULL, '1');
+VALUES ('806f4f41-e767-486f-897e-f53609351491', 'My Projects', b'1', 'My Projects', '3', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('5e41eb25-73c8-445b-b4bb-d6b0eb13b8be', 'Leave Management', b'1', 'Leave', '5', NULL, '1');
+VALUES ('5e41eb25-73c8-445b-b4bb-d6b0eb13b8be', 'Leave Management', b'1', 'Leave', '4', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('017c4814-2f06-423c-b162-6f4e914c740b', 'Leave Summary History', b'1', 'Leave Summary', '1', '5e41eb25-73c8-445b-b4bb-d6b0eb13b8be', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('334ac8ae-25fb-47af-ae29-7cf11577af88', 'My Leave Applications', b'1', 'My Leave', '2', '5e41eb25-73c8-445b-b4bb-d6b0eb13b8be', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('c0cbe425-fe5f-47c1-932a-f8bcd702a869', 'Attendance Management', b'1', 'Attendance', '6', NULL, '1');
+VALUES ('c0cbe425-fe5f-47c1-932a-f8bcd702a869', 'Attendance Management', b'1', 'Attendance', '5', NULL, '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('d46c0f38-8910-43af-b644-b8133adb8aa2', 'Attendance History', b'1', 'History', '1', 'c0cbe425-fe5f-47c1-932a-f8bcd702a869', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
@@ -175,7 +177,7 @@ VALUES ('631c01cf-45a3-4ec8-9f84-20ca3f1500ad', 'Work From Home', b'1', 'WFH', '
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
 VALUES ('c6a1c81e-fc91-4492-a569-517dffe68840', 'My Work From Home Applications', b'1', 'My WFH', '1', '631c01cf-45a3-4ec8-9f84-20ca3f1500ad', '1');
 INSERT INTO `service_authorization`.`dsi_menu` (`menu_id`, `description`, `is_active`, `name`, `position`, `parent_menu_id`, `version`)
-VALUES ('0bf7fac0-1b1e-428f-96ef-175f9eeb656c', 'Holiday Management', b'1', 'Holiday', '7', NULL, '1');
+VALUES ('0bf7fac0-1b1e-428f-96ef-175f9eeb656c', 'Holiday Management', b'1', 'Holiday', '6', NULL, '1');
 
 
 ---- HR role
@@ -213,6 +215,8 @@ INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`
 VALUES ('9f8692a5-ad66-416a-84be-6903e4d6f6a4', b'1', '1', 'b40bbe0c-52b6-4a83-a7a8-a5cdb32d909f', '33394716-ab11-4e6d-8baa-dd4cb214befc', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
 VALUES ('2ab8b9ab-ae28-4cc8-8044-32e46cbc0c4c', b'1', '1', '1ab0176c-ad4d-4cce-bda4-dd1b9001150e', '33394716-ab11-4e6d-8baa-dd4cb214befc', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('f8e5b29a-901f-4328-8f8e-c60c67cf8d18', b'1', '1', '7f68cf98-635e-4ced-98ab-b26c6e4fbd0c', '33394716-ab11-4e6d-8baa-dd4cb214befc', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 
 ---- Manager role
@@ -252,6 +256,8 @@ INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`
 VALUES ('7e5b53c0-1ac2-4ca0-b9ef-66637a675bff', b'1', '1', 'b40bbe0c-52b6-4a83-a7a8-a5cdb32d909f', 'fe3e0492-c80b-431a-8b6e-658af6a2c8d7', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
 VALUES ('8d66e0d3-c491-4f8e-8ff5-0d68daf93680', b'1', '1', '1ab0176c-ad4d-4cce-bda4-dd1b9001150e', 'fe3e0492-c80b-431a-8b6e-658af6a2c8d7', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('aa960f1c-1204-42a9-ac75-0b8e49b67515', b'1', '1', '7f68cf98-635e-4ced-98ab-b26c6e4fbd0c', 'fe3e0492-c80b-431a-8b6e-658af6a2c8d7', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 
 -----Lead Role
@@ -283,6 +289,8 @@ INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`
 VALUES ('b4efae92-b3ed-4b28-bfc7-220f2d8cc3b1', b'1', '1', '7f2738c3-917e-42f4-900d-8d8b58c302a4', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
 VALUES ('fb6e62ac-1c42-4e9c-b224-d589cd04ecd7', b'1', '1', '9ff595ee-cf01-4475-b89a-9678c25e80d0', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
+INSERT INTO `service_authorization`.`dsi_role_menu` (`role_menu_id`, `is_active`, `version`, `menu_id`, `role_id`, `system_id`)
+VALUES ('aadd374c-cc8a-4fa3-b6bc-0dafc19ef0a0', b'1', '1', 'c10699f6-b19e-42f9-b459-976108a2cccb', 'e0f72053-67c1-4964-a261-36886e1da074', '425744ba-6c10-47c0-91cf-5a4c05265b56');
 
 
 -----Member Role

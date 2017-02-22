@@ -35,12 +35,12 @@ public class WFHResource {
     })
     public Response searchOrReadEmployeesWFHRequests(@QueryParam("date") String date,
                                                      @QueryParam("reason") String reason,
-                                                     @QueryParam("statusId") String statusId,
                                                      @QueryParam("employeeNo") String employeeNo,
                                                      @QueryParam("firstName") String firstName,
                                                      @QueryParam("lastName") String lastName,
                                                      @QueryParam("nickName") String nickName,
                                                      @QueryParam("workFromHomeId") String wfhId,
+                                                     @QueryParam("workFromHomeStatusName") String statusName,
                                                      @QueryParam("from") String from,
                                                      @QueryParam("range") String range) throws CustomException {
 
@@ -50,7 +50,7 @@ public class WFHResource {
         String userID = request.getAttribute("user_id") != null ?
                 request.getAttribute("user_id").toString() : null;
 
-        return Response.ok().entity(wfhService.searchOrReadEmployeesWFHRequests(userID, date, reason, statusId, employeeNo, firstName,
+        return Response.ok().entity(wfhService.searchOrReadEmployeesWFHRequests(userID, date, reason, statusName, employeeNo, firstName,
                 lastName, nickName, wfhId, context, from, range)).build();
     }
 
@@ -62,8 +62,7 @@ public class WFHResource {
             @ApiResponse(code = 500, message = "Work from home request approval failed, unauthorized.")
     })
     public Response workFromHomeApproval(@PathParam("work_from_home_id") String wfhId,
-                                         @ApiParam(value = "Employees Work From Home Request", required = true)
-                                                     WorkFromHomeDto workFromHomeDto) throws CustomException {
+                                         WorkFromHomeDto workFromHomeDto) throws CustomException {
 
         String tenantName = request.getAttribute("tenant_name") != null ?
                 request.getAttribute("tenant_name").toString() : null;

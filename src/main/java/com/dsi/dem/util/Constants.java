@@ -40,7 +40,7 @@ public class Constants {
     public static final String APPLIED_WFH_REQUEST = "Pending";
     public static final String APPROVED_WFH_REQUEST = "Approved";
     public static final String DENIED_WFH_REQUEST = "Denied";
-    public static final String CANCELLER_WFH_REQUEST = "Canceled";
+    public static final String CANCELLER_WFH_REQUEST = "Cancelled";
 
     public static final String CASUAL_TYPE_NAME = "Casual Leave Application";
     public static final String SICK_TYPE_NAME = "Sick Leave Application";

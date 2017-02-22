@@ -457,7 +457,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
     }
 
     @Override
-    public List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusId, String employeeNo,
+    public List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusName, String employeeNo,
                                                                       String firstName, String lastName, String nickName, String wfhId,
                                                                       String context, String from, String range) throws CustomException {
 
@@ -473,8 +473,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
         TRANSFORMER.setSession(session);
 
         ContextDto contextDto = Utility.getContextDtoObj(context);
-        //List<String> contextList = Utility.getContextObj(context);
-        List<WorkFromHome> workFromHomeList = dao.searchOrReadEmployeesWFHRequests(userId, date, reason, statusId, employeeNo, firstName,
+        List<WorkFromHome> workFromHomeList = dao.searchOrReadEmployeesWFHRequests(userId, date, reason, statusName, employeeNo, firstName,
                 lastName, nickName, wfhId, contextDto, from, range);
         if(workFromHomeList == null){
             close(session);

@@ -120,6 +120,7 @@ public class NotificationConstant {
     public static final Long AUTO_NOTIFY_DRAFT_ATTENDANCE_EXPIRY_TEMPLATE_ID = 106L;
     public static final Long AUTO_NOTIFY_HOLIDAY_NEXT_WEEK_TEMPLATE_ID = 107L;
     public static final Long AUTO_NOTIFY_HOLIDAY_TOMORROW_TEMPLATE_ID = 108L;
+    public static final Long AUTO_NOTIFY_PENDING_LEAVE_TEMPLATE_ID = 109L;
 
     public static final String WEBSITE_LINK = "http://103.245.204.114:3000/#/";
 

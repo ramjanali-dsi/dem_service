@@ -928,4 +928,18 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
         }
         return null;
     }
+
+    @Override
+    public List<LeaveRequest> getPendingLeaveApplication(Date date) {
+        Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.leaveStatus.leaveStatusName =:statusName " +
+                "AND lr.startDate =:startDate");
+        query.setParameter("statusName", Constants.APPLIED_LEAVE_REQUEST);
+        query.setParameter("startDate", date);
+
+        List<LeaveRequest> leaveRequests = query.list();
+        if(leaveRequests != null){
+            return leaveRequests;
+        }
+        return null;
+    }
 }

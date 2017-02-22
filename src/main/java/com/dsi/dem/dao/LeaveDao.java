@@ -53,4 +53,6 @@ public interface LeaveDao {
     LeaveStatus getLeaveStatusByName(String typeName);
     boolean getLeaveRequestByRequestTypeAndEmployeeNo(String employeeNo, Date date);
     LeaveRequest getLeaveRequestByStatusAndEmployee(String employeeNo, Date date);
+
+    List<LeaveRequest> getPendingLeaveApplication(Date date);
 }

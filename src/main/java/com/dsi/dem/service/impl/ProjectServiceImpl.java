@@ -362,6 +362,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     saveProjectTeam(projectTeam, project);
                     logger.info("Create project team:: End");
 
+                    projectTeam.setProject(project);
                     assignedProjectTeam.add(projectTeam);
                     break;
 
@@ -372,6 +373,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     teamDao.deleteProjectTeamByProjectId(projectTeam.getTeam().getTeamId(), projectId);
                     logger.info("Delete project team:: End");
 
+                    projectTeam.setProject(project);
                     unassignedProjectTeam.add(projectTeam);
                     break;
             }
@@ -566,6 +568,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     saveProjectClient(projectClient, project);
                     logger.info("Project client create:: End");
 
+                    projectClient.setProject(project);
                     assignedProjectClient.add(projectClient);
                     break;
 
@@ -576,6 +579,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     projectDao.deleteProjectClientByClientId(projectId, projectClient.getClient().getClientId());
                     logger.info("Delete project client:: End");
 
+                    projectClient.setProject(project);
                     unassignedProjectClient.add(projectClient);
                     break;
             }

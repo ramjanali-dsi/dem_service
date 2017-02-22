@@ -238,7 +238,7 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
     }
 
     @Override
-    public List<WorkFromHome> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusId, String employeeNo,
+    public List<WorkFromHome> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusName, String employeeNo,
                                                                String firstName, String lastName, String nickName, String wfhId,
                                                                ContextDto contextDto, String from, String range) {
 
@@ -339,15 +339,15 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
             paramValue.put("reason", "%" + reason + "%");
         }
 
-        if(!Utility.isNullOrEmpty(statusId)){
+        if(!Utility.isNullOrEmpty(statusName)){
             if(hasClause) {
-                queryBuilder.append(" AND wfh.status.workFromHomeStatusId =:statusId");
+                queryBuilder.append(" AND wfh.status.workFromHomeStatusName =:statusName");
 
             } else {
-                queryBuilder.append(" WHERE wfh.status.workFromHomeStatusId =:statusId");
+                queryBuilder.append(" WHERE wfh.status.workFromHomeStatusName =:statusName");
                 hasClause = true;
             }
-            paramValue.put("statusId", statusId);
+            paramValue.put("statusName", statusName);
         }
 
         if(!Utility.isNullOrEmpty(wfhId)){

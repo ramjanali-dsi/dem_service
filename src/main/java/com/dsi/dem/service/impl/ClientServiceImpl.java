@@ -354,6 +354,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
                     saveClientProject(projectClient, client);
                     logger.info("Client project create:: End");
 
+                    projectClient.setClient(client);
                     assignedProjectClient.add(projectClient);
                     break;
 
@@ -364,6 +365,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
                     projectDao.deleteProjectClientByClientId(projectClient.getProject().getProjectId(), clientId);
                     logger.info("Delete client project:: End");
 
+                    projectClient.setClient(client);
                     unassignedProjectClient.add(projectClient);
                     break;
             }

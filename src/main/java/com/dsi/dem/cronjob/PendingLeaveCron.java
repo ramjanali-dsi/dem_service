@@ -2,8 +2,10 @@ package com.dsi.dem.cronjob;
 
 import com.dsi.dem.service.LeaveService;
 import com.dsi.dem.service.impl.LeaveServiceImpl;
+import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.Utility;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import java.util.Date;
 
@@ -18,8 +20,8 @@ public class PendingLeaveCron {
 
     public static void main(String[] args) {
         logger.info("Auto notify pending pre leave request application.");
-        Date currentDate = Utility.today();
+        Date daysAfter = Utility.getDateFormatFromDate(new DateTime(Utility.today()).plusDays(1).toDate());
 
-        //TODO lot things.
+        leaveService.getPendingLeaveApplication(daysAfter);
     }
 }

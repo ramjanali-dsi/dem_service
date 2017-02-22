@@ -458,6 +458,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
             session = getSession();
             teamDao.setSession(session);
+            projectDao.setSession(session);
 
             JSONArray clientEmails = new JSONArray();
             List<ProjectTeam> teamProjects = teamDao.getProjectTeams(teamId);
@@ -639,6 +640,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                     saveTeamProject(projectTeam, team);
                     logger.info("Team project create:: End");
 
+                    projectTeam.setTeam(team);
                     assignedProjectTeam.add(projectTeam);
                     break;
 
@@ -654,6 +656,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                     teamDao.deleteProjectTeamByProjectId(teamId, projectTeam.getProject().getProjectId());
                     logger.info("Delete team project:: End");
 
+                    projectTeam.setTeam(team);
                     unassignedProjectTeam.add(projectTeam);
                     break;
             }

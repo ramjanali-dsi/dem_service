@@ -20,7 +20,7 @@ public interface WorkFromHomeService {
                                                            String from, String range) throws CustomException;
 
     WorkFromHomeDetails approveWFHRequest(WorkFromHomeDto wfhDto, String userId, String tenantName) throws CustomException;
-    List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusId, String employeeNo,
+    List<WorkFromHomeDetails> searchOrReadEmployeesWFHRequests(String userId, String date, String reason, String statusName, String employeeNo,
                                                                String firstName, String lastName, String nickName, String wfhId,
                                                                String context, String from, String range) throws CustomException;
 }

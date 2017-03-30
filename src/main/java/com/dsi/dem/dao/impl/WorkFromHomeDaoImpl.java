@@ -199,9 +199,11 @@ public class WorkFromHomeDaoImpl extends CommonService implements WorkFromHomeDa
 
     @Override
     public boolean checkLeaveRequest(String employeeId, Date date) {
+        System.out.println("Date: " + date);
+
         Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.employee.employeeId =:employeeId " +
                 "AND (lr.leaveStatus.leaveStatusName =:statusName1 OR lr.leaveStatus.leaveStatusName =:statusName2) " +
-                "AND (lr.startDate >=:date AND lr.endDate <=:date)");
+                "AND (:date BETWEEN lr.startDate AND lr.endDate)");
         query.setParameter("employeeId", employeeId);
         query.setParameter("date", date);
         query.setParameter("statusName1", Constants.APPLIED_LEAVE_REQUEST);

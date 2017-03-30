@@ -17,6 +17,7 @@ public interface EmployeeDao {
     boolean updateEmployee(Employee employee);
     boolean deleteEmployee(String employeeID);
     Employee getEmployeeByID(String employeeID);
+    Employee getEmployeeByIDAndContext(String employeeId, ContextDto context);
     Employee getEmployeeByUserID(String userID);
     Employee getEmployeeByEmployeeNO(String employeeNO);
     List<Employee> getAllEmployees();

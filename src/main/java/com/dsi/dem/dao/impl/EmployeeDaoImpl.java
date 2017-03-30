@@ -83,6 +83,49 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
+    public Employee getEmployeeByIDAndContext(String employeeId, ContextDto context) {
+        Session session = null;
+        Employee employee = null;
+        try{
+            session = getSession();
+            Query query = null;
+
+            if(context != null){
+
+                if(!Utility.isNullOrEmpty(context.getTeamId())) {
+                    query = session.createQuery("SELECT COUNT(*) FROM TeamMember tm WHERE tm.employee.employeeId =:employeeId " +
+                            "AND tm.team.teamId in (:teamIds)");
+                    query.setParameter("employeeId", employeeId);
+                    query.setParameterList("teamIds", context.getTeamId());
+
+                    if(((Long) query.uniqueResult()).intValue() > 0){
+                        query = session.createQuery("FROM Employee e WHERE e.employeeId =:employeeID");
+                        query.setParameter("employeeID", employeeId);
+                    }
+
+                } else if(!Utility.isNullOrEmpty(context.getEmployeeId())){
+                    query = session.createQuery("FROM Employee e WHERE e.employeeId =:employeeID");
+                    query.setParameter("employeeID", context.getEmployeeId());
+                }
+
+            } else {
+                query = session.createQuery("FROM Employee e WHERE e.employeeId =:employeeID");
+                query.setParameter("employeeID", employeeId);
+            }
+
+            employee = (Employee) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employee;
+    }
+
+    @Override
     public Employee getEmployeeByUserID(String userID) {
         Session session = null;
         Employee employee = null;
@@ -370,7 +413,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
                 }
             }
 
-            queryBuilder.append(" ORDER BY e.createdDate DESC");
+            queryBuilder.append(" ORDER BY e.employeeNo ASC");
 
             logger.info("Query builder: " + queryBuilder.toString());
             Query query = session.createQuery(queryBuilder.toString());

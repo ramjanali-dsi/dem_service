@@ -87,6 +87,13 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
                     Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_004);
             throw new CustomException(errorMessage);
         }
+
+        if( !(holiday.getStartDate().before(holiday.getEndDate())
+                || holiday.getStartDate().compareTo(holiday.getEndDate()) == 0) ){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_HOLIDAY_ERROR_TYPE_0006);
+            throw new CustomException(errorMessage);
+        }
     }
 
     @Override
@@ -128,6 +135,13 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
         if(holiday.getVersion() == 0){
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0014,
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_002);
+            throw new CustomException(errorMessage);
+        }
+
+        if( !(holiday.getStartDate().before(holiday.getEndDate())
+                || holiday.getStartDate().compareTo(holiday.getEndDate()) == 0) ){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_HOLIDAY_ERROR_TYPE_0006);
             throw new CustomException(errorMessage);
         }
     }
@@ -378,9 +392,18 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
         String holidayDetails = "";
         for(Holiday holiday : holidays){
             holidayDetails += "- ";
-            holidayDetails += holiday.getStartDate();
-            holidayDetails += " - ";
-            holidayDetails += holiday.getEndDate();
+
+            String holidayStartDate = Utility.getDate(holiday.getStartDate());
+            String holidayEndDate = Utility.getDate(holiday.getEndDate());
+            if(holidayStartDate.equals(holidayEndDate)){
+                holidayDetails += holidayStartDate;
+
+            } else {
+                holidayDetails += holidayStartDate;
+                holidayDetails += " - ";
+                holidayDetails += holidayEndDate;
+            }
+
             holidayDetails += " due to ";
             holidayDetails += holiday.getHolidayName();
             holidayDetails += ".\nThe office will resume it's regular operation on ";
@@ -395,7 +418,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
                 }
             }
 
-            holidayDetails += afterEndDate;
+            holidayDetails += Utility.getDate(afterEndDate);
             holidayDetails += ".";
 
             if(cnt != holidays.size() - 1){

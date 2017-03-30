@@ -1,6 +1,7 @@
 package com.dsi.dem.util;
 
-import com.dsi.dem.exception.CustomException;
+import com.dsi.dem.dao.EmployeeDao;
+import com.dsi.dem.dao.impl.EmployeeDaoImpl;
 import com.dsi.dem.model.*;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -13,6 +14,8 @@ import java.util.Date;
  * Created by sabbir on 12/9/16.
  */
 public class EmailContent {
+
+    private static final EmployeeDao employeeDao = new EmployeeDaoImpl();
 
     public static JSONObject getNotificationObject(JSONObject contentObj, Long templateId) throws JSONException {
         JSONObject notificationObj = new JSONObject();
@@ -47,6 +50,7 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", employee.getFirstName());
         contentObj.put("EmployeeLastName", employee.getLastName());
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -60,6 +64,7 @@ public class EmailContent {
         contentObj.put("TeamName", team.getName());
         contentObj.put("LeadFirstName", firstName);
         contentObj.put("LeadLastName", lastName);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -75,6 +80,7 @@ public class EmailContent {
         contentObj.put("EmployeeLastName", employee.getLastName());
         contentObj.put("LeadFirstName", lead.getFirstName());
         contentObj.put("LeadLastName", lead.getLastName());
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -89,6 +95,7 @@ public class EmailContent {
         contentObj.put("MemberCount", memberCnt);
         contentObj.put("ProjectName", projectTeam.getProject().getProjectName());
         contentObj.put("ProjectDescription", projectTeam.getProject().getDescription());
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         if(leadMember != null) {
@@ -107,6 +114,7 @@ public class EmailContent {
         contentObj.put("ClientName", projectClient.getClient().getMemberName());
         contentObj.put("ProjectName", projectClient.getProject().getProjectName());
         contentObj.put("ProjectDescription", projectClient.getProject().getDescription());
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -119,6 +127,7 @@ public class EmailContent {
         contentObj.put("Recipients", emailList);
         contentObj.put("TeamName", teamName);
         contentObj.put("ProjectName", project.getProjectName());
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -131,6 +140,7 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("ClientName", client.getMemberName());
         contentObj.put("ProjectName", projectName);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -143,7 +153,16 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", workFromHome.getEmployee().getFirstName());
         contentObj.put("EmployeeLastName", workFromHome.getEmployee().getLastName());
-        contentObj.put("WorkFromHomeDate", workFromHome.getApplyDate());
+        contentObj.put("WorkFromHomeDate", Utility.getDate(workFromHome.getApplyDate()));
+
+        String name = "";
+        if(workFromHome.getApprovedBy() != null) {
+            Employee employee = employeeDao.getEmployeeByUserID(workFromHome.getApprovedBy());
+            name = employee.getFirstName() + " " + employee.getLastName();
+        }
+
+        contentObj.put("Name", name);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -156,8 +175,30 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", leaveRequest.getEmployee().getFirstName());
         contentObj.put("EmployeeLastName", leaveRequest.getEmployee().getLastName());
-        contentObj.put("LeaveStartDate", leaveRequest.getStartDate());
-        contentObj.put("LeaveEndDate", leaveRequest.getEndDate());
+
+        String leaveStartDate = Utility.getDate(leaveRequest.getStartDate());
+        String leaveEndDate = Utility.getDate(leaveRequest.getEndDate());
+
+        String leaveDate = "";
+        if(leaveStartDate.equals(leaveEndDate)){
+            leaveDate += "date: " + leaveStartDate;
+
+        } else {
+            leaveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+        }
+
+        String name = "";
+        if(leaveRequest.getApprovalId() != null) {
+            Employee deniedEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
+            if (deniedEmployee != null) {
+                name = deniedEmployee.getFirstName() + " " + deniedEmployee.getLastName();
+            }
+        }
+
+        contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
+        contentObj.put("DeniedName", name);
+        contentObj.put("LeaveDate", leaveDate);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -170,8 +211,30 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", leaveRequest.getEmployee().getFirstName());
         contentObj.put("EmployeeLastName", leaveRequest.getEmployee().getLastName());
-        contentObj.put("ApprovedStartDate", leaveRequest.getApprovedStartDate());
-        contentObj.put("ApprovedEndDate", leaveRequest.getApprovedEndDate());
+
+        String leaveStartDate = Utility.getDate(leaveRequest.getApprovedStartDate());
+        String leaveEndDate = Utility.getDate(leaveRequest.getApprovedEndDate());
+
+        String leaveApproveDate = "";
+        if(leaveStartDate.equals(leaveEndDate)){
+            leaveApproveDate += "date: " + leaveStartDate;
+
+        } else {
+            leaveApproveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+        }
+
+        String name = "";
+        if(leaveRequest.getApprovalId() != null) {
+            Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
+            if (approvalEmployee != null) {
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+            }
+        }
+
+        contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
+        contentObj.put("ApprovalName", name);
+        contentObj.put("ApprovedDate", leaveApproveDate);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -184,9 +247,31 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", leaveRequest.getEmployee().getFirstName());
         contentObj.put("EmployeeLastName", leaveRequest.getEmployee().getLastName());
-        contentObj.put("ApprovedStartDate", leaveRequest.getApprovedStartDate());
-        contentObj.put("ApprovedEndDate", leaveRequest.getApprovedEndDate());
+
+        String leaveStartDate = Utility.getDate(leaveRequest.getApprovedStartDate());
+        String leaveEndDate = Utility.getDate(leaveRequest.getApprovedEndDate());
+
+        String leaveApproveDate = "";
+        if(leaveStartDate.equals(leaveEndDate)){
+            leaveApproveDate += "date: " + leaveStartDate;
+
+        } else {
+            leaveApproveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+        }
+
+        String name = "";
+        if(leaveRequest.getApprovalId() != null) {
+            Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
+            if (approvalEmployee != null) {
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+            }
+        }
+
+        contentObj.put("ApprovalName", name);
+        contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
+        contentObj.put("ApprovedDate", leaveApproveDate);
         contentObj.put("Reason", leaveRequest.getDeniedReason());
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -199,9 +284,32 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", leaveRequest.getEmployee().getFirstName());
         contentObj.put("EmployeeLastName", leaveRequest.getEmployee().getLastName());
-        contentObj.put("LeaveStartDate", leaveRequest.getStartDate());
-        contentObj.put("LeaveEndDate", leaveRequest.getEndDate());
+
+        String leaveStartDate = Utility.getDate(leaveRequest.getStartDate());
+        String leaveEndDate = Utility.getDate(leaveRequest.getEndDate());
+
+        String leaveDate = "";
+        if(leaveStartDate.equals(leaveEndDate)){
+            leaveDate += "date: " + leaveStartDate;
+
+        } else {
+            leaveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+        }
+
+        String name = "";
+        if(leaveRequest.getApprovalId() != null) {
+            Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
+            if (approvalEmployee != null) {
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+
+            }
+        }
+
+        contentObj.put("DeniedName", name);
+        contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
+        contentObj.put("LeaveDate", leaveDate);
         contentObj.put("Reason", leaveRequest.getLeaveReason());
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -212,7 +320,8 @@ public class EmailContent {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
-        contentObj.put("AttendanceDate", attendanceDate);
+        contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -225,8 +334,9 @@ public class EmailContent {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
-        contentObj.put("AttendanceExpiryDate", afterDate);
+        contentObj.put("AttendanceExpiryDate", Utility.getDate(afterDate));
         contentObj.put("AttendanceCSVName", draftAttendanceFileName);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -239,7 +349,8 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", employee.getFirstName());
         contentObj.put("EmployeeLastName", employee.getLastName());
-        contentObj.put("AttendanceDate", attendanceDate);
+        contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -252,9 +363,31 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", employee.getFirstName());
         contentObj.put("EmployeeLastName", employee.getLastName());
-        contentObj.put("ApprovedStartDate", leaveRequest.getApprovedStartDate());
-        contentObj.put("ApprovedEndDate", leaveRequest.getApprovedEndDate());
-        contentObj.put("AttendanceDate", attendanceDate);
+
+        String leaveStartDate = Utility.getDate(leaveRequest.getApprovedStartDate());
+        String leaveEndDate = Utility.getDate(leaveRequest.getApprovedEndDate());
+
+        String leaveApproveDate = "";
+        if(leaveStartDate.equals(leaveEndDate)){
+            leaveApproveDate += "date: " + leaveStartDate;
+
+        } else {
+            leaveApproveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+        }
+
+        String name = "";
+        if(leaveRequest.getApprovalId() != null) {
+            Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
+            if (approvalEmployee != null) {
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+            }
+        }
+
+        contentObj.put("ApprovalName", name);
+        contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
+        contentObj.put("ApprovedDate", leaveApproveDate);
+        contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -267,8 +400,9 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", workFromHome.getEmployee().getFirstName());
         contentObj.put("EmployeeLastName", workFromHome.getEmployee().getLastName());
-        contentObj.put("WorkFromHomeDate", workFromHome.getApplyDate());
-        contentObj.put("AttendanceDate", attendanceDate);
+        contentObj.put("WorkFromHomeDate", Utility.getDate(workFromHome.getApplyDate()));
+        contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
@@ -277,21 +411,32 @@ public class EmailContent {
     public static JSONObject getContentForHoliday(Holiday holiday, String tenantName, JSONArray emails) throws JSONException {
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", emails);
-        contentObj.put("HolidayStartDate", holiday.getStartDate());
-        contentObj.put("HolidayEndDate", holiday.getEndDate());
+
+        String holidayStartDate = Utility.getDate(holiday.getStartDate());
+        String holidayEndDate = Utility.getDate(holiday.getEndDate());
+
+        String holidayDate = "";
+        if(holidayStartDate.equals(holidayEndDate)){
+            holidayDate += holidayStartDate;
+
+        } else {
+            holidayDate += "from " + holidayStartDate + " - " + holidayEndDate;
+        }
+
+        contentObj.put("HolidayDate", holidayDate);
         contentObj.put("HolidayName", holiday.getHolidayName());
         contentObj.put("TenantName", tenantName);
 
-        Date afterEndDate = holiday.getEndDate();
-        afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+        Date afterEndDate = Utility.getDayAfterDate(holiday.getEndDate());
         if(Utility.checkWeekendOfDate(afterEndDate)){
-            afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+            afterEndDate = Utility.getDayAfterDate(afterEndDate);
 
             if(Utility.checkWeekendOfDate(afterEndDate)){
-                afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+                afterEndDate = Utility.getDayAfterDate(afterEndDate);
             }
         }
-        contentObj.put("OpenDate", afterEndDate);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("OpenDate", Utility.getDate(afterEndDate));
 
         return contentObj;
     }
@@ -301,6 +446,7 @@ public class EmailContent {
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", emails);
         contentObj.put("HolidayDetail", holiday);
+        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;

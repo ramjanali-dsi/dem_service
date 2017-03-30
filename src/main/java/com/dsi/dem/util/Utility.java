@@ -131,6 +131,14 @@ public class Utility {
         return calendar.get(Calendar.YEAR);
     }
 
+    public static Date getDayAfterDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.add(Calendar.DATE, 1);
+        return calendar.getTime();
+    }
+
     public static Date getFirstDay(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -217,6 +225,11 @@ public class Utility {
             logger.error("Date parse error occurs: " + e.getMessage());
         }
         return timeFormat.format(timestamp);
+    }
+
+    public static String getDate(Date date) {
+        DateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy");
+        return dateFormat.format(date);
     }
 
     public static String getLoginObject(Employee employee, String currentUserId) throws JSONException {

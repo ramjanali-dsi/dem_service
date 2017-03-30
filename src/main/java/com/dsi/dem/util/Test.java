@@ -1,13 +1,7 @@
 package com.dsi.dem.util;
 
-import com.dsi.dem.dao.EmployeeDao;
-import com.dsi.dem.dao.HolidayDao;
-import com.dsi.dem.dao.LeaveDao;
-import com.dsi.dem.dao.TeamDao;
-import com.dsi.dem.dao.impl.EmployeeDaoImpl;
-import com.dsi.dem.dao.impl.HolidayDaoImpl;
-import com.dsi.dem.dao.impl.LeaveDaoImpl;
-import com.dsi.dem.dao.impl.TeamDaoImpl;
+import com.dsi.dem.dao.*;
+import com.dsi.dem.dao.impl.*;
 import com.dsi.dem.dto.*;
 import com.dsi.dem.dto.transformer.EmployeeDtoTransformer;
 import com.dsi.dem.dto.transformer.LeaveDtoTransformer;
@@ -31,6 +25,12 @@ import org.hibernate.Session;
 import org.joda.time.DateTime;
 import scala.util.parsing.combinator.testing.Str;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.*;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -44,8 +44,11 @@ import java.util.*;
  */
 public class Test {
 
-    private static final LeaveDao leaveDao = new LeaveDaoImpl();
+    //private static final HolidayDao holidayDao = new HolidayDaoImpl();
+    //private static final LeaveService leaveService = new LeaveServiceImpl();
 
+    /*
+    private static final LeaveDao leaveDao = new LeaveDaoImpl();
     private static final EmployeeService employeeService = new EmployeeServiceImpl();
     private static final TeamService teamService = new TeamServiceImpl();
     private static final LeaveService leaveService = new LeaveServiceImpl();
@@ -53,11 +56,52 @@ public class Test {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private static final EmployeeDtoTransformer dtoTransformer = new EmployeeDtoTransformer();
-    private static final LeaveDtoTransformer LEAVE_DTO_TRANSFORMER = new LeaveDtoTransformer();
+    private static final LeaveDtoTransformer LEAVE_DTO_TRANSFORMER = new LeaveDtoTransformer();*/
 
     //private static final HazelcastInstance instance = Hazelcast.newHazelcastInstance(new Config());
 
-    public static void main(String[] args) throws CustomException, IOException, JSONException {
+    public static void main(String[] args) throws CustomException, IOException, JSONException, MessagingException {
+
+        /*WorkFromHomeDao workFromHomeDao = new WorkFromHomeDaoImpl();
+        Session session = SessionUtil.getSession();
+        workFromHomeDao.setSession(session);
+        boolean res = workFromHomeDao.checkLeaveRequest("23a9a5f0-59da-4de1-ab75-b8d5885182f0",
+                Utility.getDateFromString("2017-04-10"));
+        System.out.println(res);
+
+        TeamDao teamDao = new TeamDaoImpl();*/
+        /*Session session = SessionUtil.getSession();
+        teamDao.setSession(session);
+        List<TeamMember> teamMembers = teamDao.getTeamMembers(null, "facfc656-8830-4a37-883c-c2738ed03528");
+        System.out.println(new Gson().toJson(teamMembers));*/
+
+        /*LeaveDao leaveDao = new LeaveDaoImpl();
+        Session session = SessionUtil.getSession();
+        leaveDao.setSession(session);
+        boolean res = leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo("0310", new Date());
+        System.out.println(res);*/
+
+        /*String json = "{\"startDate\":\"2017-03-09\",\"endDate\":\"2017-03-10\",\"leaveRequestTypeId\":\"0b9cb019-74de-4e3a-90e0-ebca64c6df95\",\"leaveTypeId\":\"553fb999-2ceb-4bf0-90f2-ccf52742c8a1\",\"leaveReason\":\"\",\"version\":1}";
+
+        ObjectMapper mapper = new ObjectMapper();
+        LeaveRequestDto requestDto = mapper.readValue(json, LeaveRequestDto.class);
+
+        leaveService.saveLeaveRequest(requestDto, "b49d0f2e-ac31-4da8-a2d3-edf89beb8fcd", "DSI");*/
+
+        /*Date date = Utility.getDateFromString("2017-03-09");
+        Date date1 = Utility.getDateFormatFromDate(Utility.getDayAfterDate(date));
+
+        System.out.println("Date: " + date);
+        System.out.println("Date1: " + date1);*/
+
+
+        /*Date startDate = Utility.getDateFromString("2017-03-09");
+        Date endDate = Utility.getDateFromString("2017-03-10");
+
+        System.out.println("Start date: " + startDate);
+        System.out.println("End date: " + endDate);
+
+        System.out.println(new Gson().toJson(holidayDao.checkHolidayFromRangeAndYear(startDate, endDate, 2017)));*/
 
         //TODO HR & Manager email list API
         /*logger.info("Get HR email list.");
@@ -360,6 +404,124 @@ public class Test {
             System.out.println("Not weekend.");
         }*/
 
+        //attendanceRead();
+
+
+        /*String body = "Dear Manager/HR,\n\n{EmployeeFirstName} {EmployeeLastName} has applied for leave request for the following dates: {LeaveStartDate} - {LeaveEndDate}\n\nRegards\n{TenantName}";
+
+        JSONObject contentObj = new JSONObject("{\"Recipients\":[\"nargis.akter@dsinnovators.com\"],\"EmployeeFirstName\":\"Nargis\",\"EmployeeLastName\":\"Akter\",\"LeaveStartDate\":\"2017-03-28\",\"LeaveEndDate\":\"2017-03-28\",\"Reason\":\"Due to illness\\nTime off sheet updated\",\"TenantName\":\"Dynamic Solution\"}");
+
+        int contentKeyIndex, bodyIndex;
+        String newBody = "";
+        for(bodyIndex = 0; bodyIndex < body.length(); bodyIndex++){
+
+            if(body.charAt(bodyIndex) == '{'){
+                contentKeyIndex = bodyIndex + 1;
+                String contentKey = "";
+                while(body.charAt(contentKeyIndex) != '}'){
+                    contentKey += body.charAt(contentKeyIndex);
+                    contentKeyIndex++;
+                }
+                bodyIndex = contentKeyIndex;
+
+                if(contentKey.equals("LeaveStartDate") || contentKey.equals("LeaveEndDate")) {
+                    newBody += Utility.getDate(Utility.getDateFromString(contentObj.getString(contentKey)));
+
+                } else {
+                    newBody += contentObj.getString(contentKey);
+                }
+
+            } else {
+                newBody += body.charAt(bodyIndex);
+            }
+        }
+
+        System.out.println(newBody);
+
+
+        String subject = "Employee Registration Confirmation {EmployeeFirstName}";
+
+        int subjectIndex;
+        newBody = "";
+
+        if(subject.contains("{")) {
+            for (subjectIndex = 0; subjectIndex < subject.length(); subjectIndex++) {
+
+                if (subject.charAt(subjectIndex) == '{') {
+                    contentKeyIndex = subjectIndex + 1;
+                    String contentKey = "";
+                    while (subject.charAt(contentKeyIndex) != '}') {
+                        contentKey += subject.charAt(contentKeyIndex);
+                        contentKeyIndex++;
+                    }
+                    subjectIndex = contentKeyIndex;
+
+                    newBody += contentObj.getString(contentKey);
+
+                } else {
+                    newBody += subject.charAt(subjectIndex);
+                }
+            }
+
+            System.out.println(newBody);
+
+        } else {
+            System.out.println(subject);
+        }*/
+
+        JSONObject contentObj = new JSONObject("{\"Recipients\":[\"sabbir.ahmed@dsinnovators.com\"],\"EmployeeFirstName\":\"Sabbir\",\"EmployeeLastName\":\"Ahmed\",\"Link\":\"http://dem.dsinnovators.com/#!/\",\"TenantName\":\"Dynamic Solution Innovators Ltd.\"}");
+
+        String json = "{\n" +
+                "  \"subject\": \"Updated Employee Profile\",\n" +
+                "  \"body\": \"Dear Employee,<br> <br> Your profile has been <strong>successfully</strong> updated. Please view the changes made and contact HR for more information. You can also view your information in the following link: <br><a href='{Link}'>Click</a> <br><br>Regards,<br>{TenantName}\"\n" +
+                "}";
+
+        JSONObject jsonObject = new JSONObject(json);
+        String subject = jsonObject.getString("subject");
+        String body = jsonObject.getString("body");
+
+        Properties emailProp = new Properties();
+        emailProp.setProperty("mail.smtp.host", "smtp.gmail.com");
+        emailProp.setProperty("mail.smtp.auth", "true");
+        emailProp.setProperty("mail.smtp.port", "587");
+        emailProp.setProperty("mail.smtp.starttls.enable", "true");
+
+        javax.mail.Session session = javax.mail.Session.getDefaultInstance(emailProp, null);
+        MimeMessage message = new MimeMessage(session);
+
+        message.setFrom(new InternetAddress("triposocial.info@gmail.com"));
+        message.addRecipient(Message.RecipientType.TO, new InternetAddress("sabbir.ahmed@dsinnovators.com"));
+
+        message.setSubject(msgBody(subject, contentObj));
+        message.setText(msgBody(body, contentObj), "UTF-8", "html");
+
+        Transport transport = session.getTransport("smtp");
+        transport.connect("smtp.gmail.com", "triposocial.info@gmail.com", "dynamic4trip");
+        transport.sendMessage(message, message.getAllRecipients());
+        transport.close();
+    }
+
+    private static String msgBody(String body, JSONObject contentObj) throws JSONException {
+        int contentKeyIndex, bodyIndex;
+        String newBody = "";
+        for(bodyIndex = 0; bodyIndex < body.length(); bodyIndex++){
+
+            if(body.charAt(bodyIndex) == '{'){
+                contentKeyIndex = bodyIndex + 1;
+                String contentKey = "";
+                while(body.charAt(contentKeyIndex) != '}'){
+                    contentKey += body.charAt(contentKeyIndex);
+                    contentKeyIndex++;
+                }
+                bodyIndex = contentKeyIndex;
+
+                newBody += contentObj.getString(contentKey);
+
+            } else {
+                newBody += body.charAt(bodyIndex);
+            }
+        }
+        return newBody;
     }
 
     private static void myLeaveRequestPatch() {
@@ -379,7 +541,7 @@ public class Test {
     }
 
     private static void attendanceRead() {
-        String csvFile = "/home/sabbir/Downloads/3_jan.csv";
+        String csvFile = "/home/sabbir/Downloads/10-03-17.csv";
         BufferedReader br = null;
         String line = "";
         String cvsSplitBy = ",";
@@ -398,13 +560,13 @@ public class Test {
             while ((line = br.readLine()) != null) {
                 String[] lineSplit = line.split(cvsSplitBy);
 
-                /*if(lineSplit.length > 0) {
+                if(lineSplit.length > 0) {
 
                     if(!Utility.isNullOrEmpty(lineSplit[0])){
 
-                        System.out.println(new Gson().toJson(lineSplit));
+                        //System.out.println(new Gson().toJson(lineSplit));
 
-                        if(once){
+                        /*if(once){
                             System.out.println("Config start");
                             for(int i=0; i<lineSplit.length; i++){
                                 if(lineSplit[i].equals(ReadXMLFile.EVENT_TIME)){
@@ -430,7 +592,30 @@ public class Test {
                             if (lineSplit[CSV_FUNCTION_KEY_COLUMN].equals(ReadXMLFile.STATUS)) {
 
                                 String employeeId = lineSplit[CSV_EMPLOYEE_ID_COLUMN].replace("\'", "");
-                                if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.IN_TIME)) {
+
+                                Timestamp newTime = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
+
+                                if(inMap.get(employeeId) != null && outMap.get(employeeId) != null) {
+                                    Timestamp prevInTime = Utility.getTimeStampFromString(inMap.get(employeeId));
+                                    Timestamp prevOutTime = Utility.getTimeStampFromString(outMap.get(employeeId));
+
+                                    if (prevInTime.after(newTime)) {
+                                        inMap.put(employeeId, lineSplit[CSV_DATE_TIME_COLUMN]);
+                                    }
+
+                                    if (prevOutTime.before(newTime)) {
+                                        inMap.put(employeeId, lineSplit[CSV_DATE_TIME_COLUMN]);
+                                    }
+
+                                } else {
+                                    inMap.put(employeeId,
+                                            lineSplit[CSV_DATE_TIME_COLUMN]);
+
+                                    outMap.put(employeeId,
+                                            lineSplit[CSV_DATE_TIME_COLUMN]);
+                                }
+
+                                *//*if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.IN_TIME)) {
 
                                     if (inMap.get(employeeId) != null) {
                                         Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
@@ -460,12 +645,12 @@ public class Test {
                                         outMap.put(employeeId,
                                                 lineSplit[CSV_DATE_TIME_COLUMN]);
                                     }
-                                }
+                                }*//*
                             }
                         }
-
+*/
                     }
-                }*/
+                }
             }
 
             System.out.println(new Gson().toJson(inMap));
@@ -488,7 +673,7 @@ public class Test {
         }
     }
 
-    private static void leaveCheckTest(){
+    /*private static void leaveCheckTest(){
         try {
             System.out.println(new Gson().toJson(leaveService.isAvailableLeaveTypes("553fb999-2ceb-4bf0-90f2-ccf52742c8a1",
                     "f9e9a19f-4859-4e8c-a8f4-dc134629a57b")));
@@ -499,14 +684,14 @@ public class Test {
     }
 
     private static void searchLeaveTests() {
-        /*try{
+        *//*try{
             System.out.println(new Gson().toJson(LEAVE_DTO_TRANSFORMER.getAllLeaveRequestDto(leaveService.searchOrReadLeaveRequests(
                     "5546e9ae-1eff-41fd-906d-879584315118", null, null, null, null, null, null, null, null, null, null, null, null, null, null
             ))));
 
         }catch (Exception e){
             e.printStackTrace();
-        }*/
+        }*//*
     }
 
     private static void createEmployeeTest(){
@@ -662,10 +847,10 @@ public class Test {
 
             //teamService.saveTeam(team);
 
-            /*teamDto = transformer.getTeamDto(teamService.getTeamByID("18a30edb-b037-47cb-b0fc-89be50ebd8d1"));
+            *//*teamDto = transformer.getTeamDto(teamService.getTeamByID("18a30edb-b037-47cb-b0fc-89be50ebd8d1"));
 
 
-            System.out.println("Final object: " + new Gson().toJson(teamDto));*/
+            System.out.println("Final object: " + new Gson().toJson(teamDto));*//*
 
         } catch (Exception e){
             e.printStackTrace();
@@ -680,7 +865,7 @@ public class Test {
         } catch (CustomException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     private static void readXmlFile() throws IOException {
         Properties properties = new Properties();

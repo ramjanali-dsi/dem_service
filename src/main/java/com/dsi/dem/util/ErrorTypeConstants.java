@@ -102,6 +102,7 @@ public class ErrorTypeConstants {
     public static final String DEM_HOLIDAY_ERROR_TYPE_0003 = "hasHoliday";
     public static final String DEM_HOLIDAY_ERROR_TYPE_0004 = "holidayPresent";
     public static final String DEM_HOLIDAY_ERROR_TYPE_0005 = "weekendPresent";
+    public static final String DEM_HOLIDAY_ERROR_TYPE_0006 = "holidayDateRangeInvalid";
 
     //Attendance
     public static final String DEM_ATTENDANCE_ERROR_TYPE_0001 = "attendance";

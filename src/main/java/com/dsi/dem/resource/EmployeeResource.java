@@ -170,9 +170,12 @@ public class EmployeeResource {
     })
     public Response readEmployee(@PathParam("employee_id") String employeeID) throws CustomException {
 
+        String context = request.getAttribute("context") != null ?
+                request.getAttribute("context").toString() : null;
+
         logger.info("Read an employee info");
         EmployeeDto employeeDto = EMPLOYEE_DTO_TRANSFORMER.getEmployeeDto
-                (employeeService.getEmployeeByID(employeeID));
+                (employeeService.getEmployeeByID(employeeID, context));
 
         return Response.ok().entity(employeeDto).build();
     }

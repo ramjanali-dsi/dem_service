@@ -361,11 +361,25 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
     }
 
     @Override
-    public Employee getEmployeeByID(String employeeID) throws CustomException {
+    public Employee getEmployeeByID(String employeeID, String context) throws CustomException {
         logger.info("Read an employee by ID:: " + employeeID);
 
         try {
-            Employee employee = employeeDao.getEmployeeByID(employeeID);
+            ContextDto contextDto = Utility.getContextDtoObj(context);
+            if(contextDto != null){
+                if(Utility.isNullOrEmpty(contextDto.getTeamId())){
+
+                    if(!Utility.isNullOrEmpty(contextDto.getEmployeeId())){
+                        if(!contextDto.getEmployeeId().equals(employeeID)){
+                            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0001);
+                            throw new CustomException(errorMessage);
+                        }
+                    }
+                }
+            }
+
+            Employee employee = employeeDao.getEmployeeByIDAndContext(employeeID, contextDto);
             if (employee == null) {
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0001,
                         Constants.DEM_SERVICE_0001_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_001);
@@ -375,6 +389,20 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             JSONObject resultObj = callAnotherService.getRequest(APIProvider.API_USER + employee.getUserId());
             employee.setRoleId(resultObj.getString("roleId"));
             employee.setRoleName(resultObj.getString("roleName"));
+
+            if(contextDto != null){
+                if(!Utility.isNullOrEmpty(contextDto.getTeamId())){
+
+                    if(!Utility.isNullOrEmpty(contextDto.getEmployeeId())) {
+                        if (!contextDto.getEmployeeId().equals(employeeID)) {
+                            employee.setBankAcNo(null);
+                            employee.setETinId(null);
+                            employee.setEtinId(null);
+                            employee.setNationalId(null);
+                        }
+                    }
+                }
+            }
 
             return setEmployeesAllProperty(employeeID, employee);
 

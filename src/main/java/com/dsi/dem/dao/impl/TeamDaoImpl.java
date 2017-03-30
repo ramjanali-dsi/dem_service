@@ -4,10 +4,7 @@ import com.dsi.dem.dao.TeamDao;
 import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
-import com.dsi.dem.model.ProjectTeam;
-import com.dsi.dem.model.RoleType;
-import com.dsi.dem.model.Team;
-import com.dsi.dem.model.TeamMember;
+import com.dsi.dem.model.*;
 import com.dsi.dem.service.impl.CommonService;
 import com.dsi.dem.util.Constants;
 import com.dsi.dem.util.ErrorTypeConstants;
@@ -314,6 +311,25 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
     }
 
     @Override
+    public void deleteTeamLeadByUserId(String teamId, String userId) throws CustomException {
+        try {
+            Query query = session.createQuery("DELETE FROM TeamMember tm WHERE tm.team.teamId =:teamId AND tm.role.roleId in (SELECT r.roleId FROM RoleType r WHERE r.roleName =:roleName) " +
+                    "AND tm.employee.employeeId in (SELECT e.employeeId FROM Employee e WHERE e.userId =:userId)");
+            query.setParameter("teamId", teamId);
+            query.setParameter("userId", userId);
+            query.setParameter("roleName", RoleName.LEAD.getValue());
+
+            query.executeUpdate();
+
+        } catch (Exception e) {
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0004,
+                    Constants.DEM_SERVICE_0004_DESCRIPTION, ErrorTypeConstants.DEM_TEAM_ERROR_TYPE_0002);
+            throw new CustomException(errorMessage);
+        }
+    }
+
+    @Override
     public TeamMember getTeamMemberByTeamIDAndMemberID(String teamID, String memberID) {
         Query query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId =:teamID AND tm.employee.employeeId =:employeeID");
         query.setParameter("teamID", teamID);
@@ -332,6 +348,21 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
                 "AND tm.employee.userId =:userId");
         query.setParameter("teamID", teamID);
         query.setParameter("userId", userId);
+
+        TeamMember teamMember = (TeamMember) query.uniqueResult();
+        if(teamMember != null){
+            return teamMember;
+        }
+        return null;
+    }
+
+    @Override
+    public TeamMember getTeamMemberByTeamIDAndUserIDAndRole(String teamID, String userId, String roleId) {
+        Query query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId =:teamID " +
+                "AND tm.employee.userId =:userId AND tm.role.roleId =:roleId");
+        query.setParameter("teamID", teamID);
+        query.setParameter("userId", userId);
+        query.setParameter("roleId", roleId);
 
         TeamMember teamMember = (TeamMember) query.uniqueResult();
         if(teamMember != null){
@@ -361,9 +392,22 @@ public class TeamDaoImpl extends CommonService implements TeamDao {
             query.setParameter("teamID", teamID);
 
         } else {
-            query = session.createQuery("FROM TeamMember tm WHERE tm.employee.employeeId =:employeeID");
+            query = session.createQuery("FROM TeamMember tm WHERE tm.employee.employeeId =:employeeID)");
             query.setParameter("employeeID", employeeID);
         }
+
+        List<TeamMember> teamMemberList = query.list();
+        if(teamMemberList != null) {
+            return teamMemberList;
+        }
+        return null;
+    }
+
+    @Override
+    public List<TeamMember> getTeamMemberByEmployeeId(String employeeId) {
+        Query query = session.createQuery("FROM TeamMember tm WHERE tm.team.teamId in (SELECT t.team.teamId FROM TeamMember t " +
+                "WHERE t.employee.employeeId =:employeeID)");
+        query.setParameter("employeeID", employeeId);
 
         List<TeamMember> teamMemberList = query.list();
         if(teamMemberList != null) {

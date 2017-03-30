@@ -261,7 +261,9 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         leaveDao.updateLeaveRequest(existLeaveRequest);
         logger.info("Leave request approved success");
 
-        updateLeaveSummary(existLeaveRequest);
+        if(leaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)) {
+            updateLeaveSummary(existLeaveRequest);
+        }
 
         LeaveRequestDto requestDto = LEAVE_DTO_TRANSFORMER.getLeaveRequestDto(existLeaveRequest);
         logger.info("Employees leave request approval:: End");
@@ -280,17 +282,20 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 membersEmail = new JSONArray();
                 clientEmails = new JSONArray();
 
-                List<TeamMember> teamMemberList = teamDao.getTeamMembers(null, existLeaveRequest.getEmployee().getEmployeeId());
+                List<TeamMember> teamMemberList = teamDao.getTeamMemberByEmployeeId(existLeaveRequest.getEmployee().getEmployeeId());
 
                 if(!Utility.isNullOrEmpty(teamMemberList)){
+                    logger.info("Team member list size:: " + teamMemberList.size());
 
                     for(TeamMember member : teamMemberList){
 
+                        String emails = employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
+                                .get(0).getEmail();
                         if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
-                            leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+                            leadEmails.put(emails);
 
                         } else if(member.getRole().getRoleName().equals(RoleName.MEMBER.getValue())){
-                            membersEmail.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+                            membersEmail.put(emails);
                         }
                     }
                 }
@@ -764,7 +769,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
             teamDao.setSession(session);
             clientDao.setSession(session);
-            List<TeamMember> teamMemberList = teamDao.getTeamMembers(null, existLeaveRequest.getEmployee().getEmployeeId());
+            List<TeamMember> teamMemberList = teamDao.getTeamMemberByEmployeeId(existLeaveRequest.getEmployee().getEmployeeId());
 
             if(!Utility.isNullOrEmpty(teamMemberList)){
 
@@ -827,9 +832,11 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                             }
                         }
 
-                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, emailList);
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_CLIENT));
+                        if(emailList.length() > 0) {
+                            globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, emailList);
+                            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                    NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_CLIENT));
+                        }
                     }
                 }
             }

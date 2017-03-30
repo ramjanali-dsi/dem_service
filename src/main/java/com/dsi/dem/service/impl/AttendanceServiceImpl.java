@@ -43,153 +43,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
     public void saveAttendance(List<AttendanceDto> attendanceDtoList, String userID,
                                String attendanceDate, String tenantName) throws CustomException {
 
-        /*logger.info("Employees attendance schedule create: start");
-        Date date = attendanceDateValidation(attendanceDate);
-
-        List<String> unNotifiedEmployeeIds = new ArrayList<>();
-        List<String> presentApproveLeaveEmployeeIds = new ArrayList<>();
-        Session session = getSession();
-        attendanceDao.setSession(session);
-        leaveDao.setSession(session);
-        wfhDao.setSession(session);
-
-        int count = 0;
-        for(AttendanceDto attendanceDto : attendanceDtoList){
-
-            TemporaryAttendance temporaryAttendance = attendanceDao.getTemporaryAttendance(
-                    attendanceDto.getTempAttendanceId());
-            if(temporaryAttendance == null){
-                close(session);
-                ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
-                        Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_ATTENDANCE_ERROR_TYPE_0006);
-                throw new CustomException(errorMessage);
-            }
-
-            validationForAttendance(session, attendanceDto);
-
-            EmployeeAttendance attendance = new EmployeeAttendance();
-            attendance.setAbsent(attendanceDto.isAbsent());
-            attendance.setCheckInTime(attendanceDto.getCheckInTime());
-            attendance.setCheckOutTime(attendanceDto.getCheckOutTime());
-
-            if(attendanceDto.isAbsent()){
-                attendance.setTotalHour(attendanceDto.getTotalHour());
-
-            } else {
-                attendance.setTotalHour(Utility.getTimeCalculation(attendanceDto.getCheckInTime(),
-                        attendanceDto.getCheckOutTime()));
-            }
-
-            attendance.setComment(attendanceDto.getComment());
-            attendance.setEmployee(temporaryAttendance.getEmployee());
-            attendance.setAttendanceDate(temporaryAttendance.getAttendanceDate());
-            attendance.setCreatedBy(temporaryAttendance.getCreatedBy());
-            attendance.setModifiedBy(employeeDao.getEmployeeByUserID(userID).getEmployeeId());
-            attendance.setCreatedDate(Utility.today());
-            attendance.setLastModifiedDate(Utility.today());
-            attendance.setVersion(1);
-
-            EmployeeLeave leaveSummary;
-            WorkFromHome workFromHome = wfhDao.getWFHByEmployeeIdAndDate(attendance.getEmployee().getEmployeeId(), date);
-
-            if (attendance.isAbsent()) {
-                //TODO Approved pre & post leave request check for this date
-
-                logger.info("Employee absent.");
-                if (leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
-                        attendance.getEmployee().getEmployeeNo(), date)) {
-                    logger.info("Employee has approved pre/post leave request.");
-                    attendance.setComment(Constants.LEAVE_COMMENT);
-
-                } else if(workFromHome != null){
-                    logger.info("Employee has approved work form home request.");
-
-                    attendance.setAbsent(false);
-                    attendance.setCheckInTime(Constants.CHECK_IN_TIME);
-                    attendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
-                    attendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
-                            Constants.CHECK_OUT_TIME));
-                    attendance.setComment(Constants.WFH_COMMENT);
-
-                } else {
-                    logger.info("Employee has no pre/post approved leave & work from home request.");
-
-                    leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
-                    leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
-                    leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
-                            + leaveSummary.getTotalSickUsed()
-                            + leaveSummary.getTotalNotNotify()
-                            + leaveSummary.getTotalSpecialLeave());
-                    leaveDao.updateEmployeeLeaveSummary(leaveSummary);
-                    logger.info("Leave summary updated for absent.");
-
-                    unNotifiedEmployeeIds.add(temporaryAttendance.getEmployee().getEmployeeId());
-                }
-
-            } else {
-                //TODO Approved pre & post leave request check for this date
-
-                logger.info("Employee present.");
-                LeaveRequest leaveRequest = leaveDao.getLeaveRequestByStatusAndEmployee(
-                        attendance.getEmployee().getEmployeeNo(), date);
-
-                if (leaveRequest != null) {
-                    logger.info("Employee has approved leave request.");
-                    leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
-
-                    switch (leaveRequest.getLeaveType().getLeaveTypeName()) {
-                        case Constants.SICK_TYPE_NAME:
-                            leaveSummary.setTotalSickUsed(leaveSummary.getTotalSickUsed() - 1);
-
-                            break;
-                        case Constants.CASUAL_TYPE_NAME:
-                            leaveSummary.setTotalCasualUsed(leaveSummary.getTotalCasualUsed() - 1);
-
-                            break;
-                        case Constants.SPECIAL_TYPE_NAME:
-                            leaveSummary.setTotalSpecialLeave(leaveSummary.getTotalSpecialLeave() - 1);
-                            break;
-                    }
-
-                    leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
-                            + leaveSummary.getTotalSickUsed()
-                            + leaveSummary.getTotalNotNotify()
-                            + leaveSummary.getTotalSpecialLeave());
-                    leaveDao.updateEmployeeLeaveSummary(leaveSummary);
-                    logger.info("Leave summary updated for present.");
-
-                    presentApproveLeaveEmployeeIds.add(temporaryAttendance.getEmployee().getEmployeeId());
-
-                } else if(workFromHome != null){
-                    logger.info("Employee has approved work from home request.");
-
-                    workFromHome.setStatus(wfhDao.getWFHStatusByName(Constants.CANCELLER_WFH_REQUEST));
-                    workFromHome.setLastModifiedDate(Utility.today());
-                    workFromHome.setReason("Already present that day.");
-                    wfhDao.updateWorkFromHomeRequest(workFromHome);
-                    logger.info("Work form home request updated to cancel status.");
-                }
-            }
-
-            attendanceDao.saveAttendance(attendance);
-            logger.info("Save employee attendance success");
-
-            if(count % 20 == 0){
-                session.flush();
-                session.clear();
-            }
-            count++;
-        }
-
-        logger.info("Delete all temporary attendances.");
-        attendanceDao.deleteTempAttendance(Utility.getDateFromString(attendanceDate));
-
-        logger.info("Delete attendance draft file.");
-        attendanceDao.deleteAttendanceDraft(Utility.getDateFromString(attendanceDate));
-
-        logger.info("Employees attendance schedule create: End");
-        close(session);*/
-
         Session session = getSession();
         try {
             logger.info("Employees attendance schedule create: start");
@@ -248,9 +101,60 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 WorkFromHome workFromHome = wfhDao.getWFHByEmployeeIdAndDate(attendance.getEmployee().getEmployeeId(), date);
 
                 if (attendance.isAbsent()) {
-                    //TODO Approved pre & post leave request check for this date
 
-                    logger.info("Employee absent.");
+                    if(!leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
+                            attendance.getEmployee().getEmployeeNo(), date) && workFromHome == null){
+                        logger.info("Employee has no pre/post approved leave & work from home request.");
+
+                        leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
+                        leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
+                        leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
+                                + leaveSummary.getTotalSickUsed()
+                                + leaveSummary.getTotalNotNotify()
+                                + leaveSummary.getTotalSpecialLeave());
+                        leaveDao.updateEmployeeLeaveSummary(leaveSummary);
+                        logger.info("Leave summary updated for absent.");
+
+                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
+                                .get(0).getEmail();
+                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
+                                attendanceDate, tenantName, new JSONArray().put(email));
+
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                        List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
+                        if (!Utility.isNullOrEmpty(leadList)) {
+                            for (Employee employee : leadList) {
+                                leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
+                            }
+                        }
+
+                        if(hrManagerEmailList.length() > 0) {
+                            for (int i = 0; i < hrManagerEmailList.length(); i++) {
+                                hrManagerLeadEmailList.put(hrManagerEmailList.get(i));
+                            }
+                        }
+
+                        if(leadEmails.length() > 0) {
+                            for (int i = 0; i<leadEmails.length(); i++) {
+                                hrManagerLeadEmailList.put(leadEmails.get(i));
+                            }
+                        }
+
+                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
+                                attendanceDate, tenantName, hrManagerLeadEmailList);
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+
+                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+                    }
+
+                    /*logger.info("Employee absent.");
                     if (leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
                             attendance.getEmployee().getEmployeeNo(), date)) {
                         logger.info("Employee has approved pre/post leave request.");
@@ -306,7 +210,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
-                    }
+                    }*/
 
                 } else {
                     //TODO Approved pre & post leave request check for this date
@@ -355,8 +259,19 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                             }
                         }
 
-                        hrManagerLeadEmailList.put(hrManagerEmailList);
-                        hrManagerLeadEmailList.put(leadEmails);
+                        if(hrManagerEmailList.length() > 0) {
+                            for (int i = 0; i < hrManagerEmailList.length(); i++) {
+                                hrManagerLeadEmailList.put(hrManagerEmailList.get(i));
+                            }
+                        }
+
+                        if(leadEmails.length() > 0) {
+                            for (int i = 0; i<leadEmails.length(); i++) {
+                                hrManagerLeadEmailList.put(leadEmails.get(i));
+                            }
+                        }
+                        //hrManagerLeadEmailList.put(hrManagerEmailList);
+                        //hrManagerLeadEmailList.put(leadEmails);
 
                         globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
                                 leaveRequest, attendanceDate, tenantName, hrManagerLeadEmailList);
@@ -377,10 +292,12 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                                 }
                             }
 
-                            globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
-                                    leaveRequest, attendanceDate, tenantName, clientEmails);
-                            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                    NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_CLIENT));
+                            if(clientEmails.length() > 0) {
+                                globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
+                                        leaveRequest, attendanceDate, tenantName, clientEmails);
+                                notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                        NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_CLIENT));
+                            }
                         }
 
                     } else if(workFromHome != null){
@@ -392,8 +309,19 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         wfhDao.updateWorkFromHomeRequest(workFromHome);
                         logger.info("Work form home request updated to cancel status.");
 
-                        hrManagerLeadEmailList.put(hrManagerEmailList);
-                        hrManagerLeadEmailList.put(leadEmails);
+                        if(hrManagerEmailList.length() > 0) {
+                            for (int i = 0; i < hrManagerEmailList.length(); i++) {
+                                hrManagerLeadEmailList.put(hrManagerEmailList.get(i));
+                            }
+                        }
+
+                        if(leadEmails.length() > 0) {
+                            for (int i = 0; i<leadEmails.length(); i++) {
+                                hrManagerLeadEmailList.put(leadEmails.get(i));
+                            }
+                        }
+                        //hrManagerLeadEmailList.put(hrManagerEmailList);
+                        //hrManagerLeadEmailList.put(leadEmails);
 
                         globalContentObj = EmailContent.getContentForAttendanceApproveWFH(workFromHome, attendanceDate,
                                 tenantName, hrManagerLeadEmailList);
@@ -738,7 +666,29 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                                 }
 
                                 String employeeIdVal = lineSplit[CSV_EMPLOYEE_ID_COLUMN].replace("\'", "");
-                                if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.IN_TIME)) {
+                                Timestamp newTime = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
+
+                                if(inMap.get(employeeIdVal) != null && outMap.get(employeeIdVal) != null) {
+                                    Timestamp prevInTime = Utility.getTimeStampFromString(inMap.get(employeeIdVal));
+                                    Timestamp prevOutTime = Utility.getTimeStampFromString(outMap.get(employeeIdVal));
+
+                                    if (prevInTime.after(newTime)) {
+                                        inMap.put(employeeIdVal, lineSplit[CSV_DATE_TIME_COLUMN]);
+                                    }
+
+                                    if (prevOutTime.before(newTime)) {
+                                        inMap.put(employeeIdVal, lineSplit[CSV_DATE_TIME_COLUMN]);
+                                    }
+
+                                } else {
+                                    inMap.put(employeeIdVal,
+                                            lineSplit[CSV_DATE_TIME_COLUMN]);
+
+                                    outMap.put(employeeIdVal,
+                                            lineSplit[CSV_DATE_TIME_COLUMN]);
+                                }
+
+                                /*if (lineSplit[CSV_TYPE_COLUMN].equals(ReadXMLFile.IN_TIME)) {
 
                                     if (inMap.get(employeeIdVal) != null) {
                                         Timestamp nextDate = Utility.getTimeStampFromString(lineSplit[CSV_DATE_TIME_COLUMN]);
@@ -764,7 +714,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                                     } else {
                                         outMap.put(employeeIdVal, lineSplit[CSV_DATE_TIME_COLUMN]);
                                     }
-                                }
+                                }*/
                             }
                         }
 
@@ -796,6 +746,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
             session = getSession();
             attendanceDao.setSession(session);
+            wfhDao.setSession(session);
+            leaveDao.setSession(session);
             once = true;
 
             int count = 0;
@@ -803,58 +755,78 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 String employeeNo = employee.getEmployeeNo();
                 logger.info("Employee no: " + employeeNo);
 
-                if (inMap.containsKey(employeeNo) && outMap.containsKey(employeeNo)) {
-                    TemporaryAttendance tempAttendance = new TemporaryAttendance();
-                    tempAttendance.setEmployee(employee);
-                    tempAttendance.setAbsent(false);
-                    tempAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
-                    tempAttendance.setCheckInTime(Utility.getTime(inMap.get(employeeNo)));
-                    tempAttendance.setCheckOutTime(Utility.getTime(outMap.get(employeeNo)));
-                    tempAttendance.setTotalHour(Utility.getTimeCalculation(
-                            Utility.getTime(inMap.get(employeeNo)), Utility.getTime(outMap.get(employeeNo))));
-                    tempAttendance.setCreatedDate(Utility.today());
-                    tempAttendance.setLastModifiedDate(Utility.today());
-                    tempAttendance.setCreatedBy(currentEmployee.getEmployeeId());
-                    tempAttendance.setModifiedBy(currentEmployee.getEmployeeId());
-                    tempAttendance.setVersion(1);
+                if(employee.isActive()) {
+                    if (inMap.containsKey(employeeNo) && outMap.containsKey(employeeNo)) {
+                        TemporaryAttendance tempAttendance = new TemporaryAttendance();
+                        tempAttendance.setEmployee(employee);
+                        tempAttendance.setAbsent(false);
+                        tempAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
+                        tempAttendance.setCheckInTime(Utility.getTime(inMap.get(employeeNo)));
+                        tempAttendance.setCheckOutTime(Utility.getTime(outMap.get(employeeNo)));
+                        tempAttendance.setTotalHour(Utility.getTimeCalculation(
+                                Utility.getTime(inMap.get(employeeNo)), Utility.getTime(outMap.get(employeeNo))));
+                        tempAttendance.setCreatedDate(Utility.today());
+                        tempAttendance.setLastModifiedDate(Utility.today());
+                        tempAttendance.setCreatedBy(currentEmployee.getEmployeeId());
+                        tempAttendance.setModifiedBy(currentEmployee.getEmployeeId());
+                        tempAttendance.setVersion(1);
 
-                    attendanceDao.saveTempAttendance(tempAttendance);
+                        attendanceDao.saveTempAttendance(tempAttendance);
 
-                } else {
-                    TemporaryAttendance tempAttendance = new TemporaryAttendance();
-                    tempAttendance.setEmployee(employee);
-                    tempAttendance.setAbsent(true);
-                    tempAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
-                    tempAttendance.setCreatedDate(Utility.today());
-                    tempAttendance.setLastModifiedDate(Utility.today());
-                    tempAttendance.setCreatedBy(currentEmployee.getEmployeeId());
-                    tempAttendance.setModifiedBy(currentEmployee.getEmployeeId());
-                    tempAttendance.setVersion(1);
+                    } else {
+                        TemporaryAttendance tempAttendance = new TemporaryAttendance();
+                        tempAttendance.setEmployee(employee);
+                        tempAttendance.setAbsent(true);
+                        tempAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
+                        tempAttendance.setCreatedDate(Utility.today());
+                        tempAttendance.setLastModifiedDate(Utility.today());
+                        tempAttendance.setCreatedBy(currentEmployee.getEmployeeId());
+                        tempAttendance.setModifiedBy(currentEmployee.getEmployeeId());
+                        tempAttendance.setVersion(1);
 
-                    attendanceDao.saveTempAttendance(tempAttendance);
-                }
+                        logger.info("Check employee has approved leave/wfh");
+                        Date date = Utility.getDateFromString(attendanceDateTime);
+                        WorkFromHome workFromHome = wfhDao.getWFHByEmployeeIdAndDate(employee.getEmployeeId(), date);
 
-                if (once) {
-                    Date date = attendanceDateValidation(attendanceDateTime);
+                        if (leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(employeeNo, date)) {
+                            logger.info("Employee has approved pre/post leave request.");
+                            tempAttendance.setComment(Constants.LEAVE_COMMENT);
 
-                    draftAttendance = attendanceDao.getDraftAttendanceFileByDate(date);
-                    if(draftAttendance == null) {
-                        draftAttendance = new DraftAttendance();
-                        draftAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
-                        draftAttendance.setCreatedDate(Utility.todayTimeStamp());
-                        draftAttendance.setLastModifiedDate(Utility.todayTimeStamp());
-                        attendanceDao.saveAttendanceDraft(draftAttendance);
+                        } else if (workFromHome != null) {
+                            logger.info("Employee has approved work form home request.");
+                            tempAttendance.setAbsent(false);
+                            tempAttendance.setCheckInTime(Constants.CHECK_IN_TIME);
+                            tempAttendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
+                            tempAttendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
+                                    Constants.CHECK_OUT_TIME));
+                            tempAttendance.setComment(Constants.WFH_COMMENT);
+                        }
+
+                        attendanceDao.saveTempAttendance(tempAttendance);
                     }
-                    once = false;
-                }
 
-                if(count % 20 == 0){
-                    session.flush();
-                    session.clear();
-                }
-                count++;
+                    if (once) {
+                        Date date = attendanceDateValidation(attendanceDateTime);
 
-                logger.info("Save temporary attendance success");
+                        draftAttendance = attendanceDao.getDraftAttendanceFileByDate(date);
+                        if (draftAttendance == null) {
+                            draftAttendance = new DraftAttendance();
+                            draftAttendance.setAttendanceDate(Utility.getDateFromString(attendanceDateTime));
+                            draftAttendance.setCreatedDate(Utility.todayTimeStamp());
+                            draftAttendance.setLastModifiedDate(Utility.todayTimeStamp());
+                            attendanceDao.saveAttendanceDraft(draftAttendance);
+                        }
+                        once = false;
+                    }
+
+                    if (count % 20 == 0) {
+                        session.flush();
+                        session.clear();
+                    }
+                    count++;
+
+                    logger.info("Save temporary attendance success");
+                }
             }
         }
 

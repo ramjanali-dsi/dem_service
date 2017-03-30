@@ -378,17 +378,23 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
         TeamMember leadMember = teamDao.getTeamLeadByTeamID(teamId);
 
+        close(session);
+
         String leadAssignId = null;
         String leadUnAssignId = null;
         for(TeamMember teamMember : teamMemberList){
+            session = getSession();
+            teamDao.setSession(session);
 
-            TeamMember existMember = teamDao.getTeamMemberByTeamIDAndUserID(team.getTeamId(),
-                    teamMember.getEmployee().getUserId());
+            TeamMember existMember;
             RoleType roleType = teamDao.getRoleTypeByRoleId(teamMember.getRole().getRoleId());
             switch (teamMember.getActivity()){
                 case 1:
                     logger.info("Create Team members:: Start");
                     validateInputForMemberCreation(teamMember, session);
+
+                    existMember = teamDao.getTeamMemberByTeamIDAndUserIDAndRole(team.getTeamId(),
+                            teamMember.getEmployee().getUserId(), roleType.getRoleId());
 
                     if(existMember == null){
                         teamMember.setVersion(team.getVersion());
@@ -418,6 +424,9 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                         throw new CustomException(errorMessage);
                     }
 
+                    existMember = teamDao.getTeamMemberByTeamIDAndUserID(team.getTeamId(),
+                            teamMember.getEmployee().getUserId());
+
                     if(existMember != null) {
                         unassignedTeamMembers.add(existMember);
                         teamDao.deleteTeamMemberByUserId(teamId, teamMember.getEmployee().getUserId());
@@ -426,13 +435,18 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                     logger.info("Delete Team members:: End");
                     break;
             }
+
+            close(session);
         }
+
+        session = getSession();
+        teamDao.setSession(session);
 
         if(leadAssignId != null){
             unassignedTeamMembers.add(leadMember);
 
             leadUnAssignId = leadMember.getEmployee().getUserId();
-            teamDao.deleteTeamMemberByUserId(teamId, leadMember.getEmployee().getUserId());
+            teamDao.deleteTeamLeadByUserId(teamId, leadMember.getEmployee().getUserId());
             logger.info("Delete previous team lead.");
         }
 

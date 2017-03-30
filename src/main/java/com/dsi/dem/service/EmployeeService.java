@@ -16,7 +16,7 @@ public interface EmployeeService {
     void validateInputForCreation(Employee employee) throws CustomException;
     Employee updateEmployee(Employee employee, String currentUserId, String tenantName) throws CustomException;
     void deleteEmployee(String employeeID) throws CustomException;
-    Employee getEmployeeByID(String employeeID) throws CustomException;
+    Employee getEmployeeByID(String employeeID, String context) throws CustomException;
     Employee getEmployeeByUserID(String userID) throws CustomException;
     Employee getEmployeeByEmployeeNO(String employeeNO) throws CustomException;
     List<Employee> getTeamLeadsProfile(String employeeId) throws CustomException;

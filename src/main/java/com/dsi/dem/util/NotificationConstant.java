@@ -122,7 +122,9 @@ public class NotificationConstant {
     public static final Long AUTO_NOTIFY_HOLIDAY_TOMORROW_TEMPLATE_ID = 108L;
     public static final Long AUTO_NOTIFY_PENDING_LEAVE_TEMPLATE_ID = 109L;
 
-    public static final String WEBSITE_LINK = "http://103.245.204.114:3000/#/";
+    //public static final String WEBSITE_LINK = "http://103.245.204.114:3000/#/";
+    //public static final String WEBSITE_LINK = "http://103.245.204.115/#!/";
+    public static final String WEBSITE_LINK = "http://dem.dsinnovators.com/#!/";
 
     public static final String HR_ROLE_TYPE = "HR";
     public static final String MANAGER_ROLE_TYPE = "Manager";

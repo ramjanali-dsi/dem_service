@@ -23,10 +23,10 @@ public class Team {
     @Column(length = 50)
     private String name;
 
-    @Column(length = 20)
+    @Column(length = 50)
     private String floor;
 
-    @Column(length = 20)
+    @Column(length = 50)
     private String room;
 
     @Column(name = "member_count")

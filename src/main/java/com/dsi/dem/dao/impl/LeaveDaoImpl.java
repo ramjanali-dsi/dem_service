@@ -216,7 +216,7 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
             paramValue.put("employeeID", employeeId);
         }
 
-        queryBuilder.append(" ORDER BY el.employee.createdDate DESC");
+        queryBuilder.append(" ORDER BY el.employee.employeeNo ASC");
 
         logger.info("Query builder: " + queryBuilder.toString());
         Query query = session.createQuery(queryBuilder.toString());

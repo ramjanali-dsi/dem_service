@@ -174,7 +174,7 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
                 queryBuilder.append(" WHERE et.employee.employeeNo like :employeeNo");
                 hasClause = true;
             }
-            paramValue.put("employeeNo", employeeNo);
+            paramValue.put("employeeNo", "%" + employeeNo + "%");
         }
 
         if(!Utility.isNullOrEmpty(firstName)){
@@ -212,26 +212,26 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
 
         if(!Utility.isNullOrEmpty(teamName)){
             if(hasClause){
-                queryBuilder.append(" AND et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                queryBuilder.append(" AND et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name =:teamName)");
 
             } else {
-                queryBuilder.append(" WHERE et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name like :teamName)");
+                queryBuilder.append(" WHERE et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.name =:teamName)");
                 hasClause = true;
             }
-            paramValue.put("teamName", "%" + teamName + "%");
+            paramValue.put("teamName", teamName);
         }
 
         if(!Utility.isNullOrEmpty(projectName)){
             if(hasClause){
                 queryBuilder.append(" AND et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
 
             } else {
                 queryBuilder.append(" WHERE et.employee.employeeId in (SELECT tm.employee.employeeId FROM TeamMember tm WHERE tm.team.teamId in " +
-                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName like :projectName))");
+                        "(SELECT pt.team.teamId FROM ProjectTeam pt WHERE pt.project.projectName =:projectName))");
                 hasClause = true;
             }
-            paramValue.put("projectName", "%" + projectName + "%");
+            paramValue.put("projectName", projectName);
         }
 
         if(!Utility.isNullOrEmpty(isAbsent)){
@@ -255,7 +255,7 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
             paramValue.put("attendanceDate", attendanceDate);
         }
 
-        queryBuilder.append(" ORDER BY et.attendanceDate DESC");
+        queryBuilder.append(" ORDER BY et.employee.employeeNo ASC, et.attendanceDate DESC");
 
         logger.info("Query builder: " + queryBuilder.toString());
         Query query = session.createQuery(queryBuilder.toString());
@@ -395,7 +395,7 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
     @Override
     public void deleteTemporaryAttendanceFromCron(Date createdDate) throws CustomException {
         try{
-            Query query = session.createQuery("DELETE FROM TemporaryAttendance ta WHERE ta.createdDate =:createdDate");
+            Query query = session.createQuery("DELETE FROM TemporaryAttendance ta WHERE ta.createdDate <=:createdDate");
             query.setParameter("createdDate", createdDate);
 
             query.executeUpdate();
@@ -410,7 +410,8 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
 
     @Override
     public List<TemporaryAttendance> getAllTempAttendances(Date attendanceDate) {
-        Query query = session.createQuery("FROM TemporaryAttendance ta WHERE ta.attendanceDate =:attendanceDate");
+        Query query = session.createQuery("FROM TemporaryAttendance ta WHERE ta.attendanceDate =:attendanceDate " +
+                "ORDER BY ta.employee.employeeNo ASC");
         query.setParameter("attendanceDate", attendanceDate);
 
         List<TemporaryAttendance> temporaryAttendances = query.list();
@@ -464,7 +465,7 @@ public class AttendanceDaoImpl extends CommonService implements AttendanceDao {
     @Override
     public void deleteAttendanceDraftFromCron(Date createdDate) throws CustomException {
         try{
-            Query query = session.createQuery("DELETE FROM DraftAttendance da WHERE da.createdDate =:createdDate");
+            Query query = session.createQuery("DELETE FROM DraftAttendance da WHERE DATE(da.createdDate) <=:createdDate");
             query.setParameter("createdDate", createdDate);
 
             query.executeUpdate();

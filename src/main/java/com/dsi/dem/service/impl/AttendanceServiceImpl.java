@@ -59,6 +59,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.ATTENDANCE_CONFIRM_TEMPLATE_ID_FOR_MANAGER_HR));
 
+            List<String> attendanceIgnoreList = Utility.getAttendanceIgnoreList();
+
             int count = 0;
             for (AttendanceDto attendanceDto : attendanceDtoList) {
 
@@ -103,122 +105,67 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                 if (attendance.isAbsent()) {
 
-                    if(!leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
-                            attendance.getEmployee().getEmployeeNo(), date) && workFromHome == null){
-                        logger.info("Employee has no pre/post approved leave & work from home request.");
+                    if(!attendanceIgnoreList.contains(attendance.getEmployee().getEmployeeNo())) {
 
-                        leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
-                        leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
-                        leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
-                                + leaveSummary.getTotalSickUsed()
-                                + leaveSummary.getTotalNotNotify()
-                                + leaveSummary.getTotalSpecialLeave());
-                        leaveDao.updateEmployeeLeaveSummary(leaveSummary);
-                        logger.info("Leave summary updated for absent.");
+                        if (!leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
+                                attendance.getEmployee().getEmployeeNo(), date) && workFromHome == null) {
+                            logger.info("Employee has no pre/post approved leave & work from home request.");
 
-                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
-                                .get(0).getEmail();
-                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
-                                attendanceDate, tenantName, new JSONArray().put(email));
+                            leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
+                            leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
+                            leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
+                                    + leaveSummary.getTotalSickUsed()
+                                    + leaveSummary.getTotalNotNotify()
+                                    + leaveSummary.getTotalSpecialLeave());
+                            leaveDao.updateEmployeeLeaveSummary(leaveSummary);
+                            logger.info("Leave summary updated for absent.");
 
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
+                            email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
+                                    .get(0).getEmail();
+                            globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
+                                    attendanceDate, tenantName, new JSONArray().put(email));
 
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
+                            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                    NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
 
-                        List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
-                        if (!Utility.isNullOrEmpty(leadList)) {
-                            for (Employee employee : leadList) {
-                                leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
+                            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                    NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
+
+                            List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
+                            if (!Utility.isNullOrEmpty(leadList)) {
+                                for (Employee employee : leadList) {
+                                    leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
+                                }
                             }
-                        }
 
-                        if(hrManagerEmailList.length() > 0) {
-                            for (int i = 0; i < hrManagerEmailList.length(); i++) {
-                                hrManagerLeadEmailList.put(hrManagerEmailList.get(i));
+                            if (hrManagerEmailList.length() > 0) {
+                                for (int i = 0; i < hrManagerEmailList.length(); i++) {
+                                    hrManagerLeadEmailList.put(hrManagerEmailList.get(i));
+                                }
                             }
-                        }
 
-                        if(leadEmails.length() > 0) {
-                            for (int i = 0; i<leadEmails.length(); i++) {
-                                hrManagerLeadEmailList.put(leadEmails.get(i));
+                            if (leadEmails.length() > 0) {
+                                for (int i = 0; i < leadEmails.length(); i++) {
+                                    hrManagerLeadEmailList.put(leadEmails.get(i));
+                                }
                             }
+
+                            globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
+                                    attendanceDate, tenantName, hrManagerLeadEmailList);
+                            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                    NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+
+                            notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                                    NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+
+                        } else if (workFromHome != null) {
+                            attendance.setAbsent(false);
+                            attendance.setCheckInTime(Constants.CHECK_IN_TIME);
+                            attendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
+                            attendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
+                                    Constants.CHECK_OUT_TIME));
                         }
-
-                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
-                                attendanceDate, tenantName, hrManagerLeadEmailList);
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
-
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
-
-                    } else if(workFromHome != null){
-                        attendance.setAbsent(false);
-                        attendance.setCheckInTime(Constants.CHECK_IN_TIME);
-                        attendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
-                        attendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
-                                Constants.CHECK_OUT_TIME));
                     }
-
-                    /*logger.info("Employee absent.");
-                    if (leaveDao.getLeaveRequestByRequestTypeAndEmployeeNo(
-                            attendance.getEmployee().getEmployeeNo(), date)) {
-                        logger.info("Employee has approved pre/post leave request.");
-                        attendance.setComment(Constants.LEAVE_COMMENT);
-
-                    } else if(workFromHome != null){
-                        logger.info("Employee has approved work form home request.");
-
-                        attendance.setAbsent(false);
-                        attendance.setCheckInTime(Constants.CHECK_IN_TIME);
-                        attendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
-                        attendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
-                                Constants.CHECK_OUT_TIME));
-                        attendance.setComment(Constants.WFH_COMMENT);
-
-                    } else {
-                        logger.info("Employee has no pre/post approved leave & work from home request.");
-
-                        leaveSummary = leaveDao.getEmployeeLeaveSummary(attendance.getEmployee().getEmployeeId());
-                        leaveSummary.setTotalNotNotify(leaveSummary.getTotalNotNotify() + 1);
-                        leaveSummary.setTotalLeaveUsed(leaveSummary.getTotalCasualUsed()
-                                + leaveSummary.getTotalSickUsed()
-                                + leaveSummary.getTotalNotNotify()
-                                + leaveSummary.getTotalSpecialLeave());
-                        leaveDao.updateEmployeeLeaveSummary(leaveSummary);
-                        logger.info("Leave summary updated for absent.");
-
-                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
-                                .get(0).getEmail();
-                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
-                                attendanceDate, tenantName, new JSONArray().put(email));
-
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
-
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
-
-                        List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
-                        if (!Utility.isNullOrEmpty(leadList)) {
-                            for (Employee employee : leadList) {
-                                leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
-                            }
-                        }
-
-                        hrManagerLeadEmailList.put(hrManagerEmailList);
-                        hrManagerLeadEmailList.put(leadList);
-
-                        globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
-                                attendanceDate, tenantName, hrManagerLeadEmailList);
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
-
-                        notificationList.put(EmailContent.getNotificationObject(globalContentObj,
-                                NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
-                    }*/
 
                 } else {
                     //TODO Approved pre & post leave request check for this date
@@ -280,8 +227,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                                 hrManagerLeadEmailList.put(leadEmails.get(i));
                             }
                         }
-                        //hrManagerLeadEmailList.put(hrManagerEmailList);
-                        //hrManagerLeadEmailList.put(leadEmails);
 
                         globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
                                 leaveRequest, attendanceDate, tenantName, hrManagerLeadEmailList);

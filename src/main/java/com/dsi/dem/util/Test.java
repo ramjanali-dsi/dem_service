@@ -12,10 +12,7 @@ import com.dsi.dem.service.AttendanceService;
 import com.dsi.dem.service.EmployeeService;
 import com.dsi.dem.service.LeaveService;
 import com.dsi.dem.service.TeamService;
-import com.dsi.dem.service.impl.AttendanceServiceImpl;
-import com.dsi.dem.service.impl.EmployeeServiceImpl;
-import com.dsi.dem.service.impl.LeaveServiceImpl;
-import com.dsi.dem.service.impl.TeamServiceImpl;
+import com.dsi.dem.service.impl.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.codehaus.jettison.json.JSONArray;
@@ -469,7 +466,17 @@ public class Test {
             System.out.println(subject);
         }*/
 
-        JSONObject contentObj = new JSONObject("{\"Recipients\":[\"sabbir.ahmed@dsinnovators.com\"],\"EmployeeFirstName\":\"Sabbir\",\"EmployeeLastName\":\"Ahmed\",\"Link\":\"http://dem.dsinnovators.com/#!/\",\"TenantName\":\"Dynamic Solution Innovators Ltd.\"}");
+        String key = "0104";
+        List<String> ignoreLIst = Utility.getAttendanceIgnoreList();
+
+        if(!ignoreLIst.contains(key)){
+            System.out.println("Key don't exist.");
+
+        } else {
+            System.out.println("Key exist.");
+        }
+
+        /*JSONObject contentObj = new JSONObject("{\"Recipients\":[\"sabbir.ahmed@dsinnovators.com\"],\"EmployeeFirstName\":\"Sabbir\",\"EmployeeLastName\":\"Ahmed\",\"Link\":\"http://dem.dsinnovators.com/#!/\",\"TenantName\":\"Dynamic Solution Innovators Ltd.\"}");
 
         String json = "{\n" +
                 "  \"subject\": \"Updated Employee Profile\",\n" +
@@ -498,7 +505,7 @@ public class Test {
         Transport transport = session.getTransport("smtp");
         transport.connect("smtp.gmail.com", "triposocial.info@gmail.com", "dynamic4trip");
         transport.sendMessage(message, message.getAllRecipients());
-        transport.close();
+        transport.close();*/
     }
 
     private static String msgBody(String body, JSONObject contentObj) throws JSONException {

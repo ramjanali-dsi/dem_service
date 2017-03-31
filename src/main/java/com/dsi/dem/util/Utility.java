@@ -4,6 +4,7 @@ import com.dsi.dem.dto.ContextDto;
 import com.dsi.dem.exception.CustomException;
 import com.dsi.dem.exception.ErrorMessage;
 import com.dsi.dem.model.Employee;
+import com.dsi.dem.service.impl.APIProvider;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -334,31 +335,21 @@ public class Utility {
         return null;
     }
 
-    public static List<String> getContextObj(String context) throws CustomException {
-        List<String> contextList;
-        JSONObject contextObj;
-        JSONArray contextArray;
-        try{
-            if(context != null) {
-                contextList = new ArrayList<>();
-                contextObj = new JSONObject(context);
-                if(contextObj.has("teamId")) {
-                    contextArray = contextObj.getJSONArray("teamId");
+    public static List<String> getAttendanceIgnoreList(){
+        List<String> ignoreList = new ArrayList<>();
 
-                    for (int i = 0; i < contextArray.length(); i++) {
-                        contextList.add(contextArray.getString(i));
-                    }
+        String ignoreProp = APIProvider.ATTENDANCE_IGNORE_LIST;
+        if(!Utility.isNullOrEmpty(ignoreProp)){
 
-                    return contextList;
-                }
+            if(ignoreProp.contains(",")){
+                String[] splitIgnoreProp = ignoreProp.split(", ");
+                Collections.addAll(ignoreList, splitIgnoreProp);
+
+            } else {
+                ignoreList.add(ignoreProp);
             }
-
-        } catch (JSONException je){
-            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0012,
-                    Constants.DEM_SERVICE_0012_DESCRIPTION, ErrorTypeConstants.DEM_ERROR_TYPE_006);
-            throw new CustomException(errorMessage);
         }
-        return null;
+        return ignoreList;
     }
 
     public static void saveToFile(InputStream uploadedInputStream, String uploadedFileLocation) throws CustomException {

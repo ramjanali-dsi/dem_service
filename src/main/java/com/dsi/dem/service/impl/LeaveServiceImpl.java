@@ -486,6 +486,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         validateInputForCreation(leaveRequest, userId, session);
 
+        leaveRequest.setLeaveType(leaveDao.getLeaveTypeByID(leaveRequest.getLeaveType().getLeaveTypeId()));
         leaveRequest.setLeaveStatus(leaveDao.getLeaveStatusByName(Constants.APPLIED_LEAVE_REQUEST));
         leaveRequest.setDaysCount(Utility.getDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1);
         leaveRequest.setEmployee(employeeDao.getEmployeeByUserID(userId));
@@ -1006,6 +1007,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
         validateInputForSpecialLeaveCreation(leaveRequest, specialLeaveDto.getEmployeeId(), session);
 
+        leaveRequest.setLeaveType(leaveDao.getLeaveTypeByID(leaveRequest.getLeaveType().getLeaveTypeId()));
         leaveRequest.setLeaveStatus(leaveDao.getLeaveStatusByName(Constants.APPLIED_LEAVE_REQUEST));
         leaveRequest.setDaysCount(Utility.getDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1);
         leaveRequest.setEmployee(employeeDao.getEmployeeByID(specialLeaveDto.getEmployeeId()));

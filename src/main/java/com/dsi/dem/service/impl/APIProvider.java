@@ -42,4 +42,6 @@ public class APIProvider {
     public static final String API_NOTIFICATION_CREATE = BASE_NOTIFICATION_URL + apiProp.getProperty("notification.create");
 
     public static final String PHOTO_DIRECTORY = apiProp.getProperty("dem.photoDirectory");
+
+    public static final String ATTENDANCE_IGNORE_LIST = apiProp.getProperty("attendance.ignoreList");
 }

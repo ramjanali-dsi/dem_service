@@ -158,7 +158,7 @@ public class EmailContent {
         String name = "";
         if(workFromHome.getApprovedBy() != null) {
             Employee employee = employeeDao.getEmployeeByUserID(workFromHome.getApprovedBy());
-            name = "<strong>" + employee.getFirstName() + " " + employee.getLastName() + "</strong>";
+            name = employee.getFirstName() + " " + employee.getLastName();
         }
 
         contentObj.put("Name", name);
@@ -191,7 +191,7 @@ public class EmailContent {
         if(leaveRequest.getApprovalId() != null) {
             Employee deniedEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (deniedEmployee != null) {
-                name = "<strong>" + deniedEmployee.getFirstName() + " " + deniedEmployee.getLastName() + "</strong>";
+                name = deniedEmployee.getFirstName() + " " + deniedEmployee.getLastName();
             }
         }
 
@@ -227,7 +227,7 @@ public class EmailContent {
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
             }
         }
 
@@ -263,7 +263,7 @@ public class EmailContent {
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
             }
         }
 
@@ -300,7 +300,7 @@ public class EmailContent {
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
 
             }
         }
@@ -379,7 +379,7 @@ public class EmailContent {
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
+                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
             }
         }
 

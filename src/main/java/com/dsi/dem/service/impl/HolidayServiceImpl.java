@@ -396,29 +396,29 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
             String holidayStartDate = Utility.getDate(holiday.getStartDate());
             String holidayEndDate = Utility.getDate(holiday.getEndDate());
             if(holidayStartDate.equals(holidayEndDate)){
-                holidayDetails += holidayStartDate;
+                holidayDetails += "<strong>" + holidayStartDate + "</strong>";
 
             } else {
-                holidayDetails += holidayStartDate;
-                holidayDetails += " - ";
-                holidayDetails += holidayEndDate;
+                holidayDetails += "<strong>" + holidayStartDate + " - " + holidayEndDate + "</strong>";
             }
 
             holidayDetails += " due to ";
-            holidayDetails += holiday.getHolidayName();
+            holidayDetails += "<strong>" + holiday.getHolidayName() + "</strong>";
             holidayDetails += ".\nThe office will resume it's regular operation on ";
 
-            Date afterEndDate = holiday.getEndDate();
-            afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+            Date afterEndDate = Utility.getDayAfterDate(holiday.getEndDate());
+            //afterEndDate.setTime(afterEndDate.getTime() + 86400000);
             if(Utility.checkWeekendOfDate(afterEndDate)){
-                afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+                afterEndDate = Utility.getDayAfterDate(afterEndDate);
+                //afterEndDate.setTime(afterEndDate.getTime() + 86400000);
 
                 if(Utility.checkWeekendOfDate(afterEndDate)){
-                    afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+                    //afterEndDate.setTime(afterEndDate.getTime() + 86400000);
+                    afterEndDate = Utility.getDayAfterDate(afterEndDate);
                 }
             }
 
-            holidayDetails += Utility.getDate(afterEndDate);
+            holidayDetails += "<strong>" + Utility.getDate(afterEndDate) + "</strong>";
             holidayDetails += ".";
 
             if(cnt != holidays.size() - 1){

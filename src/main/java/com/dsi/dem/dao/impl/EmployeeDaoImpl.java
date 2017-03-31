@@ -774,6 +774,29 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
+    public List<EmployeeDesignation> getEmployeeCurrentDesignation(String employeeId) {
+        Session session = null;
+        List<EmployeeDesignation> employeeDesignationList = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeDesignation ed WHERE ed.employee.employeeId =:employeeID " +
+                    "AND ed.isCurrent =:current");
+            query.setParameter("employeeID", employeeId);
+            query.setParameter("current", true);
+
+            employeeDesignationList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeDesignationList;
+    }
+
+    @Override
     public EmployeeDesignation getEmployeeDesignationByDesignationIDAndEmployeeID(String designationID, String employeeID) {
         Session session = null;
         EmployeeDesignation designation = null;
@@ -848,6 +871,29 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             session = getSession();
             Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.employee.employeeId =:employeeID");
             query.setParameter("employeeID", employeeID);
+
+            employeeEmailList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeEmailList;
+    }
+
+    @Override
+    public List<EmployeeEmail> getPreferredEmailByEmployeeId(String employeeId) {
+        Session session = null;
+        List<EmployeeEmail> employeeEmailList = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.employee.employeeId =:employeeID " +
+                    "AND ee.isPreferred =:preferred");
+            query.setParameter("employeeID", employeeId);
+            query.setParameter("preferred", true);
 
             employeeEmailList = query.list();
 
@@ -1017,6 +1063,29 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             session = getSession();
             Query query = session.createQuery("FROM EmployeeContact ec WHERE ec.employee.employeeId =:employeeID");
             query.setParameter("employeeID", employeeID);
+
+            employeeContactList = query.list();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeContactList;
+    }
+
+    @Override
+    public List<EmployeeContact> getEmployeeOfficialContact(String employeeId) {
+        Session session = null;
+        List<EmployeeContact> employeeContactList = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeContact ec WHERE ec.employee.employeeId =:employeeID " +
+                    "AND ec.type.contactTypeName =:typeName");
+            query.setParameter("employeeID", employeeId);
+            query.setParameter("typeName", "Official");
 
             employeeContactList = query.list();
 

@@ -47,12 +47,14 @@ public interface EmployeeDao {
     boolean updatePrevEmployeeDesignations(String employeeID);
     boolean deleteEmployeeDesignation(String employeeID, String designationID);
     List<EmployeeDesignation> getEmployeeDesignationsByEmployeeID(String employeeID);
+    List<EmployeeDesignation> getEmployeeCurrentDesignation(String employeeId);
     EmployeeDesignation getEmployeeDesignationByDesignationIDAndEmployeeID(String designationID, String employeeID);
 
     boolean saveEmployeeEmail(EmployeeEmail employeeEmail);
     boolean updateEmployeeEmail(EmployeeEmail employeeEmail);
     boolean deleteEmployeeEmail(String employeeID, String emailID);
     List<EmployeeEmail> getEmployeeEmailsByEmployeeID(String employeeID);
+    List<EmployeeEmail> getPreferredEmailByEmployeeId(String employeeId);
     List<EmployeeEmail> getEmployeeEmailsByUserID(String userId);
     List<EmployeeEmail> getAllPreferredEmails();
     EmployeeEmail getEmployeeEmailByEmailName(String email);
@@ -63,6 +65,7 @@ public interface EmployeeDao {
     boolean updateEmployeeContactInfo(EmployeeContact employeeContact);
     boolean deleteEmployeeContactInfo(String employeeID, String contactInfoID);
     List<EmployeeContact> getEmployeeContactsByEmployeeID(String employeeID);
+    List<EmployeeContact> getEmployeeOfficialContact(String employeeId);
     EmployeeContact getEmployeeContactByIDAndEmployeeID(String contactID, String employeeID);
     EmployeeContact getEmployeeContactByPhoneAndType(String phone, String type);
 }

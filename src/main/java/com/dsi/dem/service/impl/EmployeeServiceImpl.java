@@ -500,7 +500,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
         logger.info("Employee list size:: " + employeeList.size());
         List<Employee> employees = new ArrayList<>();
         for(Employee employee : employeeList){
-            employees.add(setEmployeesAllProperty(employee.getEmployeeId(), employee));
+            employees.add(setEmployeesAllPropertyForDashboard(employee));
         }
         return employees;
     }
@@ -527,6 +527,34 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
         }
 
         List<EmployeeContact> contacts = employeeDao.getEmployeeContactsByEmployeeID(employeeID);
+        if(!Utility.isNullOrEmpty(contacts)){
+            employee.setContactInfo(contacts);
+        }
+        return employee;
+    }
+
+    private Employee setEmployeesAllPropertyForDashboard(Employee employee) {
+        EmployeeInfo info = employeeDao.getEmployeeInfoByEmployeeID(employee.getEmployeeId());
+        if(info != null){
+            employee.setInfo(info);
+        }
+
+        EmployeeLeave leave = employeeDao.getEmployeeLeaveSummaryByEmployeeID(employee.getEmployeeId());
+        if(leave != null){
+            employee.setLeaveInfo(leave);
+        }
+
+        List<EmployeeDesignation> designations = employeeDao.getEmployeeCurrentDesignation(employee.getEmployeeId());
+        if(!Utility.isNullOrEmpty(designations)){
+            employee.setDesignations(designations);
+        }
+
+        List<EmployeeEmail> emails = employeeDao.getPreferredEmailByEmployeeId(employee.getEmployeeId());
+        if(!Utility.isNullOrEmpty(emails)){
+            employee.setEmailInfo(emails);
+        }
+
+        List<EmployeeContact> contacts = employeeDao.getEmployeeOfficialContact(employee.getEmployeeId());
         if(!Utility.isNullOrEmpty(contacts)){
             employee.setContactInfo(contacts);
         }

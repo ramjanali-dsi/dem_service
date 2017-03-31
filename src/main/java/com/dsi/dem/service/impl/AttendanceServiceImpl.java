@@ -93,6 +93,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                 attendance.setModifiedBy(employeeDao.getEmployeeByUserID(userID).getEmployeeId());
                 attendance.setCreatedDate(Utility.today());
                 attendance.setLastModifiedDate(Utility.today());
+                attendance.setComment(temporaryAttendance.getComment());
                 attendance.setVersion(1);
 
                 String email;
@@ -152,6 +153,13 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.ATTENDANCE_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
+
+                    } else if(workFromHome != null){
+                        attendance.setAbsent(false);
+                        attendance.setCheckInTime(Constants.CHECK_IN_TIME);
+                        attendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
+                        attendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
+                                Constants.CHECK_OUT_TIME));
                     }
 
                     /*logger.info("Employee absent.");
@@ -244,6 +252,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         leaveDao.updateEmployeeLeaveSummary(leaveSummary);
                         logger.info("Leave summary updated for present.");
 
+                        attendance.setComment(Constants.LEAVE_CANCEL_COMMENT);
+
                         email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
                                 .get(0).getEmail();
                         globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
@@ -308,6 +318,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         workFromHome.setReason("Already present that day.");
                         wfhDao.updateWorkFromHomeRequest(workFromHome);
                         logger.info("Work form home request updated to cancel status.");
+
+                        attendance.setComment(Constants.WFH_CANCEL_COMMENT);
 
                         if(hrManagerEmailList.length() > 0) {
                             for (int i = 0; i < hrManagerEmailList.length(); i++) {
@@ -794,11 +806,6 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                         } else if (workFromHome != null) {
                             logger.info("Employee has approved work form home request.");
-                            tempAttendance.setAbsent(false);
-                            tempAttendance.setCheckInTime(Constants.CHECK_IN_TIME);
-                            tempAttendance.setCheckOutTime(Constants.CHECK_OUT_TIME);
-                            tempAttendance.setTotalHour(Utility.getTimeCalculation(Constants.CHECK_IN_TIME,
-                                    Constants.CHECK_OUT_TIME));
                             tempAttendance.setComment(Constants.WFH_COMMENT);
                         }
 

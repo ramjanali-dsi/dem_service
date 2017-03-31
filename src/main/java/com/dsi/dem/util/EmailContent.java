@@ -158,7 +158,7 @@ public class EmailContent {
         String name = "";
         if(workFromHome.getApprovedBy() != null) {
             Employee employee = employeeDao.getEmployeeByUserID(workFromHome.getApprovedBy());
-            name = employee.getFirstName() + " " + employee.getLastName();
+            name = "<strong>" + employee.getFirstName() + " " + employee.getLastName() + "</strong>";
         }
 
         contentObj.put("Name", name);
@@ -181,17 +181,17 @@ public class EmailContent {
 
         String leaveDate = "";
         if(leaveStartDate.equals(leaveEndDate)){
-            leaveDate += "date: " + leaveStartDate;
+            leaveDate += "date: <strong>" + leaveStartDate + "</strong>";
 
         } else {
-            leaveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+            leaveDate += "dates: <strong>" + leaveStartDate + " - " + leaveEndDate + "</strong>";
         }
 
         String name = "";
         if(leaveRequest.getApprovalId() != null) {
             Employee deniedEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (deniedEmployee != null) {
-                name = deniedEmployee.getFirstName() + " " + deniedEmployee.getLastName();
+                name = "<strong>" + deniedEmployee.getFirstName() + " " + deniedEmployee.getLastName() + "</strong>";
             }
         }
 
@@ -217,17 +217,17 @@ public class EmailContent {
 
         String leaveApproveDate = "";
         if(leaveStartDate.equals(leaveEndDate)){
-            leaveApproveDate += "date: " + leaveStartDate;
+            leaveApproveDate += "date: <strong>" + leaveStartDate + "</strong>";
 
         } else {
-            leaveApproveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+            leaveApproveDate += "dates: <strong>" + leaveStartDate + " - " + leaveEndDate + "</strong>";
         }
 
         String name = "";
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
             }
         }
 
@@ -253,17 +253,17 @@ public class EmailContent {
 
         String leaveApproveDate = "";
         if(leaveStartDate.equals(leaveEndDate)){
-            leaveApproveDate += "date: " + leaveStartDate;
+            leaveApproveDate += "date: <strong>" + leaveStartDate + "</strong>";
 
         } else {
-            leaveApproveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+            leaveApproveDate += "dates: <strong>" + leaveStartDate + " - " + leaveEndDate + "</strong>";
         }
 
         String name = "";
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
             }
         }
 
@@ -290,17 +290,17 @@ public class EmailContent {
 
         String leaveDate = "";
         if(leaveStartDate.equals(leaveEndDate)){
-            leaveDate += "date: " + leaveStartDate;
+            leaveDate += "date: <strong>" + leaveStartDate + "</strong>";
 
         } else {
-            leaveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+            leaveDate += "dates: <strong>" + leaveStartDate + " - " + leaveEndDate + "</strong>";
         }
 
         String name = "";
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
 
             }
         }
@@ -369,17 +369,17 @@ public class EmailContent {
 
         String leaveApproveDate = "";
         if(leaveStartDate.equals(leaveEndDate)){
-            leaveApproveDate += "date: " + leaveStartDate;
+            leaveApproveDate += "date: <strong>" + leaveStartDate + "</strong>";
 
         } else {
-            leaveApproveDate += "dates: " + leaveStartDate + " - " + leaveEndDate;
+            leaveApproveDate += "dates: <strong>" + leaveStartDate + " - " + leaveEndDate + "</strong>";
         }
 
         String name = "";
         if(leaveRequest.getApprovalId() != null) {
             Employee approvalEmployee = employeeDao.getEmployeeByID(leaveRequest.getApprovalId());
             if (approvalEmployee != null) {
-                name = approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName();
+                name = "<strong>" + approvalEmployee.getFirstName() + " " + approvalEmployee.getLastName() + "</strong>";
             }
         }
 
@@ -417,14 +417,14 @@ public class EmailContent {
 
         String holidayDate = "";
         if(holidayStartDate.equals(holidayEndDate)){
-            holidayDate += holidayStartDate;
+            holidayDate += "<strong>" + holidayStartDate + "</strong>";
 
         } else {
-            holidayDate += "from " + holidayStartDate + " - " + holidayEndDate;
+            holidayDate += "from <strong>" + holidayStartDate + " - " + holidayEndDate + "</strong>";
         }
 
         contentObj.put("HolidayDate", holidayDate);
-        contentObj.put("HolidayName", holiday.getHolidayName());
+        contentObj.put("HolidayName", "<strong>" + holiday.getHolidayName() + "</strong>");
         contentObj.put("TenantName", tenantName);
 
         Date afterEndDate = Utility.getDayAfterDate(holiday.getEndDate());

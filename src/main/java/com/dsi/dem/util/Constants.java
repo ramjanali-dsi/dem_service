@@ -51,7 +51,9 @@ public class Constants {
     public static final String TEMPORARY_ATTENDANCE_TYPE = "Temporary";
     public static final String CONFIRM_ATTENDANCE_TYPE = "Confirm";
     public static final String LEAVE_COMMENT = "Employee has approved leave request";
+    public static final String LEAVE_CANCEL_COMMENT = "Your approved leave request has been cancelled due to Presence.";
     public static final String WFH_COMMENT = "Employee has approved work from home request";
+    public static final String WFH_CANCEL_COMMENT = "Your approved work from home request has been cancelled due to Presence.";
 
     //Error code
     public static final String DEM_SERVICE_0001 = "dem_service_0001";

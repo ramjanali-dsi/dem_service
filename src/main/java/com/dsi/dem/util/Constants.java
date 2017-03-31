@@ -9,15 +9,14 @@ public class Constants {
 
     public static final String AUTHORIZATION = "authorization";
 
-    public static final String TENANT_NAME = "Dynamic Solution";
+    public static final String TENANT_NAME = "Dynamic Solution Innovators Ltd.";
     public static final String MESSAGE = "message";
     public static final String SYSTEM = "system";
-    public static final String SYSTEM_HEADER_ID = "0759a760-b9df-4c8a-8a64-fa31f256d13b";
+    public static final String SYSTEM_HEADER_ID = "_system_header_id_";
 
-    static final String SYSTEM_ID = "425744ba-6c10-47c0-91cf-5a4c05265b56";
+    static final String SYSTEM_ID = "_system_id_";
 
     static final String DATE_FORMAT="yyyy-MM-dd";
-    public static final String TIMESTAMP_DATE_FORMAT="MMM dd, yyyy hh:mm:ss a";
 
     public static final int DAYS_AGO_COUNT = 5;
     public static final int TOTAL_SICK = 10;

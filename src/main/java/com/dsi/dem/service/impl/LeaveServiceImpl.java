@@ -274,7 +274,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            String email = employeeDao.getEmployeeEmailsByEmployeeID(existLeaveRequest.getEmployee().getEmployeeId()).get(0).getEmail();
+            String email = employeeDao.getPreferredEmail(existLeaveRequest.getEmployee().getEmployeeId()).getEmail();
             hrManagerEmailList = notificationService.getHrManagerEmailList();
             if(leaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
 
@@ -289,8 +289,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
                     for(TeamMember member : teamMemberList){
 
-                        String emails = employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
-                                .get(0).getEmail();
+                        String emails = employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail();
                         if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
                             leadEmails.put(emails);
 
@@ -514,7 +513,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
                 emailList = new JSONArray();
                 for(Employee teamLead : teamLeads){
-                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                    emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
                 globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList);
@@ -721,6 +720,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         } else if(mode == 2){
             existLeaveRequest.setDeniedReason(leaveRequest.getLeaveReason());
             existLeaveRequest.setLeaveStatus(leaveDao.getLeaveStatusByName(Constants.CANCELLER_LEAVE_REQUEST));
+            existLeaveRequest.setApprovalId(employeeDao.getEmployeeByUserID(userId).getEmployeeId());
             existLeaveRequest.setApprovedDate(Utility.today());
         }
         existLeaveRequest.setVersion(leaveRequest.getVersion());
@@ -777,10 +777,10 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 for(TeamMember member : teamMemberList){
 
                     if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
-                        leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+                        leadEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
 
                     } else if(member.getRole().getRoleName().equals(RoleName.MEMBER.getValue())){
-                        memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail());
+                        memberEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
                     }
                 }
             }
@@ -1025,7 +1025,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            String email = employeeDao.getEmployeeEmailsByEmployeeID(leaveRequest.getEmployee().getEmployeeId()).get(0).getEmail();
+            String email = employeeDao.getPreferredEmail(leaveRequest.getEmployee().getEmployeeId()).getEmail();
             JSONObject globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName,
                     new JSONArray().put(email));
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
@@ -1042,7 +1042,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
                 emailList = new JSONArray();
                 for(Employee teamLead : teamLeads){
-                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                    emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
                 globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, emailList);
@@ -1146,8 +1146,8 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
     }
 
     @Override
-    public LeaveRequestDto updateSpecialLeave(LeaveRequestDto specialLeaveDto, String leaveRequestId,
-                                              String tenantName) throws CustomException {
+    public LeaveRequestDto updateSpecialLeave(LeaveRequestDto specialLeaveDto, String userId,
+                                              String leaveRequestId, String tenantName) throws CustomException {
         logger.info("Special leave request update:: Start");
         logger.info("Convert LeaveRequest Dto to LeaveRequest Object.");
         LeaveRequest leaveRequest = LEAVE_DTO_TRANSFORMER.getLeaveRequest(specialLeaveDto);
@@ -1172,6 +1172,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         } else if(mode == 2){
             existLeaveRequest.setDeniedReason(leaveRequest.getLeaveReason());
             existLeaveRequest.setLeaveStatus(leaveDao.getLeaveStatusByName(Constants.CANCELLER_LEAVE_REQUEST));
+            existLeaveRequest.setApprovalId(employeeDao.getEmployeeByUserID(userId).getEmployeeId());
             existLeaveRequest.setApprovedDate(Utility.today());
         }
         existLeaveRequest.setVersion(leaveRequest.getVersion());
@@ -1211,7 +1212,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         try{
             JSONArray notificationList = new JSONArray();
 
-            String email = employeeDao.getEmployeeEmailsByEmployeeID(existLeaveRequest.getEmployee().getEmployeeId()).get(0).getEmail();
+            String email = employeeDao.getPreferredEmail(existLeaveRequest.getEmployee().getEmployeeId()).getEmail();
             employeeContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName,
                     new JSONArray().put(email));
 
@@ -1223,7 +1224,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             if(!Utility.isNullOrEmpty(leadList)){
 
                 for(Employee lead : leadList){
-                    leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(lead.getEmployeeId()).get(0).getEmail());
+                    leadEmails.put(employeeDao.getPreferredEmail(lead.getEmployeeId()).getEmail());
                 }
             }
 

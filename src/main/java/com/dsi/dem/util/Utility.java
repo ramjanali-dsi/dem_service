@@ -64,7 +64,7 @@ public class Utility {
         calendar.setTime(date);
 
         boolean flag = false;
-        if((calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) ||
+        if((calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) ||
                 calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY){
             flag = true;
         }

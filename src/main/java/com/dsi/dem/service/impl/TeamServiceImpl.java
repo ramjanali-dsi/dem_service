@@ -81,7 +81,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
             if(roleType.getRoleName().equals(RoleName.LEAD.getValue())){
                 leadUserId = employee.getUserId();
-                leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
+                leadEmail = employeeDao.getPreferredEmail(employee.getEmployeeId()).getEmail();
                 leadFirstName = employee.getFirstName();
                 leadLastName = employee.getLastName();
             }
@@ -184,10 +184,10 @@ public class TeamServiceImpl extends CommonService implements TeamService {
         String leadEmail = "";
         String leadFirstName = "";
         String leadLastName = "";
-        for(TeamMember member : team.getMembers()){
+        for(TeamMember member : existTeam.getMembers()){
 
             if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
-                leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId()).get(0).getEmail();
+                leadEmail = employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail();
                 leadFirstName = member.getEmployee().getFirstName();
                 leadLastName = member.getEmployee().getLastName();
                 break;
@@ -199,11 +199,11 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             JSONArray notificationList = new JSONArray();
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForTeam(existTeam, tenantName, leadFirstName, leadLastName, emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
-            globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName,
+            globalContentObj = EmailContent.getContentForTeam(existTeam, tenantName, leadFirstName, leadLastName,
                     new JSONArray().put(leadEmail));
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_LEAD));
@@ -243,7 +243,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
         Team team = teamDao.getTeamByID(teamID);
         TeamMember leadMember = teamDao.getTeamLeadByTeamID(teamID);
-        String leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(leadMember.getEmployee().getEmployeeId()).get(0).getEmail();
+        String leadEmail = employeeDao.getPreferredEmail(leadMember.getEmployee().getEmployeeId()).getEmail();
 
         try{
             logger.info("Remove user context.");
@@ -481,7 +481,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             }
 
             TeamMember teamLeadMember = teamDao.getTeamLeadByTeamID(teamId);
-            String leadEmail = employeeDao.getEmployeeEmailsByEmployeeID(teamLeadMember.getEmployee().getEmployeeId()).get(0).getEmail();
+            String leadEmail = employeeDao.getPreferredEmail(teamLeadMember.getEmployee().getEmployeeId()).getEmail();
             String memberEmail;
 
             if(!Utility.isNullOrEmpty(assignedTeamMembers)) {
@@ -498,7 +498,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_LEAD));
 
-                    memberEmail = employeeDao.getEmployeeEmailsByEmployeeID(assignMember.getEmployee().getEmployeeId()).get(0).getEmail();
+                    memberEmail = employeeDao.getPreferredEmail(assignMember.getEmployee().getEmployeeId()).getEmail();
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), team.getName(),
                             teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail));
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
@@ -689,8 +689,7 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             List<TeamMember> teamMembersList = teamDao.getTeamMembers(teamId, null);
             if(!Utility.isNullOrEmpty(teamMembersList)) {
                 for (TeamMember member : teamMembersList) {
-                    memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
-                            .get(0).getEmail());
+                    memberEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
 
                     if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
                         leadMember = member.getEmployee();

@@ -83,7 +83,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
 
                 emailList = new JSONArray();
                 for(Employee teamLead : teamLeads){
-                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                    emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
                 globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, emailList);
@@ -234,7 +234,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
             List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(existWFH.getEmployee().getEmployeeId());
             if (!Utility.isNullOrEmpty(teamLeads)) {
                 for (Employee teamLead : teamLeads) {
-                    leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                    leadEmails.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
             }
 
@@ -397,7 +397,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            String email = employeeDao.getEmployeeEmailsByEmployeeID(existWFH.getEmployee().getEmployeeId()).get(0).getEmail();
+            String email = employeeDao.getPreferredEmail(existWFH.getEmployee().getEmployeeId()).getEmail();
             JSONObject employeeContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, new JSONArray().put(email));
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
@@ -422,7 +422,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
 
                 emailList = new JSONArray();
                 for(Employee teamLead : teamLeads){
-                    emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                    emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
                 globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, emailList);

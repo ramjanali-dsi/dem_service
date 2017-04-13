@@ -58,6 +58,7 @@ public interface EmployeeDao {
     List<EmployeeEmail> getEmployeeEmailsByUserID(String userId);
     List<EmployeeEmail> getAllPreferredEmails();
     EmployeeEmail getEmployeeEmailByEmailName(String email);
+    EmployeeEmail getPreferredEmail(String employeeId);
     EmployeeEmail getEmployeeEmailByEmailIDAndEmployeeID(String emailID, String employeeID);
     EmployeeEmail getEmployeeEmailByEmployeeIDAndTypeID(String employeeID, String typeID);
 
@@ -67,5 +68,5 @@ public interface EmployeeDao {
     List<EmployeeContact> getEmployeeContactsByEmployeeID(String employeeID);
     List<EmployeeContact> getEmployeeOfficialContact(String employeeId);
     EmployeeContact getEmployeeContactByIDAndEmployeeID(String contactID, String employeeID);
-    EmployeeContact getEmployeeContactByPhoneAndType(String phone, String type);
+    EmployeeContact getEmployeeContactByPhoneAndTypeId(String phone, String typeId);
 }

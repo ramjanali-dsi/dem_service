@@ -164,6 +164,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
 
         Session session = getSession();
         holidayDao.setSession(session);
+        clientDao.setSession(session);
 
         List<Holiday> holidayList = holidayDao.getAllHolidaysBetweenDate(startDate, endDate);
         if(!Utility.isNullOrEmpty(holidayList)){
@@ -208,6 +209,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
 
         Session session = getSession();
         holidayDao.setSession(session);
+        clientDao.setSession(session);
 
         Holiday holiday = holidayDao.getHolidayByDate(date);
         if(holiday != null){
@@ -407,13 +409,10 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
             holidayDetails += ".\nThe office will resume it's regular operation on ";
 
             Date afterEndDate = Utility.getDayAfterDate(holiday.getEndDate());
-            //afterEndDate.setTime(afterEndDate.getTime() + 86400000);
             if(Utility.checkWeekendOfDate(afterEndDate)){
                 afterEndDate = Utility.getDayAfterDate(afterEndDate);
-                //afterEndDate.setTime(afterEndDate.getTime() + 86400000);
 
                 if(Utility.checkWeekendOfDate(afterEndDate)){
-                    //afterEndDate.setTime(afterEndDate.getTime() + 86400000);
                     afterEndDate = Utility.getDayAfterDate(afterEndDate);
                 }
             }

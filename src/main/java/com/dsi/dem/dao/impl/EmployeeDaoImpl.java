@@ -934,7 +934,8 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
         List<EmployeeEmail> employeeEmails = null;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.isPreferred =:preferred");
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.isPreferred =:preferred " +
+                    "AND ee.employee.isActive =:preferred");
             query.setParameter("preferred", true);
 
             employeeEmails = query.list();
@@ -957,6 +958,29 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
             session = getSession();
             Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.email =:email");
             query.setParameter("email", email);
+
+            employeeEmail = (EmployeeEmail) query.uniqueResult();
+
+        } catch (Exception e){
+            logger.error("Database error occurs when get: " + e.getMessage());
+        } finally {
+            if(session != null) {
+                close(session);
+            }
+        }
+        return employeeEmail;
+    }
+
+    @Override
+    public EmployeeEmail getPreferredEmail(String employeeId) {
+        Session session = null;
+        EmployeeEmail employeeEmail = null;
+        try{
+            session = getSession();
+            Query query = session.createQuery("FROM EmployeeEmail ee WHERE ee.employee.employeeId =:employeeID " +
+                    "AND ee.isPreferred =:preferred");
+            query.setParameter("employeeID", employeeId);
+            query.setParameter("preferred", true);
 
             employeeEmail = (EmployeeEmail) query.uniqueResult();
 
@@ -1122,14 +1146,14 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     }
 
     @Override
-    public EmployeeContact getEmployeeContactByPhoneAndType(String phone, String type) {
+    public EmployeeContact getEmployeeContactByPhoneAndTypeId(String phone, String typeId) {
         Session session = null;
         EmployeeContact employeeContact = null;
         try{
             session = getSession();
-            Query query = session.createQuery("FROM EmployeeContact ec WHERE ec.phone =:phone AND ec.type.contactTypeName =:mode");
+            Query query = session.createQuery("FROM EmployeeContact ec WHERE ec.phone =:phone AND ec.type.contactTypeId =:typeId");
             query.setParameter("phone", phone);
-            query.setParameter("mode", type);
+            query.setParameter("typeId", typeId);
 
             employeeContact = (EmployeeContact) query.uniqueResult();
 

@@ -250,7 +250,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
-            String email = employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail();
+            String email = employeeDao.getPreferredEmail(employee.getEmployeeId()).getEmail();
             JSONObject empContentObj = EmailContent.getContentObjForEmployee(employee, tenantName, null, email);
             notificationList.put(EmailContent.getNotificationObject(empContentObj,
                     NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_EMPLOYEE));
@@ -275,7 +275,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
 
                     emailList = new JSONArray();
                     for(Employee teamLead : leadList){
-                        emailList.put(employeeDao.getEmployeeEmailsByEmployeeID(teamLead.getEmployeeId()).get(0).getEmail());
+                        emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                     }
 
                     globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);

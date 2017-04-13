@@ -56,7 +56,10 @@ public class SpecialLeaveResource {
         String tenantName = request.getAttribute("tenant_name") != null ?
                 request.getAttribute("tenant_name").toString() : null;
 
-        return Response.ok().entity(leaveService.updateSpecialLeave(leaveRequestDto,
+        String userID = request.getAttribute("user_id") != null ?
+                request.getAttribute("user_id").toString() : null;
+
+        return Response.ok().entity(leaveService.updateSpecialLeave(leaveRequestDto, userID,
                 leaveRequestID, tenantName)).build();
     }
 

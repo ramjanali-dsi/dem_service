@@ -53,8 +53,11 @@ public class ContactServiceImpl extends CommonService implements ContactService 
     public void saveEmployeeContactInfo(EmployeeContact employeeContact, String employeeId) throws CustomException {
 
         validationInputForCreation(employeeContact);
-        saveContact(employeeContact, employeeId);
 
+        if(employeeDao.getEmployeeContactByPhoneAndTypeId(employeeContact.getPhone(),
+                employeeContact.getType().getContactTypeId()) == null) {
+            saveContact(employeeContact, employeeId);
+        }
     }
 
     private void saveContact(EmployeeContact contact, String employeeID) throws CustomException {
@@ -83,6 +86,13 @@ public class ContactServiceImpl extends CommonService implements ContactService 
                     Constants.DEM_SERVICE_0014_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0015);
             throw new CustomException(errorMessage);
         }
+
+        /*if(employeeDao.getEmployeeContactByPhoneAndTypeId(contact.getPhone(),
+                contact.getType().getContactTypeId()) != null){
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_EMPLOYEE_ERROR_TYPE_0022);
+            throw new CustomException(errorMessage);
+        }*/
     }
 
     @Override

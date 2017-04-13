@@ -120,8 +120,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                             leaveDao.updateEmployeeLeaveSummary(leaveSummary);
                             logger.info("Leave summary updated for absent.");
 
-                            email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
-                                    .get(0).getEmail();
+                            email = employeeDao.getPreferredEmail(temporaryAttendance.getEmployee().getEmployeeId()).getEmail();
                             globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
                                     attendanceDate, tenantName, new JSONArray().put(email));
 
@@ -134,7 +133,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                             List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
                             if (!Utility.isNullOrEmpty(leadList)) {
                                 for (Employee employee : leadList) {
-                                    leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
+                                    leadEmails.put(employeeDao.getPreferredEmail(employee.getEmployeeId()).getEmail());
                                 }
                             }
 
@@ -201,8 +200,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                         attendance.setComment(Constants.LEAVE_CANCEL_COMMENT);
 
-                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
-                                .get(0).getEmail();
+                        email = employeeDao.getPreferredEmail(temporaryAttendance.getEmployee().getEmployeeId()).getEmail();
                         globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
                                 leaveRequest, attendanceDate, tenantName, new JSONArray().put(email));
 
@@ -212,7 +210,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(temporaryAttendance.getEmployee().getEmployeeId());
                         if (!Utility.isNullOrEmpty(leadList)) {
                             for (Employee employee : leadList) {
-                                leadEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(employee.getEmployeeId()).get(0).getEmail());
+                                leadEmails.put(employeeDao.getPreferredEmail(employee.getEmployeeId()).getEmail());
                             }
                         }
 
@@ -285,8 +283,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.WFH_APPROVED_PRESENT_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
 
-                        email = employeeDao.getEmployeeEmailsByEmployeeID(temporaryAttendance.getEmployee().getEmployeeId())
-                                .get(0).getEmail();
+                        email = employeeDao.getPreferredEmail(temporaryAttendance.getEmployee().getEmployeeId()).getEmail();
                         globalContentObj = EmailContent.getContentForAttendanceApproveWFH(workFromHome, attendanceDate, tenantName,
                                 new JSONArray().put(email));
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,

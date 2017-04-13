@@ -39,6 +39,7 @@ public class ErrorTypeConstants {
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0019 = "employeeLeaveSummary";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0020 = "hasLeadRole";
     public static final String DEM_EMPLOYEE_ERROR_TYPE_0021 = "hasAssignToTeam";
+    public static final String DEM_EMPLOYEE_ERROR_TYPE_0022 = "hasPhone";
 
 
     //Project

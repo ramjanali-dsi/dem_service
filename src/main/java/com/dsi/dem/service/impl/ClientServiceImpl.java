@@ -169,9 +169,9 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         close(session);
 
         String projectNames = "";
-        for(int i=0; i<client.getProjects().size(); i++) {
-            projectNames += client.getProjects().get(i).getProject().getProjectName();
-            if (i != client.getProjects().size() - 1) {
+        for(int i=0; i<existClient.getProjects().size(); i++) {
+            projectNames += existClient.getProjects().get(i).getProject().getProjectName();
+            if (i != existClient.getProjects().size() - 1) {
                 projectNames += ",";
             }
         }
@@ -181,7 +181,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
             JSONArray notificationList = new JSONArray();
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForClient(existClient, projectNames, tenantName, emailList);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_UPDATE_TEMPLATE_ID));
 
@@ -388,8 +388,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
                     List<TeamMember> teamMembers = projectDao.getTeamMembersByProjectId(assignedClient.getProject().getProjectId());
                     if(!Utility.isNullOrEmpty(teamMembers)){
                         for(TeamMember member : teamMembers){
-                            memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
-                                    .get(0).getEmail());
+                            memberEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
                         }
                     }
 
@@ -418,8 +417,7 @@ public class ClientServiceImpl extends CommonService implements ClientService {
                     List<TeamMember> teamMembers = projectDao.getTeamMembersByProjectId(unassignedClient.getProject().getProjectId());
                     if(!Utility.isNullOrEmpty(teamMembers)){
                         for(TeamMember member : teamMembers){
-                            memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
-                                    .get(0).getEmail());
+                            memberEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
                         }
                     }
 

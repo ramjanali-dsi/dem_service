@@ -171,9 +171,9 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
 
         int cnt = 0;
         String teamName = "";
-        for(ProjectTeam projectTeam : project.getTeams()){
+        for(ProjectTeam projectTeam : existProject.getTeams()){
             teamName += projectTeam.getTeam().getName();
-            if(cnt != project.getTeams().size()){
+            if(cnt != existProject.getTeams().size()){
                 teamName += ",";
             }
             cnt++;
@@ -184,7 +184,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             JSONArray notificationList = new JSONArray();
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, teamName, emailList);
+            JSONObject contentObj = EmailContent.getContentForProject(existProject, tenantName, teamName, emailList);
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_UPDATE_TEMPLATE_ID));
 
@@ -406,8 +406,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     List<TeamMember> teamMembersList = teamDao.getTeamMembers(assignProject.getTeam().getTeamId(),null);
                     if(!Utility.isNullOrEmpty(teamMembersList)) {
                         for (TeamMember member : teamMembersList) {
-                            memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
-                                    .get(0).getEmail());
+                            memberEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
 
                             if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
                                 leadMember = member.getEmployee();
@@ -444,8 +443,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     List<TeamMember> teamMembersList = teamDao.getTeamMembers(unAssignProject.getTeam().getTeamId(),null);
                     if(!Utility.isNullOrEmpty(teamMembersList)) {
                         for (TeamMember member : teamMembersList) {
-                            memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
-                                    .get(0).getEmail());
+                            memberEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
 
                             if(member.getRole().getRoleName().equals(RoleName.LEAD.getValue())){
                                 leadMember = member.getEmployee();
@@ -598,8 +596,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             List<TeamMember> teamMembers = projectDao.getTeamMembersByProjectId(projectId);
             if(!Utility.isNullOrEmpty(teamMembers)){
                 for(TeamMember member : teamMembers){
-                    memberEmails.put(employeeDao.getEmployeeEmailsByEmployeeID(member.getEmployee().getEmployeeId())
-                            .get(0).getEmail());
+                    memberEmails.put(employeeDao.getPreferredEmail(member.getEmployee().getEmployeeId()).getEmail());
                 }
             }
 

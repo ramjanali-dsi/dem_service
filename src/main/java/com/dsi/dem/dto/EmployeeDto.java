@@ -32,6 +32,10 @@ public class EmployeeDto {
 
     private String bankAcNo;
 
+    private String bankName;
+
+    private String branchName;
+
     private String ipAddress;
 
     private String macAddress;
@@ -129,6 +133,22 @@ public class EmployeeDto {
 
     public void setBankAcNo(String bankAcNo) {
         this.bankAcNo = bankAcNo;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
     }
 
     public String getIpAddress() {

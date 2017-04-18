@@ -196,13 +196,14 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
         dao.setSession(session);
 
         WorkFromHome existWFH = dao.getWFHByIdAndUserId(workFromHome.getWorkFromHomeId(), userId);
-        String statusName = existWFH.getStatus().getWorkFromHomeStatusName();
         if(existWFH == null){
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
                     Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_WFH_ERROR_TYPE_0001);
             throw new CustomException(errorMessage);
         }
+
+        String statusName = existWFH.getStatus().getWorkFromHomeStatusName();
 
         validateInputForUpdate(workFromHome, mode, existWFH, session);
         if(mode == 1){
@@ -377,6 +378,13 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
             close(session);
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
                     Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_WFH_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
+
+        if(!existWFH.getStatus().getWorkFromHomeStatusName().equals(Constants.APPLIED_WFH_REQUEST)){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_WFH_ERROR_TYPE_0011);
             throw new CustomException(errorMessage);
         }
 

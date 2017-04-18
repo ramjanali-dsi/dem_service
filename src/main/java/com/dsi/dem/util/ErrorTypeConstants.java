@@ -95,6 +95,7 @@ public class ErrorTypeConstants {
     public static final String DEM_LEAVE_ERROR_TYPE_0020 = "specialPostMustBeSick";
     public static final String DEM_LEAVE_ERROR_TYPE_0021 = "specialPreMustBeSpecial";
     public static final String DEM_LEAVE_ERROR_TYPE_0022 = "alreadyHasForWFH";
+    public static final String DEM_LEAVE_ERROR_TYPE_0023 = "hasApproveOrDenyLR";
 
 
     //Holiday
@@ -126,5 +127,6 @@ public class ErrorTypeConstants {
     public static final String DEM_WFH_ERROR_TYPE_0008 = "applyDate";
     public static final String DEM_WFH_ERROR_TYPE_0009 = "wfhNotAllowed";
     public static final String DEM_WFH_ERROR_TYPE_0010 = "alreadyHasForLR";
+    public static final String DEM_WFH_ERROR_TYPE_0011 = "hasApproveOrDenyWFH";
 }
 

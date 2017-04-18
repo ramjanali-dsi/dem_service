@@ -226,6 +226,20 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         LEAVE_DTO_TRANSFORMER.setSession(session);
 
         LeaveRequest existLeaveRequest = leaveDao.getLeaveRequestById(leaveRequest.getLeaveRequestId(), null);
+        if(existLeaveRequest == null){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0005,
+                    Constants.DEM_SERVICE_0005_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0001);
+            throw new CustomException(errorMessage);
+        }
+
+        if(!existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPLIED_LEAVE_REQUEST)){
+            close(session);
+            ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
+                    Constants.DEM_SERVICE_0013_DESCRIPTION, ErrorTypeConstants.DEM_LEAVE_ERROR_TYPE_0023);
+            throw new CustomException(errorMessage);
+        }
+
         LeaveType leaveType = existLeaveRequest.getLeaveType();
 
         if(leaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)) {

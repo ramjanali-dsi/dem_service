@@ -42,6 +42,12 @@ public class Employee {
     @Column(name = "bank_ac_no", length = 50)
     private String bankAcNo;
 
+    @Column(name = "bank_name", length = 100)
+    private String bankName;
+
+    @Column(name = "branch_name", length = 50)
+    private String branchName;
+
     @Column(name = "ip_address", length = 40)
     private String ipAddress;
 
@@ -152,6 +158,22 @@ public class Employee {
 
     public void setBankAcNo(String bankAcNo) {
         this.bankAcNo = bankAcNo;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
     }
 
     public String getIpAddress() {

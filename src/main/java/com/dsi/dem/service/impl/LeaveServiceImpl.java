@@ -13,6 +13,7 @@ import com.dsi.dem.model.*;
 import com.dsi.dem.service.LeaveService;
 import com.dsi.dem.service.NotificationService;
 import com.dsi.dem.util.*;
+import com.google.gson.Gson;
 import org.apache.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -634,7 +635,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             }
 
             logger.info("Casual type leave application.");
-            if((Constants.TOTAL_CASUAL - leaveSummary.getTotalCasualUsed())
+            if((leaveSummary.getTotalCasual() - leaveSummary.getTotalCasualUsed())
                     < (Utility.getDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1)){
                 close(session);
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
@@ -656,7 +657,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             if(leaveType.getLeaveTypeName().equals(Constants.CASUAL_TYPE_NAME)){
 
                 logger.info("Casual type leave application.");
-                if((Constants.TOTAL_CASUAL - leaveSummary.getTotalCasualUsed())
+                if((leaveSummary.getTotalCasual() - leaveSummary.getTotalCasualUsed())
                         < (Utility.getDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1)){
                     close(session);
                     ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
@@ -678,7 +679,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             if(leaveType.getLeaveTypeName().equals(Constants.SICK_TYPE_NAME)){
 
                 logger.info("Sick type leave application.");
-                if((Constants.TOTAL_SICK - leaveSummary.getTotalSickUsed())
+                if((leaveSummary.getTotalSick() - leaveSummary.getTotalSickUsed())
                         < (Utility.getDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1)){
                     close(session);
                     ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
@@ -1137,7 +1138,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
             }
 
             logger.info("Sick type leave application.");
-            if((Constants.TOTAL_SICK - leaveSummary.getTotalSickUsed())
+            if((leaveSummary.getTotalSick() - leaveSummary.getTotalSickUsed())
                     < (Utility.getDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate()) + 1)){
                 close(session);
                 ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0013,
@@ -1388,17 +1389,72 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         List<LeaveRequest> leaveRequests = leaveDao.getPendingLeaveApplication(date);
         try {
             logger.info("Notification create:: Start");
-            JSONArray notificationList = new JSONArray();
 
             if(!Utility.isNullOrEmpty(leaveRequests)) {
-                JSONArray emailList = notificationService.getHrManagerEmailList();
+                logger.info("Pending leave requests list size:: " + leaveRequests.size());
+                JSONArray notificationList = new JSONArray();
+                JSONArray emailList;
                 JSONObject globalContentObj;
 
                 for(LeaveRequest leaveRequest : leaveRequests){
+                    emailList = notificationService.getHrManagerEmailList();
+
+                    List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(
+                            leaveRequest.getEmployee().getEmployeeId());
+                    if(!Utility.isNullOrEmpty(teamLeads)) {
+                        for (Employee teamLead : teamLeads) {
+                            emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
+                        }
+                    }
+
                     globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest,
                             Constants.TENANT_NAME, emailList);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.AUTO_NOTIFY_PENDING_LEAVE_TEMPLATE_ID));
+                }
+
+                notificationService.createNotification(notificationList.toString());
+            }
+            logger.info("Notification create:: End");
+
+        } catch (Exception e){
+            close(session);
+            e.printStackTrace();
+        }
+
+        close(session);
+    }
+
+    @Override
+    public void getApproveLeaveApplication(Date date) {
+        Session session = getSession();
+        leaveDao.setSession(session);
+
+        List<LeaveRequest> leaveRequests = leaveDao.getApprovedLeaveApplication(date);
+        try {
+            logger.info("Notification create:: Start");
+
+            if(!Utility.isNullOrEmpty(leaveRequests)) {
+                logger.info("Approved leave requests list size:: " + leaveRequests.size());
+                JSONArray notificationList = new JSONArray();
+                JSONArray emailList;
+                JSONObject globalContentObj;
+
+                for(LeaveRequest leaveRequest : leaveRequests){
+                    emailList = new JSONArray();
+
+                    List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(
+                            leaveRequest.getEmployee().getEmployeeId());
+                    if(!Utility.isNullOrEmpty(teamLeads)) {
+                        for (Employee teamLead : teamLeads) {
+                            emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
+                        }
+                    }
+
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest,
+                            Constants.TENANT_NAME, emailList);
+                    notificationList.put(EmailContent.getNotificationObject(globalContentObj,
+                            NotificationConstant.AUTO_NOTIFY_APPROVED_LEAVE_TEMPLATE_ID));
                 }
 
                 notificationService.createNotification(notificationList.toString());

@@ -39,6 +39,7 @@ public interface EmployeeDao {
     EmployeeInfo getEmployeeInfoByEmployeeID(String employeeID);
 
     boolean saveEmployeeLeaveSummary(EmployeeLeave employeeLeave);
+    boolean updateEmployeeLeaveSummary(EmployeeLeave employeeLeave);
     boolean deleteEmployeeLeaveSummary(String employeeID);
     EmployeeLeave getEmployeeLeaveSummaryByEmployeeID(String employeeID);
 

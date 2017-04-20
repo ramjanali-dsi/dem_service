@@ -115,9 +115,7 @@ public class LeaveDtoTransformer extends CommonService {
         try {
             BeanUtils.copyProperties(leaveDto, employeeLeave);
             BeanUtils.copyProperties(leaveDto, employeeLeave.getEmployee());
-            leaveDto.setTotalCasual(Constants.TOTAL_CASUAL);
-            leaveDto.setTotalSick(Constants.TOTAL_SICK);
-            leaveDto.setTotalLeave(Constants.TOTAL_CASUAL + Constants.TOTAL_SICK);
+            leaveDto.setTotalLeave(employeeLeave.getTotalSick() + employeeLeave.getTotalCasual());
 
         } catch (Exception e) {
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
@@ -162,9 +160,7 @@ public class LeaveDtoTransformer extends CommonService {
             LeaveSummaryDto summaryDto = new LeaveSummaryDto();
             BeanUtils.copyProperties(summaryDto, employeeLeave);
             BeanUtils.copyProperties(summaryDto, employeeLeave.getEmployee());
-            summaryDto.setTotalCasual(Constants.TOTAL_CASUAL);
-            summaryDto.setTotalSick(Constants.TOTAL_SICK);
-            summaryDto.setTotalLeave(Constants.TOTAL_CASUAL + Constants.TOTAL_SICK);
+            summaryDto.setTotalLeave(employeeLeave.getTotalSick() + employeeLeave.getTotalCasual());
             leaveDetailsDto.setLeaveSummary(summaryDto);
 
             List<LeaveRequestDto> detailsDtoList = new ArrayList<>();

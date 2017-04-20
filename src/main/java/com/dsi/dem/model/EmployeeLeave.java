@@ -23,19 +23,25 @@ public class EmployeeLeave {
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    @Column(name = "total_leave")
+    @Column(name = "total_leave_used")
     private int totalLeaveUsed;
 
-    @Column(name = "total_sick")
+    @Column(name = "total_sick_used")
     private int totalSickUsed;
 
-    @Column(name = "total_casual")
+    @Column(name = "total_sick")
+    private int totalSick;
+
+    @Column(name = "total_casual_used")
     private int totalCasualUsed;
+
+    @Column(name = "total_casual")
+    private int totalCasual;
 
     @Column(name = "total_not_notify")
     private int totalNotNotify;
 
-    @Column(name = "total_special_leave")
+    @Column(name = "total_special_leave_used")
     private int totalSpecialLeave;
 
     private int version;
@@ -94,6 +100,22 @@ public class EmployeeLeave {
 
     public void setTotalCasualUsed(int totalCasualUsed) {
         this.totalCasualUsed = totalCasualUsed;
+    }
+
+    public int getTotalSick() {
+        return totalSick;
+    }
+
+    public void setTotalSick(int totalSick) {
+        this.totalSick = totalSick;
+    }
+
+    public int getTotalCasual() {
+        return totalCasual;
+    }
+
+    public void setTotalCasual(int totalCasual) {
+        this.totalCasual = totalCasual;
     }
 
     public int getTotalSpecialLeave() {

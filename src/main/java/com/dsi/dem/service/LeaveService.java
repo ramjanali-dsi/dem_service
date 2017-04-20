@@ -56,4 +56,5 @@ public interface LeaveService {
                                                       String leaveRequestId, String from, String range) throws CustomException;
 
     void getPendingLeaveApplication(Date date);
+    void getApproveLeaveApplication(Date date);
 }

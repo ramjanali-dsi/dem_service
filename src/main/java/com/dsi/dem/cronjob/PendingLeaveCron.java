@@ -19,9 +19,14 @@ public class PendingLeaveCron {
     private static final LeaveService leaveService = new LeaveServiceImpl();
 
     public static void main(String[] args) {
-        logger.info("Auto notify pending pre leave request application.");
+        logger.info("Auto notify pending pre leave request application:: Start");
         Date daysAfter = Utility.getDateFormatFromDate(new DateTime(Utility.today()).plusDays(1).toDate());
 
         leaveService.getPendingLeaveApplication(daysAfter);
+        logger.info("Auto notify pending pre leave request application:: End");
+
+        logger.info("Auto notify approved leave request application:: Start");
+        leaveService.getApproveLeaveApplication(daysAfter);
+        logger.info("Auto notify approved leave request application:: End");
     }
 }

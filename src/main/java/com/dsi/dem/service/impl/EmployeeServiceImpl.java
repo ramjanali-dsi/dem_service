@@ -70,6 +70,16 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             employeeLeave.setEmployee(employee);
             employeeLeave.setVersion(1);
 
+            EmployeeLeave leaveSummary = employee.getLeaveInfo();
+            if(leaveSummary != null){
+                employeeLeave.setTotalSick(leaveSummary.getTotalSick());
+                employeeLeave.setTotalCasual(leaveSummary.getTotalCasual());
+
+            } else {
+                employeeLeave.setTotalSick(Constants.TOTAL_SICK);
+                employeeLeave.setTotalCasual(Constants.TOTAL_CASUAL);
+            }
+
             employeeDao.saveEmployeeLeaveSummary(employeeLeave);
             logger.info("Save employee leave summary success");
 
@@ -236,6 +246,15 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             employeeInfo.setStatus(employeeDao.getEmployeeStatusById(employee.getInfo().getStatus().getEmployeeStatusId()));
             employeeDao.updateEmployeeInfo(employeeInfo);
             logger.info("Employee info update success");
+
+            EmployeeLeave leaveSummary = employee.getLeaveInfo();
+            if(leaveSummary != null) {
+                EmployeeLeave employeeLeave = employeeDao.getEmployeeLeaveSummaryByEmployeeID(employee.getEmployeeId());
+                employeeLeave.setTotalCasual(leaveSummary.getTotalCasual());
+                employeeLeave.setTotalSick(leaveSummary.getTotalSick());
+                employeeDao.updateEmployeeLeaveSummary(employeeLeave);
+                logger.info("Employee leave summary updated.");
+            }
 
             setEmployeesAllProperty(employee.getEmployeeId(), employee);
 

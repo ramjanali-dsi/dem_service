@@ -814,7 +814,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 }
             }
 
-            JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, leadEmails);
+            JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, leadEmails, pendingLeaveRequestLink);
 
             if(mode == 1) {
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
@@ -1414,7 +1414,6 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
             if(!Utility.isNullOrEmpty(leaveRequests)) {
                 logger.info("Pending leave requests list size:: " + leaveRequests.size());
-                JSONArray notificationList = new JSONArray();
                 JSONArray emailList;
                 JSONObject globalContentObj;
 
@@ -1455,6 +1454,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         List<LeaveRequest> leaveRequests = leaveDao.getApprovedLeaveApplication(date);
         try {
             logger.info("Notification create:: Start");
+            String leaveSummaryLink = RoutingConstant.LEAVE_SUMMARY;
 
             if(!Utility.isNullOrEmpty(leaveRequests)) {
                 logger.info("Approved leave requests list size:: " + leaveRequests.size());
@@ -1474,7 +1474,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                     }
 
                     globalContentObj = EmailContent.getContentForApproveLeaveRequest(leaveRequest,
-                            Constants.TENANT_NAME, emailList);
+                            Constants.TENANT_NAME, emailList, leaveSummaryLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.AUTO_NOTIFY_APPROVED_LEAVE_TEMPLATE_ID));
                 }

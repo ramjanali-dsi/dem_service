@@ -32,6 +32,10 @@ public class EmployeeDtoTransformer {
             employeeInfo.setStatus(employeeStatus);
             employee.setInfo(employeeInfo);
 
+            EmployeeLeave employeeLeave = new EmployeeLeave();
+            BeanUtils.copyProperties(employeeLeave, employeeDto.getLeaveSummary());
+            employee.setLeaveInfo(employeeLeave);
+
             List<EmployeeDesignation> designationList = new ArrayList<>();
             for(EmployeeDesignationDto designationDto : employeeDto.getDesignationList()){
                 designationList.add(getEmployeeDesignation(designationDto));
@@ -71,6 +75,10 @@ public class EmployeeDtoTransformer {
             BeanUtils.copyProperties(employeeStatus, employeeDto.getEmployeeInfo());
             employeeInfo.setStatus(employeeStatus);
             employee.setInfo(employeeInfo);
+
+            EmployeeLeave employeeLeave = new EmployeeLeave();
+            BeanUtils.copyProperties(employeeLeave, employeeDto.getLeaveSummary());
+            employee.setLeaveInfo(employeeLeave);
 
         } catch (Exception e) {
             ErrorMessage errorMessage = new ErrorMessage(Constants.DEM_SERVICE_0007,
@@ -183,9 +191,7 @@ public class EmployeeDtoTransformer {
 
             LeaveSummaryDto leaveDto = new LeaveSummaryDto();
             BeanUtils.copyProperties(leaveDto, employee.getLeaveInfo());
-            leaveDto.setTotalCasual(Constants.TOTAL_CASUAL);
-            leaveDto.setTotalSick(Constants.TOTAL_SICK);
-            leaveDto.setTotalLeave(Constants.TOTAL_CASUAL + Constants.TOTAL_SICK);
+            leaveDto.setTotalLeave(employee.getLeaveInfo().getTotalSick() + employee.getLeaveInfo().getTotalCasual());
             employeeDto.setLeaveSummary(leaveDto);
 
             List<EmployeeDesignationDto> designationList = new ArrayList<>();

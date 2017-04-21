@@ -46,13 +46,13 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
         LeaveType leaveType = (LeaveType) query.uniqueResult();
 
         if(leaveType.getLeaveTypeName().equals(Constants.CASUAL_TYPE_NAME)){
-            if(leaveSummary.getTotalCasualUsed() < Constants.TOTAL_CASUAL){
+            if(leaveSummary.getTotalCasualUsed() < leaveSummary.getTotalCasual()){
                 success = true;
             }
         }
 
         if(leaveType.getLeaveTypeName().equals(Constants.SICK_TYPE_NAME)){
-            if(leaveSummary.getTotalSickUsed() < Constants.TOTAL_SICK){
+            if(leaveSummary.getTotalSickUsed() < leaveSummary.getTotalSick()){
                 success = true;
             }
         }
@@ -934,6 +934,20 @@ public class LeaveDaoImpl extends CommonService implements LeaveDao {
         Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.leaveStatus.leaveStatusName =:statusName " +
                 "AND lr.startDate =:startDate");
         query.setParameter("statusName", Constants.APPLIED_LEAVE_REQUEST);
+        query.setParameter("startDate", date);
+
+        List<LeaveRequest> leaveRequests = query.list();
+        if(leaveRequests != null){
+            return leaveRequests;
+        }
+        return null;
+    }
+
+    @Override
+    public List<LeaveRequest> getApprovedLeaveApplication(Date date) {
+        Query query = session.createQuery("FROM LeaveRequest lr WHERE lr.leaveStatus.leaveStatusName =:statusName " +
+                "AND lr.approvedStartDate =:startDate");
+        query.setParameter("statusName", Constants.APPROVED_LEAVE_REQUEST);
         query.setParameter("startDate", date);
 
         List<LeaveRequest> leaveRequests = query.list();

@@ -181,7 +181,7 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
 
             List<TeamMember> teamMembers = query.list();
 
-            logger.info("Team member size: " + teamMembers.size());
+            logger.info("Team lead size: " + teamMembers.size());
 
             for(TeamMember member : teamMembers){
                 employeeList.add(member.getEmployee());
@@ -639,6 +639,11 @@ public class EmployeeDaoImpl extends BaseDao implements EmployeeDao {
     @Override
     public boolean saveEmployeeLeaveSummary(EmployeeLeave employeeLeave) {
         return save(employeeLeave);
+    }
+
+    @Override
+    public boolean updateEmployeeLeaveSummary(EmployeeLeave employeeLeave) {
+        return update(employeeLeave);
     }
 
     @Override

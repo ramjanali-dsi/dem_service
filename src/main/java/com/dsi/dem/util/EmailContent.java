@@ -31,13 +31,13 @@ public class EmailContent {
     }
 
     public static JSONObject getContentObjForEmployee(Employee employee, String tenantName,
-                                                      String password, String email) throws JSONException {
+                                                      String password, String email, String link) throws JSONException {
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", new JSONArray().put(email));
         contentObj.put("EmployeeFirstName", employee.getFirstName());
         contentObj.put("EmployeeLastName", employee.getLastName());
         contentObj.put("TenantName", tenantName);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("Username", email);
         contentObj.put("Password", password);
 
@@ -45,33 +45,33 @@ public class EmailContent {
     }
 
     public static JSONObject getContentObjForGlobal(Employee employee, String tenantName,
-                                                          JSONArray email) throws JSONException {
+                                                          JSONArray email, String link) throws JSONException {
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", employee.getFirstName());
         contentObj.put("EmployeeLastName", employee.getLastName());
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForTeam(Team team, String tenantName, String firstName,
-                                               String lastName, JSONArray email) throws JSONException {
+                                               String lastName, JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
         contentObj.put("TeamName", team.getName());
         contentObj.put("LeadFirstName", firstName);
         contentObj.put("LeadLastName", lastName);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForTeamMemberAssignUnAssign(Employee employee, String teamName, Employee lead,
-                                                                   String tenantName, JSONArray email) throws JSONException {
+                                                                   String tenantName, JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -80,14 +80,14 @@ public class EmailContent {
         contentObj.put("EmployeeLastName", employee.getLastName());
         contentObj.put("LeadFirstName", lead.getFirstName());
         contentObj.put("LeadLastName", lead.getLastName());
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForProjectTeamAssignUnAssign(ProjectTeam projectTeam, String tenantName, Employee leadMember,
-                                                                    int memberCnt, JSONArray email) throws JSONException {
+                                                                    int memberCnt, JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -95,7 +95,7 @@ public class EmailContent {
         contentObj.put("MemberCount", memberCnt);
         contentObj.put("ProjectName", projectTeam.getProject().getProjectName());
         contentObj.put("ProjectDescription", projectTeam.getProject().getDescription());
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         if(leadMember != null) {
@@ -107,47 +107,47 @@ public class EmailContent {
     }
 
     public static JSONObject getContentForProjectClientAssignUnAssign(ProjectClient projectClient, String tenantName,
-                                                                      JSONArray email) throws JSONException {
+                                                                      JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
         contentObj.put("ClientName", projectClient.getClient().getMemberName());
         contentObj.put("ProjectName", projectClient.getProject().getProjectName());
         contentObj.put("ProjectDescription", projectClient.getProject().getDescription());
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForProject(Project project, String tenantName, String teamName,
-                                                  JSONArray emailList) throws JSONException {
+                                                  JSONArray emailList, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", emailList);
         contentObj.put("TeamName", teamName);
         contentObj.put("ProjectName", project.getProjectName());
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForClient(Client client, String projectName, String tenantName,
-                                                 JSONArray email) throws JSONException {
+                                                 JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
         contentObj.put("ClientName", client.getMemberName());
         contentObj.put("ProjectName", projectName);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForWFHRequest(WorkFromHome workFromHome, String tenantName,
-                                                          JSONArray email) throws JSONException {
+                                                          JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -162,14 +162,14 @@ public class EmailContent {
         }
 
         contentObj.put("Name", name);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForApplyLeaveRequest(LeaveRequest leaveRequest, String tenantName,
-                                                            JSONArray email) throws JSONException {
+                                                            JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -198,14 +198,14 @@ public class EmailContent {
         contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
         contentObj.put("DeniedName", name);
         contentObj.put("LeaveDate", leaveDate);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForApproveLeaveRequest(LeaveRequest leaveRequest, String tenantName,
-                                                              JSONArray email) throws JSONException {
+                                                              JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -234,14 +234,14 @@ public class EmailContent {
         contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
         contentObj.put("ApprovalName", name);
         contentObj.put("ApprovedDate", leaveApproveDate);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForApproveSpecialLeaveRequest(LeaveRequest leaveRequest, String tenantName,
-                                                                     JSONArray email) throws JSONException {
+                                                                     JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -271,14 +271,14 @@ public class EmailContent {
         contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
         contentObj.put("ApprovedDate", leaveApproveDate);
         contentObj.put("Reason", leaveRequest.getDeniedReason());
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForApplySpecialLeaveRequest(LeaveRequest leaveRequest, String tenantName,
-                                                                   JSONArray email) throws JSONException {
+                                                                   JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -309,26 +309,26 @@ public class EmailContent {
         contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
         contentObj.put("LeaveDate", leaveDate);
         contentObj.put("Reason", leaveRequest.getLeaveReason());
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForAttendance(String attendanceDate, String tenantName,
-                                                     JSONArray email) throws JSONException {
+                                                     JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
         contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForDraftAttendance(String draftAttendanceFileName, String tenantName,
-                                                          JSONArray email) throws JSONException {
+                                                          JSONArray email, String link) throws JSONException {
         Date afterDate = new Date();
         afterDate.setTime(afterDate.getTime() + 86400000);
 
@@ -336,28 +336,28 @@ public class EmailContent {
         contentObj.put("Recipients", email);
         contentObj.put("AttendanceExpiryDate", Utility.getDate(afterDate));
         contentObj.put("AttendanceCSVName", draftAttendanceFileName);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForAttendanceForEmployee(Employee employee, String attendanceDate,
-                                                                String tenantName, JSONArray email) throws JSONException {
+                                                                String tenantName, JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
         contentObj.put("EmployeeFirstName", employee.getFirstName());
         contentObj.put("EmployeeLastName", employee.getLastName());
         contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForAttendanceApproveLeave(Employee employee, LeaveRequest leaveRequest, String attendanceDate,
-                                                                 String tenantName, JSONArray email) throws JSONException {
+                                                                 String tenantName, JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -387,14 +387,14 @@ public class EmailContent {
         contentObj.put("LeaveType", leaveRequest.getLeaveType().getLeaveTypeName());
         contentObj.put("ApprovedDate", leaveApproveDate);
         contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
     public static JSONObject getContentForAttendanceApproveWFH(WorkFromHome workFromHome, String attendanceDate,
-                                                               String tenantName, JSONArray email) throws JSONException {
+                                                               String tenantName, JSONArray email, String link) throws JSONException {
 
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", email);
@@ -402,13 +402,13 @@ public class EmailContent {
         contentObj.put("EmployeeLastName", workFromHome.getEmployee().getLastName());
         contentObj.put("WorkFromHomeDate", Utility.getDate(workFromHome.getApplyDate()));
         contentObj.put("AttendanceDate", Utility.getDate(Utility.getDateFromString(attendanceDate)));
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;
     }
 
-    public static JSONObject getContentForHoliday(Holiday holiday, String tenantName, JSONArray emails) throws JSONException {
+    public static JSONObject getContentForHoliday(Holiday holiday, String tenantName, JSONArray emails, String link) throws JSONException {
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", emails);
 
@@ -435,18 +435,18 @@ public class EmailContent {
                 afterEndDate = Utility.getDayAfterDate(afterEndDate);
             }
         }
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("OpenDate", Utility.getDate(afterEndDate));
 
         return contentObj;
     }
 
     public static JSONObject getContentForAutoNotifyHoliday(String holiday, String tenantName,
-                                                            JSONArray emails) throws JSONException {
+                                                            JSONArray emails, String link) throws JSONException {
         JSONObject contentObj = new JSONObject();
         contentObj.put("Recipients", emails);
         contentObj.put("HolidayDetail", holiday);
-        contentObj.put("Link", NotificationConstant.WEBSITE_LINK);
+        contentObj.put("Link", link);
         contentObj.put("TenantName", tenantName);
 
         return contentObj;

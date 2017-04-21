@@ -72,9 +72,10 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String pendingWFHlink = RoutingConstant.PENDING_WFH_APPLICATION;
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, emailList, pendingWFHlink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.WFH_APPLY_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -86,7 +87,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                     emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
-                globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, emailList);
+                globalContentObj = EmailContent.getContentForWFHRequest(workFromHome, tenantName, emailList, pendingWFHlink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.WFH_APPLY_TEMPLATE_ID_FOR_LEAD));
             }
@@ -227,9 +228,11 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
         try {
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String pendingWFHlink = RoutingConstant.PENDING_WFH_APPLICATION;
+            String wfhDetailLink = RoutingConstant.WORK_FROM_HOME_DETAIL;
 
             hrEmailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, hrEmailList);
+            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, hrEmailList, pendingWFHlink);
 
             leadEmails = new JSONArray();
             List<Employee> teamLeads = employeeDao.getTeamLeadsProfileOfAnEmployee(existWFH.getEmployee().getEmployeeId());
@@ -244,7 +247,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                         NotificationConstant.WFH_PENDING_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if (leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails, pendingWFHlink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.WFH_PENDING_TEMPLATE_ID_FOR_LEAD));
                 }
@@ -254,7 +257,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                         NotificationConstant.WFH_PENDING_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if (leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails, wfhDetailLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.WFH_PENDING_CANCEL_TEMPLATE_ID_FOR_LEAD));
                 }
@@ -264,7 +267,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                         NotificationConstant.WFH_APPROVED_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if (leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, leadEmails, wfhDetailLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.WFH_APPROVED_CANCEL_TEMPLATE_ID_FOR_LEAD));
                 }
@@ -404,12 +407,14 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String wfhDetailLink = RoutingConstant.WORK_FROM_HOME_DETAIL;
+            String employeeWFHApplicationLink = RoutingConstant.EMPLOYEE_WORK_FROM_HOME_DETAIL;
 
             String email = employeeDao.getPreferredEmail(existWFH.getEmployee().getEmployeeId()).getEmail();
-            JSONObject employeeContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, new JSONArray().put(email));
+            JSONObject employeeContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, new JSONArray().put(email), employeeWFHApplicationLink);
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, emailList, wfhDetailLink);
             if(status.getWorkFromHomeStatusName().equals(Constants.DENIED_WFH_REQUEST)){
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.WFH_DENIED_TEMPLATE_ID_FOR_MANAGER_HR));
@@ -433,7 +438,7 @@ public class WorkFromHomeServiceImpl extends CommonService implements WorkFromHo
                     emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
-                globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, emailList);
+                globalContentObj = EmailContent.getContentForWFHRequest(existWFH, tenantName, emailList, wfhDetailLink);
                 if(status.getWorkFromHomeStatusName().equals(Constants.DENIED_WFH_REQUEST)){
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.WFH_DENIED_TEMPLATE_ID_FOR_LEAD));

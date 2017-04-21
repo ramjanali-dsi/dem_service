@@ -83,10 +83,11 @@ public class ClientServiceImpl extends CommonService implements ClientService {
 
         try{
             logger.info("Notification create:: Start");
+            String clientLink = RoutingConstant.CLIENT + client.getClientId();
             JSONArray notificationList = new JSONArray();
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList, clientLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_CREATE_TEMPLATE_ID));
 
@@ -179,9 +180,10 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String clientLink = RoutingConstant.CLIENT + existClient.getClientId();
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForClient(existClient, projectNames, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForClient(existClient, projectNames, tenantName, emailList, clientLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_UPDATE_TEMPLATE_ID));
 
@@ -231,9 +233,10 @@ public class ClientServiceImpl extends CommonService implements ClientService {
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String clientLink = RoutingConstant.CLIENT ;
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForClient(client, projectNames, tenantName, emailList, clientLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.CLIENT_DELETE_TEMPLATE_ID));
 
@@ -378,6 +381,8 @@ public class ClientServiceImpl extends CommonService implements ClientService {
 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String clientLink = RoutingConstant.CLIENT+ clientId;
+            String demLink = NotificationConstant.WEBSITE_LINK;
 
             JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
 
@@ -392,18 +397,18 @@ public class ClientServiceImpl extends CommonService implements ClientService {
                         }
                     }
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, hrManagerEmailList, clientLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, memberEmails);
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, memberEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName,
-                            new JSONArray().put(assignedClient.getClient().getMemberEmail()));
+                            new JSONArray().put(assignedClient.getClient().getMemberEmail()), demLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
 
@@ -421,12 +426,12 @@ public class ClientServiceImpl extends CommonService implements ClientService {
                         }
                     }
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, hrManagerEmailList, clientLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, memberEmails);
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, memberEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }

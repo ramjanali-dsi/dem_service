@@ -110,15 +110,16 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                     getContextObject(null, leadUserId, team.getTeamId(), 1));
 
             logger.info("Notification create:: Start");
-            JSONArray notificationList = new JSONArray();
+            String teamLink = RoutingConstant.TEAM + "/" +team.getTeamId();
 
+            JSONArray notificationList = new JSONArray();
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName, emailList, teamLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadFirstName, leadLastName,
-                    new JSONArray().put(leadEmail));
+                    new JSONArray().put(leadEmail), teamLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_CREATE_TEMPLATE_ID_FOR_LEAD));
 
@@ -198,13 +199,14 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
+            String teamLink = RoutingConstant.TEAM + "/" + team.getTeamId();
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForTeam(existTeam, tenantName, leadFirstName, leadLastName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForTeam(existTeam, tenantName, leadFirstName, leadLastName, emailList, teamLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             globalContentObj = EmailContent.getContentForTeam(existTeam, tenantName, leadFirstName, leadLastName,
-                    new JSONArray().put(leadEmail));
+                    new JSONArray().put(leadEmail), teamLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_UPDATE_TEMPLATE_ID_FOR_LEAD));
 
@@ -253,14 +255,15 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
+            String teamLink = RoutingConstant.TEAM ;
             JSONArray emailList = notificationService.getHrManagerEmailList();
             JSONObject globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadMember.getEmployee().getFirstName(),
-                    leadMember.getEmployee().getLastName(), emailList);
+                    leadMember.getEmployee().getLastName(), emailList, teamLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_MANAGER_HR));
 
             globalContentObj = EmailContent.getContentForTeam(team, tenantName, leadMember.getEmployee().getFirstName(),
-                    leadMember.getEmployee().getFirstName(), new JSONArray().put(leadEmail));
+                    leadMember.getEmployee().getFirstName(), new JSONArray().put(leadEmail), teamLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.TEAM_DELETE_TEMPLATE_ID_FOR_LEAD));
 
@@ -483,30 +486,32 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             TeamMember teamLeadMember = teamDao.getTeamLeadByTeamID(teamId);
             String leadEmail = employeeDao.getPreferredEmail(teamLeadMember.getEmployee().getEmployeeId()).getEmail();
             String memberEmail;
+            String demLink = NotificationConstant.WEBSITE_LINK;
+            String teamLink = RoutingConstant.TEAM + "/" + team.getTeamId();
 
             if(!Utility.isNullOrEmpty(assignedTeamMembers)) {
                 for (TeamMember assignMember : assignedTeamMembers) {
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(),
                             team.getName(), teamLeadMember.getEmployee(),
-                            tenantName, hrManagerEmailList);
+                            tenantName, hrManagerEmailList, teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), team.getName(),
-                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail), teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_LEAD));
 
                     memberEmail = employeeDao.getPreferredEmail(assignMember.getEmployee().getEmployeeId()).getEmail();
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), team.getName(),
-                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail), teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_EMPLOYEE));
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(assignMember.getEmployee(), team.getName(),
-                                teamLeadMember.getEmployee(), tenantName, clientEmails);
+                                teamLeadMember.getEmployee(), tenantName, clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_MEMBER_ASSIGN_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -518,24 +523,24 @@ public class TeamServiceImpl extends CommonService implements TeamService {
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(),
                             team.getName(), teamLeadMember.getEmployee(),
-                            tenantName, hrManagerEmailList);
+                            tenantName, hrManagerEmailList, teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), team.getName(),
-                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(leadEmail), teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_LEAD));
 
                     memberEmail = employeeDao.getEmployeeEmailsByUserID(unassignedMember.getEmployee().getUserId()).get(0).getEmail();
                     contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), team.getName(),
-                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail));
+                            teamLeadMember.getEmployee(), tenantName, new JSONArray().put(memberEmail), teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_EMPLOYEE));
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForTeamMemberAssignUnAssign(unassignedMember.getEmployee(), team.getName(),
-                                teamLeadMember.getEmployee(), tenantName, clientEmails);
+                                teamLeadMember.getEmployee(), tenantName, clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_MEMBER_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -684,6 +689,8 @@ public class TeamServiceImpl extends CommonService implements TeamService {
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
             JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
+            String teamLink = RoutingConstant.TEAM + "/" + team.getTeamId();
+            String demLink = NotificationConstant.WEBSITE_LINK;
 
             Employee leadMember = null;
             List<TeamMember> teamMembersList = teamDao.getTeamMembers(teamId, null);
@@ -706,20 +713,20 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                 for (ProjectTeam assignProject : assignedProjectTeam) {
 
                     contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
-                            teamMembersList.size(), hrManagerEmailList);
+                            teamMembersList.size(), hrManagerEmailList ,teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
-                                teamMembersList.size(), memberEmails);
+                                teamMembersList.size(), memberEmails, teamLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
-                                teamMembersList.size(), clientEmails);
+                                teamMembersList.size(), clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -730,20 +737,20 @@ public class TeamServiceImpl extends CommonService implements TeamService {
                 for(ProjectTeam unAssignProject : unassignedProjectTeam){
 
                     contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
-                            teamMembersList.size(), hrManagerEmailList);
+                            teamMembersList.size(), hrManagerEmailList, teamLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
-                                teamMembersList.size(), memberEmails);
+                                teamMembersList.size(), memberEmails, teamLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
-                                teamMembersList.size(), clientEmails);
+                                teamMembersList.size(), clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }

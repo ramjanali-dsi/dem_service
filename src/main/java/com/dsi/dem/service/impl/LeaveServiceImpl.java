@@ -287,6 +287,12 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String specialLeavReqLink = RoutingConstant.SPECIAL_LEAVE_REQ + leaveRequest.getLeaveRequestId();
+            String myLeaveApplicationLink = RoutingConstant.LEAVE_APPLICATION ;
+            String demLink = NotificationConstant.WEBSITE_LINK;
+            String appprovedLeaveLink = RoutingConstant.APPROVED_LEAVE_DETAIL +
+                                        leaveRequest.getEmployee().getEmployeeId() + "/" + leaveRequest.getLeaveRequestId();
+            String deniedLeaveReqLink = RoutingConstant.DENIED_LEAVE_SUMMARY + leaveRequest.getEmployee().getEmployeeId();
 
             String email = employeeDao.getPreferredEmail(existLeaveRequest.getEmployee().getEmployeeId()).getEmail();
             hrManagerEmailList = notificationService.getHrManagerEmailList();
@@ -327,50 +333,50 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
                 if(leaveType.getType().equals(Constants.SPECIAL_LEAVE_TYPE)){
                     globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName,
-                            new JSONArray().put(email));
+                            new JSONArray().put(email), myLeaveApplicationLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
 
-                    globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+                    globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, specialLeavReqLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(leadEmails.length() > 0) {
-                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, leadEmails);
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, leadEmails, appprovedLeaveLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD));
                     }
 
                     if(membersEmail.length() > 0){
-                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, membersEmail);
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, membersEmail, myLeaveApplicationLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
-                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, clientEmails);
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.SPECIAL_LEAVE_APPROVE_TEMPLATE_ID_FOR_CLIENT));
                     }
 
                 } else {
                     globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest,
-                            tenantName, new JSONArray().put(email));
+                            tenantName, new JSONArray().put(email), myLeaveApplicationLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
 
-                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, appprovedLeaveLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(leadEmails.length() > 0) {
-                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, leadEmails);
+                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, leadEmails, appprovedLeaveLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_LEAD));
                     }
 
                     if(clientEmails.length() > 0){
-                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, clientEmails);
+                        globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.LEAVE_APPROVE_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -378,23 +384,24 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
             } else if (leaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.DENIED_LEAVE_REQUEST)) {
 
+
                 if(leaveType.getType().equals(Constants.SPECIAL_LEAVE_TYPE)){
-                    globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+                    globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, specialLeavReqLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.SPECIAL_LEAVE_DENIED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     globalContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName,
-                            new JSONArray().put(email));
+                            new JSONArray().put(email), myLeaveApplicationLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.SPECIAL_LEAVE_DENIED_TEMPLATE_ID_FOR_EMPLOYEE));
 
                 } else {
-                    globalContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+                    globalContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, deniedLeaveReqLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.LEAVE_DENIED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     globalContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName,
-                            new JSONArray().put(email));
+                            new JSONArray().put(email), myLeaveApplicationLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.LEAVE_DENIED_TEMPLATE_ID_FOR_EMPLOYEE));
                 }
@@ -516,9 +523,10 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String leaveRequestLink = RoutingConstant.LEAVE_REQUEST_PENDING + leaveRequest.getEmployee().getEmployeeId() + "/" + leaveRequest.getLeaveRequestId();
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList, leaveRequestLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.LEAVE_APPLY_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -530,7 +538,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                     emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
-                globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList);
+                globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest, tenantName, emailList, leaveRequestLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.LEAVE_APPLY_TEMPLATE_ID_FOR_LEAD));
             }
@@ -774,13 +782,19 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         logger.info("Notification create:: Start");
         JSONObject globalContentObj;
         JSONArray hrManagerEmailList, leadEmails, memberEmails;
+
         try{
             JSONArray notificationList = new JSONArray();
+            String pendingLeaveRequestLink = RoutingConstant.LEAVE_REQUEST_PENDING + leaveRequest.getEmployee().getEmployeeId() + "/" + leaveRequest.getLeaveRequestId();
+            String appprovedLeaveLink = RoutingConstant.APPROVED_LEAVE_DETAIL +
+                    leaveRequest.getEmployee().getEmployeeId() + "/" + leaveRequest.getLeaveRequestId();
+            String myLeaveApplicationLink = RoutingConstant.LEAVE_APPLICATION ;
+            String demLink = NotificationConstant.WEBSITE_LINK;
 
             leadEmails = new JSONArray();
             memberEmails = new JSONArray();
             hrManagerEmailList = notificationService.getHrManagerEmailList();
-            globalContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+            globalContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, pendingLeaveRequestLink);
 
             teamDao.setSession(session);
             clientDao.setSession(session);
@@ -799,7 +813,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 }
             }
 
-            JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, leadEmails);
+            JSONObject leadContentObj = EmailContent.getContentForApplyLeaveRequest(existLeaveRequest, tenantName, leadEmails, pendingLeaveRequestLink);
 
             if(mode == 1) {
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
@@ -820,18 +834,18 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 }
 
             } else if(mode == 2 && existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
-                globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+                globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, appprovedLeaveLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if(leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, leadEmails, appprovedLeaveLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_LEAD));
                 }
 
                 if(memberEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, memberEmails);
+                    globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, memberEmails, myLeaveApplicationLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_MEMBERS));
                 }
@@ -848,7 +862,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                         }
 
                         if(emailList.length() > 0) {
-                            globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, emailList);
+                            globalContentObj = EmailContent.getContentForApproveLeaveRequest(existLeaveRequest, tenantName, emailList, demLink);
                             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                     NotificationConstant.PENDING_APPROVE_CANCEL_TEMPLATE_ID_FOR_CLIENT));
                         }
@@ -1038,16 +1052,18 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String specialLeavReqLink = RoutingConstant.SPECIAL_LEAVE_REQ + leaveRequest.getLeaveRequestId();
+            String myLeaveApplicationLink = RoutingConstant.LEAVE_APPLICATION ;
+            String employeeLeaveReqSummaryLink = RoutingConstant.DENIED_LEAVE_SUMMARY + leaveRequest.getEmployee().getEmployeeId();
 
             String email = employeeDao.getPreferredEmail(leaveRequest.getEmployee().getEmployeeId()).getEmail();
             JSONObject globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName,
-                    new JSONArray().put(email));
+                    new JSONArray().put(email), myLeaveApplicationLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_EMPLOYEE));
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest,
-                    tenantName, emailList);
+            globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, emailList, specialLeavReqLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -1059,7 +1075,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                     emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                 }
 
-                globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, emailList);
+                globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(leaveRequest, tenantName, emailList, employeeLeaveReqSummaryLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.SPECIAL_LEAVE_APPLY_TEMPLATE_ID_FOR_LEAD));
             }
@@ -1225,14 +1241,18 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         JSONArray hrManagerEmailList, leadEmails;
         try{
             JSONArray notificationList = new JSONArray();
+            String employeeLeaveAppLink = RoutingConstant.LEAVE_APPLICATION;
+            String specialLeaveReqLink = RoutingConstant.SPECIAL_LEAVE_REQ + leaveRequest.getLeaveRequestId();
+            String leaveSummaryLink = RoutingConstant.LEAVE_SUMMARY + leaveRequest.getEmployee().getEmployeeId();
+            String demLink = NotificationConstant.WEBSITE_LINK;
 
             String email = employeeDao.getPreferredEmail(existLeaveRequest.getEmployee().getEmployeeId()).getEmail();
             employeeContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName,
-                    new JSONArray().put(email));
+                    new JSONArray().put(email), employeeLeaveAppLink);
 
             leadEmails = new JSONArray();
             hrManagerEmailList = notificationService.getHrManagerEmailList();
-            globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+            globalContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, specialLeaveReqLink);
 
             List<Employee> leadList = employeeDao.getTeamLeadsProfileOfAnEmployee(existLeaveRequest.getEmployee().getEmployeeId());
             if(!Utility.isNullOrEmpty(leadList)){
@@ -1242,7 +1262,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                 }
             }
 
-            JSONObject leadContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName, leadEmails);
+            JSONObject leadContentObj = EmailContent.getContentForApplySpecialLeaveRequest(existLeaveRequest, tenantName, leadEmails, leaveSummaryLink);
 
             if(mode == 1) {
                 notificationList.put(EmailContent.getNotificationObject(employeeContentObj,
@@ -1270,16 +1290,16 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
             } else if(mode == 2 && existLeaveRequest.getLeaveStatus().getLeaveStatusName().equals(Constants.APPROVED_LEAVE_REQUEST)){
                 globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName,
-                        new JSONArray().put(email));
+                        new JSONArray().put(email), employeeLeaveAppLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_EMPLOYEE));
 
-                globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList);
+                globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, hrManagerEmailList, specialLeaveReqLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_MANAGER_HR));
 
                 if(leadEmails.length() > 0) {
-                    globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, leadEmails);
+                    globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, leadEmails, leaveSummaryLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_LEAD));
                 }
@@ -1299,7 +1319,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
                             }
                         }
 
-                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, emailList);
+                        globalContentObj = EmailContent.getContentForApproveSpecialLeaveRequest(existLeaveRequest, tenantName, emailList, demLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.PENDING_SPECIAL_APPROVE_CANCEL_LEAVE_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -1389,6 +1409,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
         try {
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String leaveSummaryLink = RoutingConstant.LEAVE_SUMMARY;
 
             if(!Utility.isNullOrEmpty(leaveRequests)) {
                 JSONArray emailList = notificationService.getHrManagerEmailList();
@@ -1396,7 +1417,7 @@ public class LeaveServiceImpl extends CommonService implements LeaveService {
 
                 for(LeaveRequest leaveRequest : leaveRequests){
                     globalContentObj = EmailContent.getContentForApplyLeaveRequest(leaveRequest,
-                            Constants.TENANT_NAME, emailList);
+                            Constants.TENANT_NAME, emailList, leaveSummaryLink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.AUTO_NOTIFY_PENDING_LEAVE_TEMPLATE_ID));
                 }

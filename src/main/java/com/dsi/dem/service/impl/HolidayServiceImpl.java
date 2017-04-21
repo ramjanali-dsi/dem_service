@@ -172,6 +172,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
             try {
                 logger.info("Notification create:: Start");
                 JSONArray notificationList = new JSONArray();
+                String holidayManagementLink = RoutingConstant.HOLIDAY_MANAGHEMENT;
 
                 JSONArray emails = new JSONArray();
                 List<EmployeeEmail> emailList = employeeDao.getAllPreferredEmails();
@@ -185,7 +186,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
                 }
 
                 JSONObject globalContentObj = EmailContent.getContentForAutoNotifyHoliday(holidayFormat(holidayList),
-                        Constants.TENANT_NAME, emails);
+                        Constants.TENANT_NAME, emails, holidayManagementLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.AUTO_NOTIFY_HOLIDAY_NEXT_WEEK_TEMPLATE_ID));
 
@@ -217,6 +218,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
             try {
                 logger.info("Notification create:: Start");
                 JSONArray notificationList = new JSONArray();
+                String holidayManagementLink = RoutingConstant.HOLIDAY_MANAGHEMENT;
 
                 JSONArray emails = new JSONArray();
                 List<EmployeeEmail> emailList = employeeDao.getAllPreferredEmails();
@@ -229,7 +231,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
                     emails.put(client.getMemberEmail());
                 }
 
-                JSONObject globalContentObj = EmailContent.getContentForHoliday(holiday, Constants.TENANT_NAME, emails);
+                JSONObject globalContentObj = EmailContent.getContentForHoliday(holiday, Constants.TENANT_NAME, emails, holidayManagementLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.AUTO_NOTIFY_HOLIDAY_TOMORROW_TEMPLATE_ID));
 
@@ -303,7 +305,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
 
             try {
                 logger.info("Holiday publish:: Start");
-
+                String holidayManagementLink = RoutingConstant.HOLIDAY_MANAGHEMENT;
                 JSONArray notificationList = new JSONArray();
                 JSONObject contentObj;
 
@@ -337,7 +339,7 @@ public class HolidayServiceImpl extends CommonService implements HolidayService 
                     }
                     count++;
 
-                    contentObj = EmailContent.getContentForHoliday(holiday, tenantName, emails);
+                    contentObj = EmailContent.getContentForHoliday(holiday, tenantName, emails, holidayManagementLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.HOLIDAY_SELECTED_TEMPLATE_ID_FOR_ALL));
                 }

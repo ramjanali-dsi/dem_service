@@ -101,8 +101,9 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
+            String projectLink = RoutingConstant.PROJECT + project.getProjectId();
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, teamName, emailList);
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, teamName, emailList, projectLink);
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_CREATE_TEMPLATE_ID));
 
@@ -183,8 +184,9 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
 
+            String projectLink = RoutingConstant.PROJECT + existProject.getProjectId();
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject contentObj = EmailContent.getContentForProject(existProject, tenantName, teamName, emailList);
+            JSONObject contentObj = EmailContent.getContentForProject(existProject, tenantName, teamName, emailList, projectLink);
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_UPDATE_TEMPLATE_ID));
 
@@ -233,9 +235,10 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String projectLink = RoutingConstant.PROJECTS;
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, null, emailList);
+            JSONObject contentObj = EmailContent.getContentForProject(project, tenantName, null, emailList, projectLink);
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.PROJECT_DELETE_TEMPLATE_ID));
 
@@ -387,6 +390,9 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
             JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
+            String projectLink = RoutingConstant.PROJECT + project.getProjectId();
+            String demLink = NotificationConstant.WEBSITE_LINK;
+
 
             JSONArray clientEmails = new JSONArray();
             List<ProjectClient> projectClients = projectDao.getProjectClients(projectId);
@@ -399,6 +405,7 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             }
 
             if(!Utility.isNullOrEmpty(assignedProjectTeam)) {
+
                 Employee leadMember = null;
                 for (ProjectTeam assignProject : assignedProjectTeam) {
 
@@ -415,20 +422,20 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     }
 
                     contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
-                            teamMembersList.size(), hrManagerEmailList);
+                            teamMembersList.size(), hrManagerEmailList, projectLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
-                                teamMembersList.size(), memberEmails);
+                                teamMembersList.size(), memberEmails, projectLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(assignProject, tenantName, leadMember,
-                                teamMembersList.size(), clientEmails);
+                                teamMembersList.size(), clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -452,20 +459,20 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
                     }
 
                     contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
-                            teamMembersList.size(),  hrManagerEmailList);
+                            teamMembersList.size(),  hrManagerEmailList, projectLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
-                                teamMembersList.size(), memberEmails);
+                                teamMembersList.size(), memberEmails, projectLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     if(clientEmails.length() > 0){
                         contentObj = EmailContent.getContentForProjectTeamAssignUnAssign(unAssignProject, tenantName, leadMember,
-                                teamMembersList.size(), clientEmails);
+                                teamMembersList.size(), clientEmails, demLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.TEAM_PROJECT_UNASSIGNED_TEMPLATE_ID_FOR_CLIENT));
                     }
@@ -589,6 +596,8 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
 
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String projectLink = RoutingConstant.PROJECT + project.getProjectId();
+            String demLink = NotificationConstant.WEBSITE_LINK;
 
             JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
 
@@ -603,18 +612,18 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             if(!Utility.isNullOrEmpty(assignedProjectClient)) {
                 for (ProjectClient assignedClient : assignedProjectClient) {
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, hrManagerEmailList, projectLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, memberEmails);
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName, memberEmails, projectLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }
 
                     contentObj = EmailContent.getContentForProjectClientAssignUnAssign(assignedClient, tenantName,
-                            new JSONArray().put(assignedClient.getClient().getMemberEmail()));
+                            new JSONArray().put(assignedClient.getClient().getMemberEmail()), demLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_ASSIGNED_TEMPLATE_ID_FOR_CLIENT));
 
@@ -624,12 +633,12 @@ public class ProjectServiceImpl extends CommonService implements ProjectService 
             if(!Utility.isNullOrEmpty(unassignedProjectClient)){
                 for(ProjectClient unassignedClient : unassignedProjectClient){
 
-                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, hrManagerEmailList);
+                    contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, hrManagerEmailList, projectLink);
                     notificationList.put(EmailContent.getNotificationObject(contentObj,
                             NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MANAGER_HR));
 
                     if(memberEmails.length() > 0) {
-                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, memberEmails);
+                        contentObj = EmailContent.getContentForProjectClientAssignUnAssign(unassignedClient, tenantName, memberEmails, projectLink);
                         notificationList.put(EmailContent.getNotificationObject(contentObj,
                                 NotificationConstant.PROJECT_CLIENT_UNASSIGNED_TEMPLATE_ID_FOR_MEMBERS));
                     }

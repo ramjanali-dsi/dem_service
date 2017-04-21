@@ -54,8 +54,9 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             leaveDao.setSession(session);
             wfhDao.setSession(session);
 
+            String attedanceHistoryLink = RoutingConstant.ATTENDANCE_HISTORY;
             JSONArray hrManagerEmailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, hrManagerEmailList);
+            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, hrManagerEmailList, attedanceHistoryLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.ATTENDANCE_CONFIRM_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -122,7 +123,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                             email = employeeDao.getPreferredEmail(temporaryAttendance.getEmployee().getEmployeeId()).getEmail();
                             globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
-                                    attendanceDate, tenantName, new JSONArray().put(email));
+                                    attendanceDate, tenantName, new JSONArray().put(email), attedanceHistoryLink);
 
                             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                     NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_EMPLOYEE));
@@ -150,7 +151,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                             }
 
                             globalContentObj = EmailContent.getContentForAttendanceForEmployee(temporaryAttendance.getEmployee(),
-                                    attendanceDate, tenantName, hrManagerLeadEmailList);
+                                    attendanceDate, tenantName, hrManagerLeadEmailList, attedanceHistoryLink);
                             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                     NotificationConstant.ATTENDANCE_UN_NOTIFIED_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
 
@@ -202,7 +203,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                         email = employeeDao.getPreferredEmail(temporaryAttendance.getEmployee().getEmployeeId()).getEmail();
                         globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
-                                leaveRequest, attendanceDate, tenantName, new JSONArray().put(email));
+                                leaveRequest, attendanceDate, tenantName, new JSONArray().put(email), attedanceHistoryLink );
 
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_EMPLOYEE));
@@ -227,7 +228,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         }
 
                         globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
-                                leaveRequest, attendanceDate, tenantName, hrManagerLeadEmailList);
+                                leaveRequest, attendanceDate, tenantName, hrManagerLeadEmailList, attedanceHistoryLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
 
@@ -247,7 +248,7 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
 
                             if(clientEmails.length() > 0) {
                                 globalContentObj = EmailContent.getContentForAttendanceApproveLeave(temporaryAttendance.getEmployee(),
-                                        leaveRequest, attendanceDate, tenantName, clientEmails);
+                                        leaveRequest, attendanceDate, tenantName, clientEmails, attedanceHistoryLink);
                                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                         NotificationConstant.ATTENDANCE_PRESENT_APPROVE_TEMPLATE_ID_FOR_CLIENT));
                             }
@@ -278,14 +279,16 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                         //hrManagerLeadEmailList.put(hrManagerEmailList);
                         //hrManagerLeadEmailList.put(leadEmails);
 
+                        String wfhDetailLink = RoutingConstant.WORK_FROM_HOME_DETAIL;
                         globalContentObj = EmailContent.getContentForAttendanceApproveWFH(workFromHome, attendanceDate,
-                                tenantName, hrManagerLeadEmailList);
+                                tenantName, hrManagerLeadEmailList, wfhDetailLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.WFH_APPROVED_PRESENT_TEMPLATE_ID_FOR_MANAGER_HR_LEAD));
 
+                        String employeeWFHDetailLink = RoutingConstant.EMPLOYEE_WORK_FROM_HOME_DETAIL;
                         email = employeeDao.getPreferredEmail(temporaryAttendance.getEmployee().getEmployeeId()).getEmail();
                         globalContentObj = EmailContent.getContentForAttendanceApproveWFH(workFromHome, attendanceDate, tenantName,
-                                new JSONArray().put(email));
+                                new JSONArray().put(email), employeeWFHDetailLink);
                         notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                                 NotificationConstant.WFH_APPROVED_PRESENT_TEMPLATE_ID_FOR_EMPLOYEE));
                     }
@@ -389,9 +392,10 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String deleteAttendanceLink = RoutingConstant.ATTENDANCE_HISTORY;
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList, deleteAttendanceLink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.ATTENDANCE_DELETE_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -788,10 +792,11 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
             if(draftAttendance != null) {
                 logger.info("Notification create:: Start");
                 JSONArray notificationList = new JSONArray();
+                String attendanceUploadLink = RoutingConstant.ATTENDANCE_UPLOAD;
 
                 JSONArray emailList = notificationService.getHrManagerEmailList();
                 JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDateTime,
-                        tenantName, emailList);
+                        tenantName, emailList, attendanceUploadLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.ATTENDANCE_UPLOAD_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -876,9 +881,10 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
         try{
             logger.info("Notification create:: Start");
             JSONArray notificationList = new JSONArray();
+            String updatedTempAttendanceink = RoutingConstant.ATTENDANCE_UPLOAD;
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentForAttendance(attendanceDate, tenantName, emailList, updatedTempAttendanceink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.ATTENDANCE_SAVE_DRAFT_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -998,7 +1004,8 @@ public class AttendanceServiceImpl extends CommonService implements AttendanceSe
                     cnt++;
                 }
 
-                globalContentObj = EmailContent.getContentForDraftAttendance(draftAttendanceFile, Constants.TENANT_NAME, emailList);
+                String attendanceHistoryLink = RoutingConstant.ATTENDANCE_HISTORY;
+                globalContentObj = EmailContent.getContentForDraftAttendance(draftAttendanceFile, Constants.TENANT_NAME, emailList, attendanceHistoryLink);
                 notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                         NotificationConstant.AUTO_NOTIFY_DRAFT_ATTENDANCE_EXPIRY_TEMPLATE_ID));
 

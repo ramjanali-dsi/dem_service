@@ -86,14 +86,16 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             JSONArray notificationList = new JSONArray();
 
             String email = employeeEmailList.get(0).getEmail();
+            String employeeProfilelink = RoutingConstant.EMPLOYEE_PROFILE + employee.getEmployeeId();
+
             JSONObject contentObj = EmailContent.getContentObjForEmployee(employee, tenantName,
-                    resultObj.getString("password"), email);
+                    resultObj.getString("password"), email, employeeProfilelink);
 
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_EMPLOYEE));
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            contentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
+            contentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList, employeeProfilelink);
 
             notificationList.put(EmailContent.getNotificationObject(contentObj,
                     NotificationConstant.EMPLOYEE_CREATE_TEMPLATE_ID_FOR_MANAGER_HR));
@@ -251,12 +253,14 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
             JSONArray notificationList = new JSONArray();
 
             String email = employeeDao.getPreferredEmail(employee.getEmployeeId()).getEmail();
-            JSONObject empContentObj = EmailContent.getContentObjForEmployee(employee, tenantName, null, email);
+            String employeeProfilelink = RoutingConstant.EMPLOYEE_PROFILE + employee.getEmployeeId();
+
+            JSONObject empContentObj = EmailContent.getContentObjForEmployee(employee, tenantName, null, email, employeeProfilelink);
             notificationList.put(EmailContent.getNotificationObject(empContentObj,
                     NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_EMPLOYEE));
 
             JSONArray emailList = notificationService.getHrManagerEmailList();
-            JSONObject globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
+            JSONObject globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList, employeeProfilelink);
             notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                     NotificationConstant.EMPLOYEE_UPDATE_TEMPLATE_ID_FOR_MANAGER_HR));
 
@@ -278,7 +282,7 @@ public class EmployeeServiceImpl extends CommonService implements EmployeeServic
                         emailList.put(employeeDao.getPreferredEmail(teamLead.getEmployeeId()).getEmail());
                     }
 
-                    globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList);
+                    globalContentObj = EmailContent.getContentObjForGlobal(employee, tenantName, emailList, employeeProfilelink);
                     notificationList.put(EmailContent.getNotificationObject(globalContentObj,
                             NotificationConstant.EMPLOYEE_INACTIVE_TEMPLATE_ID_FOR_LEAD));
                 }
